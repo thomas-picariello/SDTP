@@ -33,10 +33,11 @@ MainWindow::MainWindow(QWidget *parent) :
             Contacts = new QAction(("Start"),window);
             Settings = new QAction(("Start"),window);
 
+            /*Debug*/
+            CameraSampler cam;
+            cam.getSample();
 
-
-
-
+            /*---------*/
 }
 
 MainWindow::~MainWindow()

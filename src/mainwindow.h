@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include "camerasampler.h"
 
 namespace Ui {
 class MainWindow;
