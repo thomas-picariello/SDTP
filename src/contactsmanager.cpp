@@ -5,10 +5,11 @@ ContactsManager::ContactsManager()
 {
 
     Contactwindow = new QWidget();
-    Quitter = new QPushButton("Quitter", Contactwindow);
+    About = new QPushButton("AboutQt", Contactwindow);
+    Contactwindow->resize(300,100);
 
 
-    connect(Quitter,SIGNAL(clicked()),qApp,SLOT(closeAllWindows()));
+    connect(About,SIGNAL(clicked()),qApp,SLOT(aboutQt()));
 
 
 }

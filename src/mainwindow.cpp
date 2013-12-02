@@ -24,10 +24,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
     window = new QWidget();
+
     ui->setupUi(this);
 
 
-     boutonStart = new QPushButton(tr("&Start"));
+     boutonStart    = new QPushButton(tr("&Start"));
      boutonContacts = new QPushButton(tr("&Contacts"));
      boutonSettings = new QPushButton(tr("&Settings"));
 
@@ -47,10 +48,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     cManager = new ContactsManager();
+    settings = new Settings();
+    starter  = new Starter();
 
-//            connect(boutonStart,SIGNAL(clicked()),Starter, SLOT(starterWindow()));
-            QObject::connect(boutonContacts,SIGNAL(clicked()),cManager,SLOT(contactsWindow()));
-    //        connect(boutonSettings,SIGNAL(clicked()),Settings,SLOT(settingsWindow()));
+            connect(boutonStart     ,SIGNAL(clicked()),starter  ,SLOT(starterWindow())  );
+            connect(boutonContacts  ,SIGNAL(clicked()),cManager ,SLOT(contactsWindow()) );
+            connect(boutonSettings  ,SIGNAL(clicked()),settings ,SLOT(settingsWindow()) );
 
 }
 

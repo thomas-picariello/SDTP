@@ -6,6 +6,8 @@
 #include <QHBoxLayout>
 #include <QApplication>
 #include "contactsmanager.h"
+#include "settingsManager.h"
+#include "starterManager.h"
 
 namespace Ui {
 class MainWindow;
@@ -26,8 +28,9 @@ private:
     QPushButton *boutonStart, *boutonContacts, *boutonSettings;
     QHBoxLayout *layout;
     QWidget *window;
-    QAction *Start, *Contacts, *Settings;
    ContactsManager *cManager;
+   Settings *settings;
+   Starter *starter;
 };
 
 #endif // MAINWINDOW_H

@@ -22,7 +22,7 @@ public slots:
 
 private:
     QWidget *Contactwindow;
-    QPushButton *Quitter;
+    QPushButton *About;
 };
 
 #endif // CONTACTSMANAGER_H
