@@ -4,7 +4,8 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QHBoxLayout>
-#include "camerasampler.h"
+#include <QApplication>
+#include "contactsmanager.h"
 
 namespace Ui {
 class MainWindow;
@@ -26,6 +27,8 @@ private:
     QHBoxLayout *layout;
     QWidget *window;
     QAction *Start, *Contacts, *Settings;
+   ContactsManager *cManager;
 };
 
 #endif // MAINWINDOW_H
+
