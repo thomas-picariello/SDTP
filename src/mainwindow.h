@@ -22,13 +22,12 @@ public:
 public slots:
 
 private:
-    Ui::MainWindow *ui;
     QPushButton *boutonStart, *boutonContacts, *boutonSettings;
-    QHBoxLayout *layout;
+    QVBoxLayout *layout;
     QWidget *window;
-   ContactsManager *cManager;
-   Settings *settings;
-   Starter *starter;
+    ContactsManager *cManager;
+    SettingsManager *settings;
+    StarterManager *starter;
 };
 
 #endif // MAINWINDOW_H
