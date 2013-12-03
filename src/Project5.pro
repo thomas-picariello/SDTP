@@ -15,10 +15,24 @@ TEMPLATE = app
 SOURCES +=      main.cpp\
                 mainwindow.cpp \
 		svoip.cpp \
-		camerasampler.cpp
+		camerasampler.cpp \
+                startermanager.cpp \
+                soundsampler.cpp \
+                settingsmanager.cpp \
+                contactsmanager.cpp \
+                basesampler.cpp \
+                graphview.cpp \
+    contact.cpp
 
 HEADERS  +=     mainwindow.h \
                 svoip.h \
-                camerasampler.h
+                camerasampler.h \
+                startermanager.h \
+                soundsampler.h \
+                settingsmanager.h \
+                contactsmanager.h \
+                basesampler.h \
+                graphview.h \
+    contact.h
 
-FORMS    +=	mainwindow.ui
+FORMS    +=

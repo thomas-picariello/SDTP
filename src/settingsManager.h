@@ -10,14 +10,14 @@
 #include <QLineEdit>
 #include <QSettings>
 
-class Settings : public QWidget
+class SettingsManager : public QWidget
 {
 
     Q_OBJECT
 
 public:
-    Settings();
-    ~Settings();
+    SettingsManager();
+    ~SettingsManager();
 
 public slots :
     void settingsWindow();

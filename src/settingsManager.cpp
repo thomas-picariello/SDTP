@@ -1,7 +1,6 @@
-#include "settingsManager.h"
-#include <QDebug>
+#include "settingsmanager.h"
 
-Settings::Settings()
+SettingsManager::SettingsManager()
 {
     setwindow = new QWidget();
 
@@ -54,14 +53,14 @@ Settings::Settings()
     connect(about,SIGNAL(clicked()),qApp,SLOT(aboutQt()));
 */
 }
-void Settings::settingsWindow()
+void SettingsManager::settingsWindow()
 {
 
     qDebug()<<"Test for SettingsWindow !";
     setwindow->show();
 
 }
-void Settings::savesettings()
+void SettingsManager::savesettings()
 {
     setwindow->hide();
 
@@ -75,7 +74,7 @@ void Settings::savesettings()
 
 }
 
-Settings::~Settings()
+SettingsManager::~SettingsManager()
 {
 
 }

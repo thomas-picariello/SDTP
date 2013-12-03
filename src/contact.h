@@ -9,7 +9,6 @@
 #include <QSettings>
 #include <QList>
 
-
 class Contact
 {
 public:
@@ -32,10 +31,6 @@ private :
     QList<QString> *names;
     QString *name, *IP, *port;
     QByteArray *key;
-
-
-
-
 
 };
 

@@ -10,12 +10,12 @@ class BaseSampler : public QObject
 public:
     explicit BaseSampler(QObject *parent = 0);
     ~BaseSampler();
-    void getSample();
     
 signals:
     void sampleAvailable(QByteArray *returnSample);
     
 public slots:
+    virtual void getSample() = 0;
 
 protected:
     QByteArray *mSample;

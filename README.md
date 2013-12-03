@@ -1,4 +1,6 @@
-Secure-Data_VoIP
+Secure-VoIP
 ================
 
 Secure alternative to common VoIP protocols
+
+@FHNW

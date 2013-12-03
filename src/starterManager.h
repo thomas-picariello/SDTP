@@ -6,14 +6,14 @@
 #include <QPushButton>
 #include <QDebug>
 
-class Starter: public QWidget
+class StarterManager: public QWidget
 {
 
      Q_OBJECT
 
 public:
-    Starter();
-    ~Starter();
+    StarterManager();
+    ~StarterManager();
 
 public slots :
     void starterWindow();

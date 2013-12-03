@@ -1,15 +1,8 @@
 #include "svoip.h"
-#include "mainwindow.h"
 
 SVoIP::SVoIP()
 {
-
-
-
-}
-void SVoIP::GetMainWindow()
-{
-    MainWindow mainWindow;
+    window = new MainWindow();
 }
 void SVoIP::GetListener()
 {
@@ -17,5 +10,5 @@ void SVoIP::GetListener()
 }
 SVoIP::~SVoIP()
 {
-
+    delete window;
 }

@@ -1,5 +1,4 @@
 #include "contactsmanager.h"
-#include <QDebug>
 
 ContactsManager::ContactsManager()
 {

@@ -15,10 +15,9 @@ class SoundSampler : public BaseSampler
 public:
     SoundSampler();
     ~SoundSampler();
-    void getSample();
-signals:
 
 public slots:
+    void getSample();
     void handleStateChanged(QAudio::State newState);
     void stopRecording();
 

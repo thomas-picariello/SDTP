@@ -1,19 +1,17 @@
 #ifndef SVOIP_H
 #define SVOIP_H
 
+#include "mainwindow.h"
+
 class SVoIP
 {
 public:
     SVoIP();
-
-    void GetMainWindow();
-
     void GetListener();
-
     ~SVoIP();
 
-
-
+private:
+    MainWindow *window;
 
 };
 

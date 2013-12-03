@@ -234,6 +234,7 @@ pip-log.txt
 
 *.pro.user
 *.pro.user.*
+*.pro
 moc_*.cpp
 qrc_*.cpp
 ui_*.h

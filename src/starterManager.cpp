@@ -1,6 +1,6 @@
-#include "starterManager.h"
+#include "startermanager.h"
 
-Starter::Starter()
+StarterManager::StarterManager()
 {
     starterwindow = new QWidget;
     about = new QPushButton("AboutQt",starterwindow);
@@ -8,12 +8,12 @@ Starter::Starter()
     connect(about,SIGNAL(clicked()),qApp,SLOT(aboutQt()));
 
 }
-void Starter::starterWindow()
+void StarterManager::starterWindow()
 {
     qDebug()<<"Test for starterWindow";
     starterwindow->show();
 }
-Starter::~Starter()
+StarterManager::~StarterManager()
 {
 
 }
