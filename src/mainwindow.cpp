@@ -51,9 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
     settings = new Settings();
     starter  = new Starter();
 
-            connect(boutonStart     ,SIGNAL(clicked()),starter  ,SLOT(starterWindow())  );
-            connect(boutonContacts  ,SIGNAL(clicked()),cManager ,SLOT(contactsWindow()) );
-            connect(boutonSettings  ,SIGNAL(clicked()),settings ,SLOT(settingsWindow()) );
+    connect(boutonStart     ,SIGNAL(clicked()),starter  ,SLOT(starterWindow())  );
+    connect(boutonContacts  ,SIGNAL(clicked()),cManager ,SLOT(contactsWindow()) );
+    connect(boutonSettings  ,SIGNAL(clicked()),settings ,SLOT(settingsWindow()) );
 
 }
 

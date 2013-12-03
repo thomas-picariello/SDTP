@@ -13,7 +13,6 @@ void Starter::starterWindow()
     qDebug()<<"Test for starterWindow";
     starterwindow->show();
 }
-
 Starter::~Starter()
 {
 
