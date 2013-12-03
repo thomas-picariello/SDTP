@@ -7,6 +7,7 @@
 #include <QBuffer>
 #include <QTimer>
 #include <QDebug>
+#include <QMetaMethod>
 #include "basesampler.h"
 
 class SoundSampler : public BaseSampler
