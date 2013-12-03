@@ -12,6 +12,7 @@ TARGET = Project5
 TEMPLATE = app
 
 
+<<<<<<< HEAD
 SOURCES += \
     svoip.cpp \
     startermanager.cpp \
@@ -34,5 +35,29 @@ HEADERS  += \
     contactsmanager.h \
     camerasampler.h \
     basesampler.h
+=======
+SOURCES +=      main.cpp\
+                mainwindow.cpp \
+		svoip.cpp \
+		camerasampler.cpp \
+                startermanager.cpp \
+                soundsampler.cpp \
+                settingsmanager.cpp \
+                contactsmanager.cpp \
+                basesampler.cpp \
+                graphview.cpp \
+    contact.cpp
+
+HEADERS  +=     mainwindow.h \
+                svoip.h \
+                camerasampler.h \
+                startermanager.h \
+                soundsampler.h \
+                settingsmanager.h \
+                contactsmanager.h \
+                basesampler.h \
+                graphview.h \
+    contact.h
+>>>>>>> 1aadf3336b21ab0e44979a790fcb53948853ecbe
 
 FORMS    +=
