@@ -23,6 +23,7 @@ StarterManager::StarterManager()
     name->setInputMask("nnnnnnnnnn");
     name->setMaxLength(10);
     name->setPlaceholderText("Contact name :");
+    name->setText("Default");
 
     buttonlayout->addWidget(okay);
     buttonlayout->addWidget(cancel);
@@ -55,11 +56,11 @@ void StarterManager::verifyContact()
 
     if(list.contains(name->text()))
     {
+        namewindow->hide();
         starter = new Starter();
-        this->hide();
         starter->opennewConnection(name->text());
         name->clear();
-        this->window()->hide();
+
 
 
 

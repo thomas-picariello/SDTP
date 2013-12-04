@@ -7,8 +7,12 @@ Starter::Starter()
 
     name = new QString;
     IP   = new QString;
-    port = new QString;
+    port = new qint16;
     key  = new QString;
+
+    socket = new QTcpSocket;
+
+
 }
 void Starter::opennewConnection(QString nametouse)
 {
@@ -18,7 +22,7 @@ void Starter::opennewConnection(QString nametouse)
     qDebug()<<"1";
     *IP = settings->value("Contacts/"+nametouse+"/IP").toString();
     qDebug()<<"2";
-    *port = settings->value("Contacts/"+nametouse+"/port").toString();
+    *port = settings->value("Contacts/"+nametouse+"/port").toInt();
     qDebug()<<"3";
     *key = settings->value("Contacts/"+nametouse+"/key").toString();
 
@@ -31,7 +35,20 @@ void Starter::opennewConnection(QString nametouse)
 
 
 
-    socket = new QTcpSocket();
+    socket->abort();
+    socket->connectToHost(*IP,*port,QIODevice::ReadWrite,QAbstractSocket::AnyIPProtocol);
+
+    if (socket->waitForConnected( 5000 ))
+    {
+
+        messenger->displaymsg("Successfully connected to"+*IP);
+        qDebug()<<"connecttohost seems to have worked correctly ... ?";
+        if (socket->isWritable())socket->write("Hello there !");
+    }
+    else qDebug()<<socket->error();
+
+
+    socket->abort();
 
 
 }

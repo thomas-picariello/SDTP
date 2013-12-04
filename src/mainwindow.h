@@ -6,10 +6,15 @@
 #include <QLayout>
 #include <QApplication>
 #include <QString>
+#include <QMenu>
+#include <QSettings>
+#include <QAction>
+#include <QStringList>
 #include "contactsmanager.h"
 #include "settingsmanager.h"
 #include "startermanager.h"
 #include "soundsampler.h"
+#include "starter.h"
 
 class MainWindow : public QWidget
 {
@@ -20,14 +25,21 @@ public:
     ~MainWindow();
 
 public slots:
+    void resolvestarter(QAction*);
 
 private:
     QPushButton *boutonStart, *boutonContacts, *boutonSettings;
+    QMenu *menu;
+    QSettings *set;
+    QAction *action;
+    QActionGroup *actiongroup;
+    QStringList *namelist;
     QVBoxLayout *layout;
     QWidget *window;
     ContactsManager *cManager;
     SettingsManager *settings;
     StarterManager *starter;
+    Starter *start;
 };
 
 #endif // MAINWINDOW_H

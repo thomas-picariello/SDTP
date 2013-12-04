@@ -32,7 +32,7 @@ QList<QString> Contact::getnames()
     qDebug()<<settings->childGroups();
     names->append(settings->childGroups());
 
-
+    settings->endGroup();
     return *names;
 }
 QString Contact::getIP(QString name)

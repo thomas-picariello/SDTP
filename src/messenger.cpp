@@ -49,6 +49,7 @@ Messenger::Messenger()
 }
 void Messenger::displaymsg(QString msg)
 {
+    messenger->show();
 
 }
 void Messenger::sendnewmsg()
