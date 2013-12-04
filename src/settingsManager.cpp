@@ -47,11 +47,6 @@ SettingsManager::SettingsManager()
     connect(close,SIGNAL(clicked()),setwindow,SLOT(hide()));
     connect(save,SIGNAL(clicked()),this, SLOT(savesettings()));
 
-
-    /*about = new QPushButton("AboutQt", setwindow);
-
-    connect(about,SIGNAL(clicked()),qApp,SLOT(aboutQt()));
-*/
 }
 void SettingsManager::settingsWindow()
 {

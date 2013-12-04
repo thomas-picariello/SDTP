@@ -1,10 +1,18 @@
-#ifndef STARTER_H
-#define STARTER_H
+#ifndef StarterManager_H
+#define StarterManager_H
 
 #include <QApplication>
 #include <QWidget>
 #include <QPushButton>
 #include <QDebug>
+#include <QLineEdit>
+#include <QLayout>
+#include <QSettings>
+#include <QMessageBox>
+
+#include "starter.h"
+
+
 
 class StarterManager: public QWidget
 {
@@ -17,12 +25,23 @@ public:
 
 public slots :
     void starterWindow();
+    void verifyContact();
 
 private :
-    QWidget *starterwindow;
-    QPushButton *about;
+    QWidget  *namewindow;
+    QPushButton *okay, *cancel;
+    QLineEdit *name;
+    QVBoxLayout *namelayout;
+    QHBoxLayout *buttonlayout;
+    QSettings *settings;
+
+    Starter *starter;
+
+
+
+
 
 
 };
 
-#endif // STARTER_H
+#endif // StarterManager_H

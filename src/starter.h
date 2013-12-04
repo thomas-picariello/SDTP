@@ -4,6 +4,7 @@
 #include <QString>
 #include <QSettings>
 #include <QDebug>
+#include <QTcpSocket>
 #include "messenger.h"
 
 
@@ -17,9 +18,10 @@ public:
 
 private :
     QSettings *settings;
-    QString *name, *IP, *port, *key;
+    QString *name, *IP, *key;
+    QString *port;
     Messenger *messenger;
-
+    QTcpSocket *socket;
 
 };
 

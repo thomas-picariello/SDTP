@@ -16,6 +16,7 @@
 #include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent){
+
     boutonStart = new QPushButton(tr("&Start"));
     boutonContacts = new QPushButton(tr("&Contacts"));
     boutonSettings = new QPushButton(tr("&Settings"));
@@ -34,12 +35,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent){
     settings = new SettingsManager();
     starter  = new StarterManager();
 
-    connect(boutonStart,SIGNAL(clicked()),
-            starter, SLOT(starterWindow()));
-    connect(boutonContacts, SIGNAL(clicked()),
-            cManager,SLOT(contactsWindow()));
-    connect(boutonSettings, SIGNAL(clicked()),
-            settings ,SLOT(settingsWindow()));
+    connect(boutonStart     ,SIGNAL(clicked()), starter ,SLOT(starterWindow()));
+    connect(boutonContacts  ,SIGNAL(clicked()), cManager,SLOT(contactsWindow()));
+    connect(boutonSettings  ,SIGNAL(clicked()), settings,SLOT(settingsWindow()));
 
     setLayout(layout);
     show();

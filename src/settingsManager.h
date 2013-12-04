@@ -31,7 +31,7 @@ private :
     QLineEdit *portline, *keyline;
     QPushButton *save, *close;
     QSettings *settings;
-    //QPushButton *about;
+
 
 };
 
