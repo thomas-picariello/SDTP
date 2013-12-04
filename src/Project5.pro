@@ -22,7 +22,9 @@ SOURCES += \
     graphview.cpp \
     contactsmanager.cpp \
     camerasampler.cpp \
-    basesampler.cpp
+    basesampler.cpp \
+    starter.cpp \
+    messenger.cpp
 
 HEADERS  += \
     svoip.h \
@@ -33,7 +35,9 @@ HEADERS  += \
     graphview.h \
     contactsmanager.h \
     camerasampler.h \
-    basesampler.h
+    basesampler.h \
+    starter.h \
+    messenger.h
 
 SOURCES +=  \
     main.cpp\
