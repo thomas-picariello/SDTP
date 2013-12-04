@@ -2,13 +2,11 @@
 
 SVoIP::SVoIP()
 {
-    window = new MainWindow();
-}
-void SVoIP::GetListener()
-{
-    //Listener listener;
+    mWindow = new MainWindow();
+    qint16 listenPort = QSettings().value("Settings/port").toInt();
+    mListener = new Listener(listenPort);
 }
 SVoIP::~SVoIP()
 {
-    delete window;
+    delete mWindow, mListener;
 }
