@@ -75,8 +75,8 @@ void MainWindow::resolvestarter(QAction* action)
 MainWindow::~MainWindow()
 {
     delete m_boutonStart, m_boutonContacts, m_boutonSettings;
-    delete m_contactListMenu;
     delete m_contactListMenuActions;
+    delete m_contactListMenu;
     delete m_contactNameList;
     delete m_windowLayout;
     delete m_contactManager;
