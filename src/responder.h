@@ -1,39 +1,27 @@
 #ifndef RESPONDER_H
 #define RESPONDER_H
 
-#include <QDebug>
-#include <QThread>
 #include <QTcpSocket>
-#include <QHostAddress>
+#include <QObject>
 
-class Responder : public QThread
+
+
+
+class Responder
 {
     Q_OBJECT
 public:
-
-    explicit Responder(quintptr socketDescriptor, QObject *parent = 0);
+    Responder(QTcpSocket *socket);
     ~Responder();
 
-    quintptr getSocketDescriptor() const;
-    void closeConnection();
-    
-signals:
-    void disconnected(quintptr socketDescriptor);
-    void error(QAbstractSocket::SocketError);
-    
-public slots:
-    void onReadyRead();
-    void onDisconnect();
+public slots :
+    void startCommunication();
+    void readIncomingData();
 
-protected:
-    QTcpSocket *mSocket;
-    bool mQuitFlag;
+private :
+    QTcpSocket *m_responderSocket;
 
-    void run();
 
-private:
-    const quintptr mSocketDescriptor;
-    
 };
 
 #endif // RESPONDER_H

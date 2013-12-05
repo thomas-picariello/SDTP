@@ -8,6 +8,7 @@
 #include <QTcpServer>
 #include <QMap>
 #include <QMapIterator>
+#include <QList>
 #include "responder.h"
 
 class Listener : public QTcpServer
@@ -15,17 +16,11 @@ class Listener : public QTcpServer
     Q_OBJECT
 public:
     explicit Listener(quint16 listenPort, QObject *parent = 0);
-    ~Listener();
-
-signals:
-    
-public slots:
-    void connectionClosed(quintptr socketDescriptor);
-    void closeConnection(QString name);
 
 private:
-    QMap<quintptr,Responder*> mRespondersList;
     void incomingConnection(qintptr socketDescriptor);
+
+    QList<Responder> *m_responderList;
 
 };
 

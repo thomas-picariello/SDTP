@@ -1,19 +1,28 @@
 #ifndef SVOIP_H
 #define SVOIP_H
 
-#include <QSettings>
+#include <QObject>
+#include <QList>
+#include <QTcpServer>
 #include "mainwindow.h"
-#include "listener.h"
+#include "responder.h"
 
-class SVoIP
+class SVoIP : public QObject
 {
+
+    Q_OBJECT
+
 public:
-    SVoIP();
+    SVoIP(QObject *parent = 0);
     ~SVoIP();
+
+public slots :
+    void acceptConnection();
 
 private:
     MainWindow *mWindow;
-    Listener *mListener;
+    QTcpServer *mListener;
+    QList<Responder> m_responderList;
 };
 
 #endif // SVOIP_H
