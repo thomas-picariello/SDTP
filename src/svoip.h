@@ -22,7 +22,7 @@ public slots :
 private:
     MainWindow *mWindow;
     QTcpServer *mListener;
-    QList<Responder> m_responderList;
+    QList<Responder*> m_responderList;
 };
 
 #endif // SVOIP_H

@@ -43,7 +43,7 @@ void Messenger::onSend()
 {
     qDebug()<<"about to emit";
     emit sendMessage(getmsg->text().toUtf8());
-    displayMessage(getmsg->text());
+    displayMessage("Sent : "+getmsg->text());
     getmsg->clear();
     qDebug()<<"emited";
 

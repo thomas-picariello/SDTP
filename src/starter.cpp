@@ -31,7 +31,7 @@ void Starter::onDataRecieved(){
 
     qDebug() << "Data recieved...";
     QByteArray data = mSocket->readAll();
-    mMessenger->displayMessage(QString(data));
+    mMessenger->displayMessage("Received : "+QString(data));
     qDebug() << "Data recieved:" << data;
 }
 void Starter::onError(QAbstractSocket::SocketError error) {
@@ -40,6 +40,7 @@ void Starter::onError(QAbstractSocket::SocketError error) {
 void Starter::onSendData(QByteArray data){
     qDebug() << "Send:" << data;
     mSocket->write(data);
+
     qDebug() << "Sent:" << data;
 
 

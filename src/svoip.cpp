@@ -13,7 +13,7 @@ SVoIP::SVoIP(QObject *parent) : QObject(parent)
 }
 void SVoIP::acceptConnection()
 {
-    m_responderList.append(Responder(mListener->nextPendingConnection()));
+    m_responderList.append(new Responder(mListener->nextPendingConnection()));
 
 }
 
