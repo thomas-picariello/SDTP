@@ -30,13 +30,13 @@ public slots:
      void savecontact();
 
 private:
-    QWidget *Contactwindow, *addcontactwindow, *editcontactwindow;
-    QPushButton *About, *addContact,*editContact, *saveContact;
-    QSettings *settings;
-    QVBoxLayout *vlayout, *addclayout, *addlabellayout, *adddatalayout;
-    QHBoxLayout *hlayout, *addchlayout;
-    QLabel *label, *addlabel, *IPlabel, *portlabel, *namelabel, *keylabel;
-    Contact *contact;
+    QWidget *m_contactManagerMainwindow, *m_addContactWindow, *m_editContactWindow;
+    QPushButton *m_addContactButton,*m_editContactButton, *m_saveContactButton;
+    QSettings *m_settings;
+    QVBoxLayout *m_addAndEditButtonLayout, *m_addWindowMainLayout, *m_addWindowLabelLayout, *m_addWindowLineEditLayout;
+    QHBoxLayout *m_contactManagerWindowMainLayout, *m_addWindowCenterLayout;
+    QLabel *m_contactListLabel, *m_addlabel, *m_IPlabel, *m_portlabel, *m_namelabel, *m_keylabel;
+    Contact *m_contact;
     QMenu *menu;
     QValidator *IPvali;
     QLineEdit *IP, *port, *name, *key;

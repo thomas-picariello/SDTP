@@ -2,7 +2,7 @@
 
 Contact::Contact()
 {
-    QSettings settings;
+    settings = new QSettings;
     names = new QList<QString>;
     name = new QString;
     IP = new QString;
@@ -10,16 +10,16 @@ Contact::Contact()
     key = new QByteArray;
 
 
-    settings.setValue("Contacts/Default/name","Default");
-    settings.setValue("Contacts/Default/IP","127.0.0.1");
-    settings.setValue("Contacts/Default/port","80");
-    settings.setValue("Contacts/Default/key","lalalalalala");
+    settings->setValue("Contacts/Default/name","Default");
+    settings->setValue("Contacts/Default/IP","127.0.0.1");
+    settings->setValue("Contacts/Default/port","80");
+    settings->setValue("Contacts/Default/key","lalalalalala");
 
 
-    *name = settings.value("Contacts/Default/name").toString();
-    *IP = settings.value("Contacts/Default/IP").toString();
-    *port = settings.value("Contacts/Default/port").toString();
-    *key = settings.value("Contacts/Default/key").toByteArray();
+    *name = settings->value("Contacts/Default/name").toString();
+    *IP = settings->value("Contacts/Default/IP").toString();
+    *port = settings->value("Contacts/Default/port").toString();
+    *key = settings->value("Contacts/Default/key").toByteArray();
 
 
 
@@ -67,6 +67,7 @@ void Contact::setname(QString name)
     qDebug()<<"name set as : "+name;
 
     settings->setValue("Contacts/"+name+"/name",name);
+    qDebug()<<"name really set as ^";
 
 }
 void Contact::setIP(QString name, QString IP)

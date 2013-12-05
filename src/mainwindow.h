@@ -28,18 +28,14 @@ public slots:
     void resolvestarter(QAction*);
 
 private:
-    QPushButton *boutonStart, *boutonContacts, *boutonSettings;
-    QMenu *menu;
-    QSettings *set;
-    QAction *action;
-    QActionGroup *actiongroup;
-    QStringList *namelist;
-    QVBoxLayout *layout;
-    QWidget *window;
-    ContactsManager *cManager;
-    SettingsManager *settings;
-    StarterManager *starter;
-    Starter *start;
+    QPushButton  *m_boutonStart,*m_boutonContacts, *m_boutonSettings;
+    QMenu *m_contactListMenu;
+    QActionGroup *m_contactListMenuActions;
+    QStringList *m_contactNameList;
+    QVBoxLayout *m_windowLayout;
+    ContactsManager *m_contactManager;
+    SettingsManager *m_settingsManager;
+    Starter *m_starter;
 };
 
 #endif // MAINWINDOW_H

@@ -13,6 +13,10 @@ class Contact
 {
 public:
     Contact();
+    void setname(QString);
+    void setIP(QString , QString);
+    void setport(QString, QString);
+    void setkey(QString, QByteArray);
     ~Contact();
 
 public slots :
@@ -21,10 +25,7 @@ public slots :
     QString getport(QString);
     QByteArray getkey(QString );
 
-    void setname(QString);
-    void setIP(QString , QString);
-    void setport(QString, QString);
-    void setkey(QString, QByteArray);
+
 
 private :
     QSettings *settings;

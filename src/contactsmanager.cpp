@@ -3,17 +3,17 @@
 ContactsManager::ContactsManager()
 {
 
-    Contactwindow = new QWidget();
-    addcontactwindow = new QWidget();
-    editcontactwindow = new QWidget();
+    m_contactManagerMainwindow = new QWidget();
+    m_addContactWindow = new QWidget();
+    m_editContactWindow = new QWidget();
 
-    settings = new QSettings;
+    m_settings = new QSettings;
 
-    contact = new Contact();
+    m_contact = new Contact();
 
-    addContact = new QPushButton("Add+");
-    editContact = new QPushButton("Edit_");
-    saveContact = new QPushButton("Save changes");
+    m_addContactButton = new QPushButton("Add+");
+    m_editContactButton = new QPushButton("Edit_");
+    m_saveContactButton = new QPushButton("Save changes");
 
     menu = new QMenu();
 
@@ -22,25 +22,25 @@ ContactsManager::ContactsManager()
     key = new QLineEdit;
     name = new QLineEdit;
 
-    vlayout = new QVBoxLayout;
-    hlayout = new QHBoxLayout;
-    addclayout = new QVBoxLayout;
-    addchlayout = new QHBoxLayout;
-    addlabellayout = new QVBoxLayout;
-    adddatalayout = new QVBoxLayout;
+    m_addAndEditButtonLayout = new QVBoxLayout;
+    m_contactManagerWindowMainLayout = new QHBoxLayout;
+    m_addWindowMainLayout = new QVBoxLayout;
+    m_addWindowCenterLayout = new QHBoxLayout;
+    m_addWindowLabelLayout = new QVBoxLayout;
+    m_addWindowLineEditLayout = new QVBoxLayout;
 
-    label = new QLabel;
-    addlabel = new QLabel;
-    IPlabel = new QLabel;
-    portlabel = new QLabel;
-    keylabel = new QLabel;
-    namelabel = new QLabel;
+    m_contactListLabel = new QLabel;
+    m_addlabel = new QLabel;
+    m_IPlabel = new QLabel;
+    m_portlabel = new QLabel;
+    m_keylabel = new QLabel;
+    m_namelabel = new QLabel;
 
     menu->addAction(" /Under Construction\\");
     menu->addSeparator();
     menu->addAction("Just use Add function instead.");
 
-    editContact->setMenu(menu);
+    m_editContactButton->setMenu(menu);
 
     port->setInputMask("00009");
     port->setMaxLength(5);
@@ -48,46 +48,46 @@ ContactsManager::ContactsManager()
     name->setMaxLength(10);
     name->setInputMask("nnnnnnnnnn");
 
-    label->setText("text to test the text capacity of QLabel");
-    addlabel->setText("New Contact informations");
-    IPlabel->setText("IP :");
-    portlabel->setText("port :");
-    namelabel->setText("name :");
-    keylabel->setText("key :");
+    m_contactListLabel->setText("text to test the text capacity of QLabel");
+    m_addlabel->setText("New Contact informations");
+    m_IPlabel->setText("IP :");
+    m_portlabel->setText("port :");
+    m_namelabel->setText("name :");
+    m_keylabel->setText("key :");
 
-    adddatalayout->addWidget(name);
-    adddatalayout->addWidget(IP);
-    adddatalayout->addWidget(port);
-    adddatalayout->addWidget(key);
+    m_addWindowLineEditLayout->addWidget(name);
+    m_addWindowLineEditLayout->addWidget(IP);
+    m_addWindowLineEditLayout->addWidget(port);
+    m_addWindowLineEditLayout->addWidget(key);
 
-    addlabellayout->addWidget(namelabel);
-    addlabellayout->addWidget(IPlabel);
-    addlabellayout->addWidget(portlabel);
-    addlabellayout->addWidget(keylabel);
+    m_addWindowLabelLayout->addWidget(m_namelabel);
+    m_addWindowLabelLayout->addWidget(m_IPlabel);
+    m_addWindowLabelLayout->addWidget(m_portlabel);
+    m_addWindowLabelLayout->addWidget(m_keylabel);
 
-    addchlayout->addLayout(addlabellayout);
-    addchlayout->addLayout(adddatalayout);
+    m_addWindowCenterLayout->addLayout(m_addWindowLabelLayout);
+    m_addWindowCenterLayout->addLayout(m_addWindowLineEditLayout);
 
-    addclayout->addWidget(addlabel);
-    addclayout->addLayout(addchlayout);
-    addclayout->addWidget(saveContact);
-
-
-
-    vlayout->addWidget(addContact);
-    vlayout->addWidget(editContact);
-
-    hlayout->addLayout(vlayout);
-    hlayout->addWidget(label);
-
-    Contactwindow->setLayout(hlayout);
-    addcontactwindow->setLayout(addclayout);
+    m_addWindowMainLayout->addWidget(m_addlabel);
+    m_addWindowMainLayout->addLayout(m_addWindowCenterLayout);
+    m_addWindowMainLayout->addWidget(m_saveContactButton);
 
 
 
-    connect(addContact  ,SIGNAL(clicked()),this,SLOT(addcontact()));
-    connect(editContact ,SIGNAL(clicked()),this,SLOT(editcontact()));
-    connect(saveContact ,SIGNAL(clicked()),this,SLOT(savecontact()));
+    m_addAndEditButtonLayout->addWidget(m_addContactButton);
+    m_addAndEditButtonLayout->addWidget(m_editContactButton);
+
+    m_contactManagerWindowMainLayout->addLayout(m_addAndEditButtonLayout);
+    m_contactManagerWindowMainLayout->addWidget(m_contactListLabel);
+
+    m_contactManagerMainwindow->setLayout(m_contactManagerWindowMainLayout);
+    m_addContactWindow->setLayout(m_addWindowMainLayout);
+
+
+
+    connect(m_addContactButton  ,SIGNAL(clicked()),this,SLOT(addcontact()));
+    connect(m_editContactButton ,SIGNAL(clicked()),this,SLOT(editcontact()));
+    connect(m_saveContactButton ,SIGNAL(clicked()),this,SLOT(savecontact()));
 
 
 
@@ -97,17 +97,17 @@ ContactsManager::ContactsManager()
 void ContactsManager::contactsWindow()
 {
     qDebug()<<"contactsWindow !";
-    settings->beginGroup("Contacts/");
-    qDebug()<<settings->childGroups();
+    m_settings->beginGroup("Contacts/");
+    qDebug()<<m_settings->childGroups();
 
     QStringList list;
 
-    list = settings->childGroups();
+    list = m_settings->childGroups();
 
-    label->setText("List of existing and used contact names :\n\n - "+list.join("\n - "));
+    m_contactListLabel->setText("List of existing and used contact names :\n\n - "+list.join("\n - "));
 
-    settings->endGroup();
-    Contactwindow->show();
+    m_settings->endGroup();
+    m_contactManagerMainwindow->show();
 
 
 }
@@ -118,8 +118,8 @@ void ContactsManager::addcontact()
     IP->setPlaceholderText("127.0.0.1");
     key->setPlaceholderText("QWEQJBKQEQGE");
 
-    qDebug()<<"addcontactwindow";
-    addcontactwindow->show();
+    qDebug()<<"m_addContactWindow";
+    m_addContactWindow->show();
 
 
 
@@ -130,34 +130,27 @@ void ContactsManager::editcontact()
 {
 
 
-    addlabel->setText("Edit Contact informations");
+    m_addlabel->setText("Edit Contact informations");
 
 
-    editcontactwindow->setLayout(addclayout);
-    qDebug()<<"editcontactwindow";
-    editcontactwindow->show();
+    m_editContactWindow->setLayout(m_addWindowMainLayout);
+    qDebug()<<"m_editContactWindow";
+    m_editContactWindow->show();
 
 }
 void ContactsManager::savecontact()
 {
-    addcontactwindow->hide();
+    m_addContactWindow->hide();
 
-    qDebug()<<name->text();
-    qDebug()<<IP->text();
-    qDebug()<<port->text();
-    qDebug()<<key->text();
-
-
-    settings->setValue("Contacts/"+name->text()+"/name",name->text());
-    settings->setValue("Contacts/"+name->text()+"/IP",IP->text());
-    settings->setValue("Contacts/"+name->text()+"/port",port->text());
-    settings->setValue("Contacts/"+name->text()+"/key",key->text());
-
-    settings->beginGroup("Contacts/");
     QStringList list;
-    list = settings->childGroups();
-    label->setText("List of existing and used contact names :\n\n - "+list.join("\n - "));
-    settings->endGroup();
+
+    m_contact->setname(name->text());
+    m_contact->setIP(name->text(),IP->text());
+    m_contact->setport(name->text(),port->text());
+    m_contact->setkey(name->text(),key->text().toUtf8());
+
+    list = m_contact->getnames();
+    m_contactListLabel->setText("List of existing and used contact names :\n\n - "+list.join("\n - "));
 
     name->clear();
     port->clear();

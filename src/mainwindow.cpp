@@ -17,74 +17,72 @@
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent){
 
-    boutonStart = new QPushButton(tr("&Start"));
-    menu = new QMenu;
+    m_boutonStart = new QPushButton(tr("&Start"));
+    m_contactListMenu = new QMenu;
 
-    boutonContacts = new QPushButton(tr("&Contacts"));
-    boutonSettings = new QPushButton(tr("&Settings"));
+    m_boutonContacts = new QPushButton(tr("&Contacts"));
+    m_boutonSettings = new QPushButton(tr("&Settings"));
 
-    boutonStart->setToolTip("Demarre une nouvelle instance de communication");
-    boutonContacts->setToolTip("Permet de gerer sa liste de contactes : Ajout;Retraits;Editions");
-    boutonSettings->setToolTip("Permet de gerer les Principaux parametres de l'application tel que : port(défaut);version de Protocol;Peripheriques;etc...");
+    m_boutonStart->setToolTip("Demarre une nouvelle instance de communication");
+    m_boutonContacts->setToolTip("Permet de gerer sa liste de contactes : Ajout;Retraits;Editions");
+    m_boutonSettings->setToolTip("Permet de gerer les Principaux parametres de l'application tel que : port(défaut);version de Protocol;Peripheriques;etc...");
 
-    layout = new QVBoxLayout();
+    m_windowLayout = new QVBoxLayout();
 
-    layout->addWidget(boutonStart);
-    layout->addWidget(boutonContacts);
-    layout->addWidget(boutonSettings);
+    m_windowLayout->addWidget(m_boutonStart);
+    m_windowLayout->addWidget(m_boutonContacts);
+    m_windowLayout->addWidget(m_boutonSettings);
 
-    cManager = new ContactsManager();
-    settings = new SettingsManager();
-    starter  = new StarterManager();
-    start = new Starter();
+    m_contactManager = new ContactsManager();
+    m_settingsManager = new SettingsManager();
+    m_starter = new Starter();
 
 
-    namelist = new QStringList;
+    m_contactNameList = new QStringList;
 
-    set = new QSettings;
+    QSettings settings;
 
-    qDebug()<<"!";
+    settings.beginGroup("Contacts");
+    *m_contactNameList = settings.childGroups();
+    settings.endGroup();
 
-    set->beginGroup("Contacts");
-    *namelist = set->childGroups();
-    set->endGroup();
+    m_contactListMenuActions = new QActionGroup(m_contactListMenu);
 
-    actiongroup = new QActionGroup(menu);
-
-    for(int i=0;i<namelist->length();i++)
+    for(int i=0;i<m_contactNameList->length();i++)
     {
-        actiongroup->addAction(namelist->at(i));
-        connect(actiongroup, SIGNAL(triggered(QAction*)),this, SLOT(resolvestarter(QAction*)));
+        m_contactListMenuActions->addAction(m_contactNameList->at(i));
+        connect(m_contactListMenuActions, SIGNAL(triggered(QAction*)),this, SLOT(resolvestarter(QAction*)));
     }
 
-    menu->addActions(actiongroup->actions());
+    m_contactListMenu->addActions(m_contactListMenuActions->actions());
 
 
 
-    boutonStart->setMenu(menu);
+    m_boutonStart->setMenu(m_contactListMenu);
 
 
 
 
-    //connect(boutonStart     ,SIGNAL(clicked()), starter ,SLOT(starterWindow()));
-    connect(boutonContacts  ,SIGNAL(clicked()), cManager,SLOT(contactsWindow()));
-    connect(boutonSettings  ,SIGNAL(clicked()), settings,SLOT(settingsWindow()));
+   connect(m_boutonContacts  ,SIGNAL(clicked()), m_contactManager,SLOT(contactsWindow()));
+    connect(m_boutonSettings  ,SIGNAL(clicked()), m_settingsManager,SLOT(settingsWindow()));
 
-    setLayout(layout);
+    setLayout(m_windowLayout);
     show();
 }
 void MainWindow::resolvestarter(QAction* action)
 {
     QString name = action->iconText();
-    qDebug()<<name;
-    start->opennewConnection(name);
+    m_starter->opennewConnection(name);
 }
 
 MainWindow::~MainWindow()
 {
-    delete boutonStart, boutonContacts, boutonSettings;
-    delete layout;
-    delete cManager;
-    delete settings;
-    delete starter;
+    delete m_boutonStart, m_boutonContacts, m_boutonSettings;
+    delete m_contactListMenu;
+    delete m_contactListMenuActions;
+    delete m_contactNameList;
+    delete m_windowLayout;
+    delete m_contactManager;
+    delete m_settingsManager;
+    delete m_starter;
 }
