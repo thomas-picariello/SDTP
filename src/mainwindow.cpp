@@ -51,19 +51,16 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent){
     for(int i=0;i<m_contactNameList->length();i++)
     {
         m_contactListMenuActions->addAction(m_contactNameList->at(i));
-        connect(m_contactListMenuActions, SIGNAL(triggered(QAction*)),this, SLOT(resolvestarter(QAction*)));
+
     }
 
     m_contactListMenu->addActions(m_contactListMenuActions->actions());
-
-
+    connect(m_contactListMenuActions, SIGNAL(triggered(QAction*)),
+            this, SLOT(resolvestarter(QAction*)));
 
     m_boutonStart->setMenu(m_contactListMenu);
 
-
-
-
-   connect(m_boutonContacts  ,SIGNAL(clicked()), m_contactManager,SLOT(contactsWindow()));
+    connect(m_boutonContacts  ,SIGNAL(clicked()), m_contactManager,SLOT(contactsWindow()));
     connect(m_boutonSettings  ,SIGNAL(clicked()), m_settingsManager,SLOT(settingsWindow()));
 
     setLayout(m_windowLayout);
@@ -72,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent){
 void MainWindow::resolvestarter(QAction* action)
 {
     QString name = action->iconText();
-    m_starter->opennewConnection(name);
+    m_starter->openConnection(name);
 }
 
 MainWindow::~MainWindow()

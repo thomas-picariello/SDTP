@@ -1,7 +1,8 @@
 #ifndef MESSENGER_H
 #define MESSENGER_H
 
-
+#include <QDebug>
+#include <QObject>
 #include <QLabel>
 #include <QWidget>
 #include <QLayout>
@@ -11,15 +12,19 @@
 
 
 
-class Messenger
+class Messenger: public QObject
 {
+    Q_OBJECT
 public:
-    Messenger();
+    explicit Messenger(QObject *parent = 0);
     ~Messenger();
 
+signals:
+    void sendMessage(QByteArray data);
+
 public slots:
-    void displaymsg(QString);
-    void sendnewmsg();
+    void displayMessage(QString);
+    void onSend();
 
 private :
     QWidget *messenger;

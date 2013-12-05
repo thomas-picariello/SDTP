@@ -58,7 +58,7 @@ void StarterManager::verifyContact()
     {
         namewindow->hide();
         starter = new Starter();
-        starter->opennewConnection(name->text());
+        starter->openConnection(name->text());
         name->clear();
 
 

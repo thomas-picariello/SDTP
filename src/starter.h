@@ -1,28 +1,33 @@
 #ifndef STARTER_H
 #define STARTER_H
 
+#include <QDebug>
+#include <QObject>
 #include <QString>
 #include <QSettings>
-#include <QDebug>
 #include <QtNetwork>
-
 #include "messenger.h"
 
-
-class Starter
+class Starter : public QObject
 {
+    Q_OBJECT
+
 public:
-    Starter();
-    void opennewConnection(QString);
+    explicit Starter(QObject *parent = 0);
+    void openConnection(QString name);
     ~Starter();
 
+signals:
+
+public slots:
+    void onConnect();
+    void onDataRecieved();
+    void onError(QAbstractSocket::SocketError error);
+    void onSendData(QByteArray data);
 
 private :
-    QSettings *settings;
-    QString *name, *IP, *key;
-    qint16 *port;
-    Messenger *messenger;
-    QTcpSocket *socket;
+    Messenger *mMessenger;
+    QTcpSocket *mSocket;
 
 };
 

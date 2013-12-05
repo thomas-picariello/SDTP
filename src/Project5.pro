@@ -15,53 +15,37 @@ TEMPLATE = app
 SOURCES += \
     svoip.cpp \
     startermanager.cpp \
+    starter.cpp \
     soundsampler.cpp \
-    settingsmanager.cpp \
+    settingsManager.cpp \
+    responder.cpp \
+    messenger.cpp \
     mainwindow.cpp \
     main.cpp \
     graphview.cpp \
     contactsmanager.cpp \
+    contact.cpp \
     camerasampler.cpp \
     basesampler.cpp \
-    starter.cpp \
-    messenger.cpp
+    listener.cpp \
+    contactlist.cpp
 
 HEADERS  += \
     svoip.h \
     startermanager.h \
-    soundsampler.h \
-    settingsmanager.h \
-    mainwindow.h \
-    graphview.h \
-    contactsmanager.h \
-    camerasampler.h \
-    basesampler.h \
     starter.h \
-    messenger.h
-
-SOURCES +=  \
-    main.cpp\
-    mainwindow.cpp \
-    svoip.cpp \
-    camerasampler.cpp \
-    startermanager.cpp \
-    soundsampler.cpp \
-    settingsmanager.cpp \
-    contactsmanager.cpp \
-    basesampler.cpp \
-    graphview.cpp \
-    contact.cpp
-
-HEADERS  += \
-    mainwindow.h \
-    svoip.h \
-    camerasampler.h \
-    startermanager.h \
     soundsampler.h \
-    settingsmanager.h \
-    contactsmanager.h \
-    basesampler.h \
+    settingsManager.h \
+    responder.h \
+    messenger.h \
+    mainwindow.h \
     graphview.h \
-    contact.h
+    contactsmanager.h \
+    contact.h \
+    camerasampler.h \
+    basesampler.h \
+    listener.h \
+    contactlist.h
 
-FORMS    +=
+FORMS    += \
+    contactlist.ui

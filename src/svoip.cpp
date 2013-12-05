@@ -4,7 +4,7 @@ SVoIP::SVoIP()
 {
     mWindow = new MainWindow();
     qint16 listenPort = QSettings().value("Settings/port").toInt();
-    mListener = new Listener(listenPort);
+    //mListener = new Listener(listenPort);
 }
 SVoIP::~SVoIP()
 {

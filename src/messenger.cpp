@@ -1,6 +1,6 @@
 #include "messenger.h"
 
-Messenger::Messenger()
+Messenger::Messenger(QObject *parent): QObject(parent)
 {
     messenger = new QWidget;
     messageDisplay = new QLabel;
@@ -40,21 +40,20 @@ Messenger::Messenger()
 
     messageDisplay->setText(msglist->join("\n"));
 
-
-    messenger->show();
-
-
-
+    connect(sendmsg, SIGNAL(clicked()),
+            this, SLOT(onSend()));
 
 }
-void Messenger::displaymsg(QString msg)
+
+void Messenger::displayMessage(QString msg)
 {
     messenger->show();
-
+    msglist->append(msg);
+    messageDisplay->setText(msglist->join("\n"));
 }
-void Messenger::sendnewmsg()
+void Messenger::onSend()
 {
-
+    emit sendMessage(getmsg->text().toLocal8Bit());
 }
 Messenger::~Messenger()
 {
