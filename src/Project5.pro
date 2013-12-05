@@ -22,13 +22,15 @@ SOURCES += \
     messenger.cpp \
     mainwindow.cpp \
     main.cpp \
+    listener.cpp \
     graphview.cpp \
+    editcontactwindow.cpp \
     contactsmanager.cpp \
+    contactlistwindow.cpp \
     contact.cpp \
     camerasampler.cpp \
-    basesampler.cpp \
-    listener.cpp \
-    contactlist.cpp
+    basesampler.cpp
+
 
 HEADERS  += \
     svoip.h \
@@ -39,13 +41,17 @@ HEADERS  += \
     responder.h \
     messenger.h \
     mainwindow.h \
+    listener.h \
     graphview.h \
+    editcontactwindow.h \
     contactsmanager.h \
+    contactlistwindow.h \
     contact.h \
     camerasampler.h \
-    basesampler.h \
-    listener.h \
-    contactlist.h
+    basesampler.h
+
 
 FORMS    += \
-    contactlist.ui
+    editcontactwindow.ui \
+    contactlistwindow.ui
+

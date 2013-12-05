@@ -28,6 +28,7 @@ public slots:
      void addcontact();
      void editcontact();
      void savecontact();
+     QStringList getContactList() const;
 
 private:
     QWidget *m_contactManagerMainwindow, *m_addContactWindow, *m_editContactWindow;
@@ -39,7 +40,6 @@ private:
     Contact *m_contact;
     QMenu *menu;
     QLineEdit *m_IPLineEdit, *m_portLineEdit, *m_nameLineEdit, *m_keyLineEdit;
-
 
 };
 

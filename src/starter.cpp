@@ -47,14 +47,14 @@ void Starter::onSendData(QByteArray data){
 }
 
 void Starter::openConnection(QString name){
-    QSettings settings;
+    Contact contact(name);
 
-    QString ip  = settings.value("Contacts/"+name+"/IP").toString();
+    QString ip  = contact.getIp();
 
     //quint16 port = settings.value("Contacts/"+name+"/port").toInt();
-    quint16 port = settings.value("Settings/port").toInt();
+    quint16 port = contact.getPort().toInt();
 
-    QByteArray key = settings.value("Contacts/"+name+"/key").toString().toUtf8();
+    QByteArray key = contact.getKey();
 
     //Close previous connection if already connected with this socket
     if(mSocket->state() == QAbstractSocket::ConnectedState ||

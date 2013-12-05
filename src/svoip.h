@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QTcpServer>
-#include "mainwindow.h"
+#include "contactlistwindow.h"
 #include "responder.h"
 
 class SVoIP : public QObject
@@ -20,7 +20,7 @@ public slots :
     void acceptConnection();
 
 private:
-    MainWindow *mWindow;
+    ContactListWindow *mWindow;
     QTcpServer *mListener;
     QList<Responder*> m_responderList;
 };

@@ -132,24 +132,15 @@ void ContactsManager::addcontact()
 
 
 }
-void ContactsManager::editcontact()
-{
-
-
+void ContactsManager::editcontact(){
     m_addlabel->setText("Edit Contact informations");
 
-
-    QList<QString> namelist;
-    namelist = m_contact->getnames();
-
-
-
+    QStringList namelist;
+    namelist = this->getContactList();
 
     m_editContactWindow->setLayout(m_addWindowMainLayout);
     qDebug()<<"m_editContactWindow";
     m_editContactWindow->show();
-
-
 
 }
 void ContactsManager::savecontact()
@@ -158,12 +149,12 @@ void ContactsManager::savecontact()
 
     QStringList list;
 
-    m_contact->setname(m_nameLineEdit->text());
-    m_contact->setIP(m_nameLineEdit->text(),m_IPLineEdit->text());
-    m_contact->setport(m_nameLineEdit->text(),m_portLineEdit->text());
-    m_contact->setkey(m_nameLineEdit->text(),m_keyLineEdit->text().toUtf8());
+    m_contact->setName(m_nameLineEdit->text());
+    m_contact->setIp(m_IPLineEdit->text());
+    m_contact->setPort(m_portLineEdit->text());
+    m_contact->setKey(m_keyLineEdit->text().toUtf8());
 
-    list = m_contact->getnames();
+    list = this->getContactList();
     m_contactListLabel->setText("List of existing and used contact names :\n\n - "+list.join("\n - "));
 
     m_nameLineEdit->clear();
@@ -171,7 +162,12 @@ void ContactsManager::savecontact()
     m_IPLineEdit->clear();
     m_keyLineEdit->clear();
 
-
+}
+QStringList ContactsManager::getContactList() const{
+    m_settings->beginGroup("Contacts");
+    QStringList contactList = m_settings->childKeys();
+    m_settings->endGroup();
+    return contactList;
 }
 
 ContactsManager::~ContactsManager(void)

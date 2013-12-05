@@ -2,7 +2,7 @@
 
 SVoIP::SVoIP(QObject *parent) : QObject(parent)
 {
-    mWindow = new MainWindow();
+    mWindow = new ContactListWindow();
 
     qint16 listenPort = QSettings().value("Settings/port").toInt();
 

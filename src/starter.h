@@ -4,8 +4,8 @@
 #include <QDebug>
 #include <QObject>
 #include <QString>
-#include <QSettings>
 #include <QtNetwork>
+#include "contact.h"
 #include "messenger.h"
 
 class Starter : public QObject
