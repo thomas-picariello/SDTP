@@ -23,20 +23,7 @@ Messenger::Messenger(QObject *parent): QObject(parent)
 
     messenger->setLayout(msglayout);
 
-    for(int i=0;i<10;i++)msglist->append("|");
-
-
-    ////////////Test area
-    ///
-
-    msglist->removeFirst();
-    msglist->append("|>>message of me or someone else :D ");
-    msglist->removeFirst();
-    msglist->append("|<<message of someone else or me ;) ");
-
-
-    ///
-    ///////////
+    for(int i=0;i<10;i++)msglist->append(" ");
 
     messageDisplay->setText(msglist->join("\n"));
 
@@ -48,12 +35,18 @@ Messenger::Messenger(QObject *parent): QObject(parent)
 void Messenger::displayMessage(QString msg)
 {
     messenger->show();
+    msglist->removeFirst();
     msglist->append(msg);
-    messageDisplay->setText(msglist->join("\n"));
+    messageDisplay->setText(msglist->join("\n| "));
 }
 void Messenger::onSend()
 {
-    emit sendMessage(getmsg->text().toLocal8Bit());
+    qDebug()<<"about to emit";
+    emit sendMessage(getmsg->text().toUtf8());
+    displayMessage(getmsg->text());
+    getmsg->clear();
+    qDebug()<<"emited";
+
 }
 Messenger::~Messenger()
 {

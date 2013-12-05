@@ -2,17 +2,24 @@
 
 Starter::Starter(QObject *parent) : QObject(parent){
     mMessenger = new Messenger;
+
+
     mSocket = new QTcpSocket;
 
     connect(mSocket, SIGNAL(readyRead()),
             this, SLOT(onDataRecieved()));
+
     connect(mSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(onError(QAbstractSocket::SocketError)));
+
     connect(mSocket, SIGNAL(connected()),
             this, SLOT(onConnect()));
+
     connect(mMessenger, SIGNAL(sendMessage(QByteArray)),
-            this, SLOT(sendData(QByteArray)));
+            this, SLOT(onSendData(QByteArray)));
+
 }
+
 
 void Starter::onConnect(){
     QString ip = mSocket->peerAddress().toString();
@@ -21,6 +28,8 @@ void Starter::onConnect(){
     mSocket->write("Hello from client");
 }
 void Starter::onDataRecieved(){
+
+    qDebug() << "Data recieved...";
     QByteArray data = mSocket->readAll();
     mMessenger->displayMessage(QString(data));
     qDebug() << "Data recieved:" << data;
@@ -29,15 +38,21 @@ void Starter::onError(QAbstractSocket::SocketError error) {
     qDebug() << error;
 }
 void Starter::onSendData(QByteArray data){
-    mSocket->write(data);
     qDebug() << "Send:" << data;
+    mSocket->write(data);
+    qDebug() << "Sent:" << data;
+
+
 }
 
 void Starter::openConnection(QString name){
     QSettings settings;
 
     QString ip  = settings.value("Contacts/"+name+"/IP").toString();
-    quint16 port = settings.value("Contacts/"+name+"/port").toInt();
+
+    //quint16 port = settings.value("Contacts/"+name+"/port").toInt();
+    quint16 port = settings.value("Settings/port").toInt();
+
     QByteArray key = settings.value("Contacts/"+name+"/key").toString().toUtf8();
 
     //Close previous connection if already connected with this socket

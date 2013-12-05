@@ -18,7 +18,7 @@ void Responder::onReadyRead(){
     QByteArray data = mSocket->readAll();
     data.prepend("Server echo: ");
     qDebug() << data;
-    mSocket->write(QByteArray());
+    mSocket->write(data);
 }
 void Responder::onDisconnect(){
     emit disconnected(getSocketDescriptor());

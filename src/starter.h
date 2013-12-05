@@ -17,7 +17,6 @@ public:
     void openConnection(QString name);
     ~Starter();
 
-signals:
 
 public slots:
     void onConnect();
