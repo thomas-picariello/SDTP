@@ -13,18 +13,18 @@ class Contact
 {
 public:
     Contact();
+
     void setname(QString);
     void setIP(QString , QString);
     void setport(QString, QString);
     void setkey(QString, QByteArray);
-    ~Contact();
 
-public slots :
     QList<QString> getnames();
     QString getIP(QString);
     QString getport(QString);
     QByteArray getkey(QString );
 
+    ~Contact();
 
 
 private :

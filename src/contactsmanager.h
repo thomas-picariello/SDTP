@@ -38,8 +38,7 @@ private:
     QLabel *m_contactListLabel, *m_addlabel, *m_IPlabel, *m_portlabel, *m_namelabel, *m_keylabel;
     Contact *m_contact;
     QMenu *menu;
-    QValidator *IPvali;
-    QLineEdit *IP, *port, *name, *key;
+    QLineEdit *m_IPLineEdit, *m_portLineEdit, *m_nameLineEdit, *m_keyLineEdit;
 
 
 };

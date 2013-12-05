@@ -17,10 +17,10 @@ ContactsManager::ContactsManager()
 
     menu = new QMenu();
 
-    IP = new QLineEdit;
-    port = new QLineEdit;
-    key = new QLineEdit;
-    name = new QLineEdit;
+    m_IPLineEdit = new QLineEdit;
+    m_portLineEdit = new QLineEdit;
+    m_keyLineEdit = new QLineEdit;
+    m_nameLineEdit = new QLineEdit;
 
     m_addAndEditButtonLayout = new QVBoxLayout;
     m_contactManagerWindowMainLayout = new QHBoxLayout;
@@ -42,11 +42,11 @@ ContactsManager::ContactsManager()
 
     m_editContactButton->setMenu(menu);
 
-    port->setInputMask("00009");
-    port->setMaxLength(5);
-    IP->setInputMask("009.009.009.009");
-    name->setMaxLength(10);
-    name->setInputMask("nnnnnnnnnn");
+    m_portLineEdit->setInputMask("00009");
+    m_portLineEdit->setMaxLength(5);
+    m_IPLineEdit->setInputMask("009.009.009.009");
+    m_nameLineEdit->setMaxLength(10);
+    m_nameLineEdit->setInputMask("nnnnnnnnnn");
 
     m_contactListLabel->setText("text to test the text capacity of QLabel");
     m_addlabel->setText("New Contact informations");
@@ -55,10 +55,15 @@ ContactsManager::ContactsManager()
     m_namelabel->setText("name :");
     m_keylabel->setText("key :");
 
-    m_addWindowLineEditLayout->addWidget(name);
-    m_addWindowLineEditLayout->addWidget(IP);
-    m_addWindowLineEditLayout->addWidget(port);
-    m_addWindowLineEditLayout->addWidget(key);
+
+
+
+
+
+    m_addWindowLineEditLayout->addWidget(m_nameLineEdit);
+    m_addWindowLineEditLayout->addWidget(m_IPLineEdit);
+    m_addWindowLineEditLayout->addWidget(m_portLineEdit);
+    m_addWindowLineEditLayout->addWidget(m_keyLineEdit);
 
     m_addWindowLabelLayout->addWidget(m_namelabel);
     m_addWindowLabelLayout->addWidget(m_IPlabel);
@@ -78,10 +83,11 @@ ContactsManager::ContactsManager()
     m_addAndEditButtonLayout->addWidget(m_editContactButton);
 
     m_contactManagerWindowMainLayout->addLayout(m_addAndEditButtonLayout);
-    m_contactManagerWindowMainLayout->addWidget(m_contactListLabel);
+    m_contactManagerWindowMainLayout->addWidget(m_contactListLabel);/////////////<---
 
     m_contactManagerMainwindow->setLayout(m_contactManagerWindowMainLayout);
     m_addContactWindow->setLayout(m_addWindowMainLayout);
+
 
 
 
@@ -113,10 +119,10 @@ void ContactsManager::contactsWindow()
 }
 void ContactsManager::addcontact()
 {
-    name->setPlaceholderText("Name :");
-    port->setPlaceholderText("80");
-    IP->setPlaceholderText("127.0.0.1");
-    key->setPlaceholderText("QWEQJBKQEQGE");
+    m_nameLineEdit->setPlaceholderText("Name :");
+    m_portLineEdit->setPlaceholderText("80");
+    m_IPLineEdit->setPlaceholderText("127.0.0.1");
+    m_keyLineEdit->setPlaceholderText("QWEQJBKQEQGE");
 
     qDebug()<<"m_addContactWindow";
     m_addContactWindow->show();
@@ -133,9 +139,17 @@ void ContactsManager::editcontact()
     m_addlabel->setText("Edit Contact informations");
 
 
+    QList<QString> namelist;
+    namelist = m_contact->getnames();
+
+
+
+
     m_editContactWindow->setLayout(m_addWindowMainLayout);
     qDebug()<<"m_editContactWindow";
     m_editContactWindow->show();
+
+
 
 }
 void ContactsManager::savecontact()
@@ -144,18 +158,18 @@ void ContactsManager::savecontact()
 
     QStringList list;
 
-    m_contact->setname(name->text());
-    m_contact->setIP(name->text(),IP->text());
-    m_contact->setport(name->text(),port->text());
-    m_contact->setkey(name->text(),key->text().toUtf8());
+    m_contact->setname(m_nameLineEdit->text());
+    m_contact->setIP(m_nameLineEdit->text(),m_IPLineEdit->text());
+    m_contact->setport(m_nameLineEdit->text(),m_portLineEdit->text());
+    m_contact->setkey(m_nameLineEdit->text(),m_keyLineEdit->text().toUtf8());
 
     list = m_contact->getnames();
     m_contactListLabel->setText("List of existing and used contact names :\n\n - "+list.join("\n - "));
 
-    name->clear();
-    port->clear();
-    IP->clear();
-    key->clear();
+    m_nameLineEdit->clear();
+    m_portLineEdit->clear();
+    m_IPLineEdit->clear();
+    m_keyLineEdit->clear();
 
 
 }

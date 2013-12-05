@@ -12,7 +12,7 @@ Contact::Contact()
 
     settings->setValue("Contacts/Default/name","Default");
     settings->setValue("Contacts/Default/IP","127.0.0.1");
-    settings->setValue("Contacts/Default/port","80");
+    settings->setValue("Contacts/Default/port","100");
     settings->setValue("Contacts/Default/key","lalalalalala");
 
 
