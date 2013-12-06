@@ -1,25 +1,34 @@
 #include "editcontactwindow.h"
 #include "ui_editcontactwindow.h"
 
-EditContactWindow::EditContactWindow(QString name, QWidget *parent) : QWidget(parent),ui(new Ui::EditContactWindow)
+EditContactWindow::EditContactWindow(QWidget *parent): QWidget(parent), ui(new Ui::EditContactWindow)
 {
-    ui->setupUi(this);
+    mContact = new Contact();
+    this->init();
 
-    if(name.isEmpty()){
-        mContact = new Contact();
-    }else{
-        mContact = new Contact(name);
-        ui->name->setText(name);
-        ui->ip->setText(mContact->getIp());
-        ui->port->setText(mContact->getPort());
-        ui->key->setText(QString(mContact->getKey()));
-    }
-
-    connect(ui->save, SIGNAL(clicked()),
-            this, SLOT(save()));
-    connect(ui->cancel, SIGNAL(clicked()),
-            this, SLOT(cancel()));
     this->show();
+}
+EditContactWindow::EditContactWindow(QString name, QWidget *parent): QWidget(parent), ui(new Ui::EditContactWindow)
+{
+    mContact = new Contact(name);
+    this->init();
+
+    ui->name->setText(mContact->getName());
+    ui->ip->setText(mContact->getIp());
+    ui->port->setText(mContact->getPort());
+    ui->key->setText(QString(mContact->getKey()));
+
+    this->show();
+}
+
+void EditContactWindow::init(){
+    ui->setupUi(this);
+    this->setAttribute(Qt::WA_DeleteOnClose);
+
+    this->connect(ui->save, SIGNAL(clicked()),
+            this, SLOT(save()));
+    this->connect(ui->cancel, SIGNAL(clicked()),
+            this, SLOT(cancel()));
 }
 
 void EditContactWindow::save(){
@@ -39,8 +48,8 @@ void EditContactWindow::save(){
             mContact->setPort(port);
             mContact->setIp(ip);
             mContact->setKey(key.toUtf8());
-            qDebug() << mContact->getName();
-            emit contactChanged();
+            emit this->contactChanged();
+
             this->close();
             this->deleteLater();
         }

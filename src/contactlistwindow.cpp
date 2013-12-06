@@ -3,7 +3,8 @@
 
 ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new Ui::ContactListWindow)
 {
-    mEditContactWindow = 0;
+    mEditContactWindow = NULL;
+    mSettingsWindow = NULL;
     mStarter = new Starter();
     ui->setupUi(this);
 
@@ -17,6 +18,8 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
             this, SLOT(onRemoveBtClick()));
     connect(ui->connect, SIGNAL(clicked()),
             this, SLOT(onConnectBtClick()));
+    connect(ui->settings, SIGNAL(clicked()),
+            this, SLOT(onSettingsBtClick()));
     connect(ui->exit, SIGNAL(clicked()),
             this, SLOT(onExitBtClick()));
 
@@ -54,7 +57,7 @@ void ContactListWindow::onConnectBtClick(){
     }
 }
 void ContactListWindow::onSettingsBtClick(){
-
+    mSettingsWindow = new SettingsWindow();
 }
 void ContactListWindow::onExitBtClick(){
     exit(0);
@@ -66,5 +69,5 @@ void ContactListWindow::refreshList(){
 
 ContactListWindow::~ContactListWindow()
 {
-    delete ui, mEditContactWindow, mStarter;
+    delete ui, mEditContactWindow, mSettingsWindow, mStarter;
 }

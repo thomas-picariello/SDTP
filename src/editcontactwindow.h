@@ -16,8 +16,11 @@ class EditContactWindow : public QWidget
     Q_OBJECT
     
 public:
-    explicit EditContactWindow(QString name = QString(), QWidget *parent = 0);
+    explicit EditContactWindow(QWidget *parent = 0);
+    explicit EditContactWindow(QString name, QWidget *parent = 0);
     ~EditContactWindow();
+    void fill(QString contactName);
+    void clear();
 
 signals:
     void contactChanged();
@@ -29,6 +32,8 @@ public slots:
 private:
     Ui::EditContactWindow *ui;
     Contact *mContact;
+
+    void init();
 };
 
 #endif // EDITCONTACTWINDOW_H

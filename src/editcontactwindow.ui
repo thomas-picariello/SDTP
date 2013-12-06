@@ -2,16 +2,19 @@
 <ui version="4.0">
  <class>EditContactWindow</class>
  <widget class="QWidget" name="EditContactWindow">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>291</width>
-    <height>241</height>
+    <width>250</width>
+    <height>250</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Contact</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

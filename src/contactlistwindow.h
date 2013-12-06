@@ -4,8 +4,10 @@
 #include <QWidget>
 #include <QSettings>
 #include "editcontactwindow.h"
+#include "settingswindow.h"
 #include "starter.h"
 #include "contact.h"
+
 
 namespace Ui {
 class ContactListWindow;
@@ -31,6 +33,7 @@ public slots:
 private:
     Ui::ContactListWindow *ui;
     EditContactWindow *mEditContactWindow;
+    SettingsWindow *mSettingsWindow;
     Starter *mStarter;
 };
 
