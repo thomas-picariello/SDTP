@@ -52,4 +52,12 @@ void Messenger::onSend()
 Messenger::~Messenger()
 {
 
+    delete messenger;
+    delete messageDisplay;
+    delete getmsg;
+    delete sendmsg;
+    delete msglist;
+    delete sendlayout;
+    delete msglayout;
+
 }

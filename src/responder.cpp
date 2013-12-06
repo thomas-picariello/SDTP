@@ -50,4 +50,9 @@ void Responder::error(QAbstractSocket::SocketError error)
 Responder::~Responder()
 {
 
+    delete m_responderSocket;
+    delete messenger;
+    delete m_incomingData;
+
+
 }
