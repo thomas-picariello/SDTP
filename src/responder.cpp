@@ -11,6 +11,7 @@ Responder::Responder(QTcpSocket *socket, QObject *parent): QObject(parent)
 
     connect(m_responderSocket,SIGNAL(readyRead()),this,SLOT(readIncomingData()));
     connect(messenger,SIGNAL(sendMessage(QByteArray)),this,SLOT(sendData(QByteArray)));
+    connect(m_responderSocket,SIGNAL(error(QAbstractSocket::SocketError)), this,SLOT(error(QAbstractSocket::SocketError)));
 
 }
 void Responder::startCommunication()
@@ -27,7 +28,23 @@ void Responder::readIncomingData()
 }
 void Responder::sendData(QByteArray data)
 {
-    m_responderSocket->write(data);
+    if(m_responderSocket->state() == QAbstractSocket::ConnectedState)
+    {
+        messenger->displayMessage("Sent : "+data);
+        m_responderSocket->write(data);
+    }
+    else messenger->displayMessage("!!!-"+data+"-!!!\n|Couldn't send message : Not connected.");
+}
+void Responder::error(QAbstractSocket::SocketError error)
+{
+    qDebug()<<error;
+
+    if(error == QAbstractSocket::RemoteHostClosedError)
+    {
+
+        messenger->displayMessage("The server has disconnected...");
+
+    }
 }
 
 Responder::~Responder()

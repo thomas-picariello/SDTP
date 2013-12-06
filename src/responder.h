@@ -21,6 +21,7 @@ public slots :
     void startCommunication();
     void readIncomingData();
     void sendData(QByteArray);
+    void error(QAbstractSocket::SocketError);
 
 private :
     QTcpSocket *m_responderSocket;

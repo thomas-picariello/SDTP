@@ -36,14 +36,27 @@ void Starter::onDataRecieved(){
 }
 void Starter::onError(QAbstractSocket::SocketError error) {
     qDebug() << error;
+
+    if(error = QAbstractSocket::RemoteHostClosedError)
+    {
+
+        mMessenger->displayMessage("The server has disconnected...");
+
+    }
+
+
 }
 void Starter::onSendData(QByteArray data){
     qDebug() << "Send:" << data;
-    mSocket->write(data);
+    if(mSocket->state() == QAbstractSocket::ConnectedState)
+    {
+        mSocket->write(data);
+        mMessenger->displayMessage("Sent : "+data);
+
+    }
+    else mMessenger->displayMessage("!!!-"+data+"-!!!\n|Couldn't send message : Not connected.");
 
     qDebug() << "Sent:" << data;
-
-
 }
 
 void Starter::openConnection(QString name){

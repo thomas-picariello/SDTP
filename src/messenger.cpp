@@ -13,7 +13,6 @@ Messenger::Messenger(QObject *parent): QObject(parent)
 
     getmsg->setPlaceholderText("Write down your deepest thougts and send them to me...");
     sendmsg->setText("Send");
-    sendmsg->setDefault(true);
 
 
     sendlayout->addWidget(getmsg);
@@ -45,7 +44,7 @@ void Messenger::onSend()
 {
     qDebug()<<"about to emit";
     emit sendMessage(getmsg->text().toUtf8());
-    displayMessage("Sent : "+getmsg->text());
+    //displayMessage("Sent : "+getmsg->text());
     getmsg->clear();
     qDebug()<<"emited";
 
