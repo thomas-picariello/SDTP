@@ -13,6 +13,7 @@ Messenger::Messenger(QObject *parent): QObject(parent)
 
     getmsg->setPlaceholderText("Write down your deepest thougts and send them to me...");
     sendmsg->setText("Send");
+    sendmsg->setDefault(true);
 
 
     sendlayout->addWidget(getmsg);
@@ -29,6 +30,7 @@ Messenger::Messenger(QObject *parent): QObject(parent)
 
     connect(sendmsg, SIGNAL(clicked()),
             this, SLOT(onSend()));
+    connect(getmsg,SIGNAL(returnPressed()),this,SLOT(onSend()));
 
 }
 
