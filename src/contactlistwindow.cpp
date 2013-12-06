@@ -35,8 +35,11 @@ void ContactListWindow::onRemoveBtClick(){
 
 }
 void ContactListWindow::onConnectBtClick(){
-    QString selectedName = ui->list->selectedItems().first()->text();
-    mStarter->openConnection(selectedName);
+    QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
+    if(selectedLines.count()>0){
+        QString selectedName = selectedLines.first()->text();
+        mStarter->openConnection(selectedName);
+    }
 }
 void ContactListWindow::onExitBtClick(){
     exit(0);
