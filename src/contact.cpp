@@ -108,7 +108,7 @@ int Contact::getNameID(QString name){
     int id = -1;
     for(int i=0; i<settings.childGroups().size(); i++){
         id = settings.childGroups().at(i).toInt();
-        if(settings.value(id + "/name").toString().compare(name)){
+        if(settings.value(id + "/name").toString().compare(name) == 0){
             settings.endGroup();
             return id;
         }
