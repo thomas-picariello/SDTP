@@ -5,6 +5,7 @@
 #include <QSettings>
 #include "editcontactwindow.h"
 #include "starter.h"
+#include "contact.h"
 
 namespace Ui {
 class ContactListWindow;
@@ -23,6 +24,7 @@ public slots:
     void onEditBtClick();
     void onRemoveBtClick();
     void onConnectBtClick();
+    void onSettingsBtClick();
     void onExitBtClick();
     void refreshList();
     

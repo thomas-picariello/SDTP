@@ -29,10 +29,22 @@ void ContactListWindow::onAddBtClick(){
             this, SLOT(refreshList()));
 }
 void ContactListWindow::onEditBtClick(){
-
+    QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
+    if(selectedLines.count()>0){
+        QString selectedName = selectedLines.first()->text();
+        mEditContactWindow = new EditContactWindow(selectedName);
+        connect(mEditContactWindow, SIGNAL(contactChanged()),
+                this, SLOT(refreshList()));
+    }
 }
 void ContactListWindow::onRemoveBtClick(){
-
+    QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
+    if(selectedLines.count()>0){
+        QString selectedName = selectedLines.first()->text();
+        Contact contact(selectedName);
+        contact.remove();
+        refreshList();
+    }
 }
 void ContactListWindow::onConnectBtClick(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
@@ -40,6 +52,9 @@ void ContactListWindow::onConnectBtClick(){
         QString selectedName = selectedLines.first()->text();
         mStarter->openConnection(selectedName);
     }
+}
+void ContactListWindow::onSettingsBtClick(){
+
 }
 void ContactListWindow::onExitBtClick(){
     exit(0);
