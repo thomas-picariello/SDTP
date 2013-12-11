@@ -1,8 +1,4 @@
-cmake_minimum_required(VERSION 2.8.8)
 cmake_policy(SET CMP0020 NEW)
-#Set project name for the whole
-set(PROJECT "SVoIP")
-project(${PROJECT})
 
 # Tell CMake to run moc when necessary:
 set(CMAKE_AUTOMOC ON)
@@ -15,7 +11,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Multimedia REQUIRED)
 
 #Set variables with all the sources to compile
-set(HEADERS
+set(SVOIP_HEADERS
     svoip.h
     contactlistwindow.h
     editcontactwindow.h
@@ -25,7 +21,7 @@ set(HEADERS
     starter.h
     messenger.h
 )
-set(SOURCES
+set(SVOIP_SOURCES
     main.cpp
     svoip.cpp
     contactlistwindow.cpp
@@ -36,7 +32,7 @@ set(SOURCES
     starter.cpp
     messenger.cpp
 )
-set(FORMS
+set(SVOIP_FORMS
     contactlistwindow.ui
     editcontactwindow.ui
     settingswindow.ui
@@ -48,18 +44,8 @@ set(FORMS
 #file(GLOB SOURCES *.cxx)
 
 #process the ui files.
-qt5_wrap_ui(UI_HEADERS ${FORMS})
+qt5_wrap_ui(SVOIP_UI_HEADERS ${SVOIP_FORMS})
 
-#set sources groupes
-source_group("UI Files" FILES ${FORMS})
-
-add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${UI_HEADERS})
+add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_HEADERS})
 
 qt5_use_modules(${PROJECT} Widgets Multimedia)
-
-if (MSVC)
-  set_target_properties(${PROJECT} PROPERTIES
-    WIN32_EXECUTABLE YES
-    LINK_FLAGS "/ENTRY:mainCRTStartup"
-  )
-endif ()
