@@ -2,6 +2,7 @@
 #define MESSENGER_H
 
 #include <QDebug>
+#include <QString>
 #include <QObject>
 #include <QLabel>
 #include <QWidget>
@@ -9,8 +10,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QStringList>
-
-
+#include "cryptopp/osrng.h"
+#include "cryptopp/modes.h"
 
 class Messenger: public QObject
 {
@@ -34,8 +35,8 @@ private :
     QStringList *msglist;
     QHBoxLayout *sendlayout;
     QVBoxLayout *msglayout;
-
-
+    CryptoPP::AES::Encryption mEncryptor;
+    CryptoPP::AES::Decryption mDecryptor;
 };
 
 #endif // MESSENGER_H
