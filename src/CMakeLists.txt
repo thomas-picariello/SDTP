@@ -38,14 +38,16 @@ set(SVOIP_FORMS
     settingswindow.ui
 )
 
-#Find the files alone:
-#file(GLOB FORMS *.ui)
-#file(GLOB HEADERS *.h)
-#file(GLOB SOURCES *.cxx)
+#add libs as include dirs
+include_directories(${LIBS_SOURCE_DIR})
 
 #process the ui files.
 qt5_wrap_ui(SVOIP_UI_HEADERS ${SVOIP_FORMS})
 
 add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_HEADERS})
 
+target_link_libraries(${PROJECT} cryptopp)
+
 qt5_use_modules(${PROJECT} Widgets Multimedia)
+
+
