@@ -2,7 +2,7 @@
 #define MESSENGER_H
 
 #include <QDebug>
-#include <QString>
+#include <QByteArray>
 #include <QObject>
 #include <QLabel>
 #include <QWidget>
