@@ -6,7 +6,7 @@
 #include <QString>
 #include <QtNetwork>
 #include "contact.h"
-#include "messenger.h"
+#include "messengerwindow.h"
 
 class Starter : public QObject
 {
@@ -25,7 +25,7 @@ public slots:
     void onSendData(QByteArray data);
 
 private :
-    Messenger *mMessenger;
+    MessengerWindow *mMessengerWindow;
     QTcpSocket *mSocket;
 
 };

@@ -15,27 +15,28 @@ set(SVOIP_HEADERS
     svoip.h
     contactlistwindow.h
     editcontactwindow.h
+    messengerwindow.h
     settingswindow.h
     responder.h
     contact.h
     starter.h
-    messenger.h
 )
 set(SVOIP_SOURCES
     main.cpp
     svoip.cpp
     contactlistwindow.cpp
     editcontactwindow.cpp
+    messengerwindow.cpp
     settingswindow.cpp
     responder.cpp
     contact.cpp
     starter.cpp
-    messenger.cpp
 )
 set(SVOIP_FORMS
     contactlistwindow.ui
     editcontactwindow.ui
     settingswindow.ui
+    messengerwindow.ui
 )
 
 #add libs as include dirs

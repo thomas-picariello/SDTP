@@ -1,7 +1,7 @@
 #include "starter.h"
 
 Starter::Starter(QObject *parent) : QObject(parent){
-    mMessenger = new Messenger;
+    mMessengerWindow = new MessengerWindow;
 
 
     mSocket = new QTcpSocket;
@@ -15,7 +15,7 @@ Starter::Starter(QObject *parent) : QObject(parent){
     connect(mSocket, SIGNAL(connected()),
             this, SLOT(onConnect()));
 
-    connect(mMessenger, SIGNAL(sendMessage(QByteArray)),
+    connect(mMessengerWindow, SIGNAL(sendMessage(QByteArray)),
             this, SLOT(onSendData(QByteArray)));
 
 }
@@ -23,7 +23,7 @@ Starter::Starter(QObject *parent) : QObject(parent){
 
 void Starter::onConnect(){
     QString ip = mSocket->peerAddress().toString();
-    mMessenger->displayMessage("Connected to: " + ip);
+    mMessengerWindow->displayMessage("Connected to: " + ip);
     qDebug() << "Connected to:" << ip;
     mSocket->write("Hello from client");
 }
@@ -31,7 +31,7 @@ void Starter::onDataRecieved(){
 
     qDebug() << "Data recieved...";
     QByteArray data = mSocket->readAll();
-    mMessenger->displayMessage("Received : "+QString(data));
+    mMessengerWindow->displayMessage("Received : "+QString(data));
     qDebug() << "Data recieved:" << data;
 }
 void Starter::onError(QAbstractSocket::SocketError error) {
@@ -40,7 +40,7 @@ void Starter::onError(QAbstractSocket::SocketError error) {
     if(error = QAbstractSocket::RemoteHostClosedError)
     {
 
-        mMessenger->displayMessage("The server has disconnected...");
+        mMessengerWindow->displayMessage("The server has disconnected...");
 
     }
 
@@ -51,10 +51,10 @@ void Starter::onSendData(QByteArray data){
     if(mSocket->state() == QAbstractSocket::ConnectedState)
     {
         mSocket->write(data);
-        mMessenger->displayMessage("Sent : "+data);
+        mMessengerWindow->displayMessage("Sent : "+data);
 
     }
-    else mMessenger->displayMessage("!!!-"+data+"-!!!\n|Couldn't send message : Not connected.");
+    else mMessengerWindow->displayMessage("!!!-"+data+"-!!!\n|Couldn't send message : Not connected.");
 
     qDebug() << "Sent:" << data;
 }
@@ -84,5 +84,5 @@ void Starter::openConnection(QString name){
 Starter::~Starter()
 {
         mSocket->close();
-        delete mSocket, mMessenger;
+        delete mSocket, mMessengerWindow;
 }

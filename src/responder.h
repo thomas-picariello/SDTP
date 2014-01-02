@@ -3,7 +3,7 @@
 
 #include <QTcpSocket>
 #include <QObject>
-#include "messenger.h"
+#include "messengerwindow.h"
 
 
 
@@ -25,7 +25,7 @@ public slots :
 
 private :
     QTcpSocket *m_responderSocket;
-    Messenger *messenger;
+    MessengerWindow *m_messenger_window;
     QByteArray *m_incomingData;
 
 
