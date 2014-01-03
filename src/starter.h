@@ -6,6 +6,7 @@
 #include <QString>
 #include <QtNetwork>
 #include "contact.h"
+#include "message.h"
 #include "messengerwindow.h"
 
 class Starter : public QObject

@@ -19,6 +19,7 @@ set(SVOIP_HEADERS
     settingswindow.h
     responder.h
     contact.h
+    message.h
     starter.h
 )
 set(SVOIP_SOURCES
@@ -30,6 +31,7 @@ set(SVOIP_SOURCES
     settingswindow.cpp
     responder.cpp
     contact.cpp
+    message.cpp
     starter.cpp
 )
 set(SVOIP_FORMS

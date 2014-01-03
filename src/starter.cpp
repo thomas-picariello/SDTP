@@ -23,38 +23,33 @@ Starter::Starter(QObject *parent) : QObject(parent){
 
 void Starter::onConnect(){
     QString ip = mSocket->peerAddress().toString();
-    mMessengerWindow->displayMessage("Connected to: " + ip);
-    qDebug() << "Connected to:" << ip;
+    mMessengerWindow->displayMessage(Message("Connected to: " + ip, Message::SERVICE));
+    //qDebug() << "Connected to:" << ip;
     mSocket->write("Hello from client");
 }
 void Starter::onDataRecieved(){
 
-    qDebug() << "Data recieved...";
+    //qDebug() << "Data recieved...";
     QByteArray data = mSocket->readAll();
-    mMessengerWindow->displayMessage("Received : "+QString(data));
-    qDebug() << "Data recieved:" << data;
+    mMessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
+    //qDebug() << "Data recieved:" << data;
 }
 void Starter::onError(QAbstractSocket::SocketError error) {
     qDebug() << error;
 
-    if(error = QAbstractSocket::RemoteHostClosedError)
-    {
-
-        mMessengerWindow->displayMessage("The server has disconnected...");
-
+    if(error = QAbstractSocket::RemoteHostClosedError){
+        mMessengerWindow->displayMessage(Message("The server has disconnected...", Message::ERR));
     }
-
-
 }
 void Starter::onSendData(QByteArray data){
     qDebug() << "Send:" << data;
     if(mSocket->state() == QAbstractSocket::ConnectedState)
     {
         mSocket->write(data);
-        mMessengerWindow->displayMessage("Sent : "+data);
+        mMessengerWindow->displayMessage(Message(data, Message::SENT));
 
     }
-    else mMessengerWindow->displayMessage("!!!-"+data+"-!!!\n|Couldn't send message : Not connected.");
+    else mMessengerWindow->displayMessage(Message("Couldn't send message : Not connected.", Message::ERR));
 
     qDebug() << "Sent:" << data;
 }

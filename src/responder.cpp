@@ -7,7 +7,7 @@ Responder::Responder(QTcpSocket *socket, QObject *parent): QObject(parent)
     m_incomingData = new QByteArray;
     m_responderSocket = new QTcpSocket;
     m_responderSocket = socket;
-    qDebug()<<"new responder created";
+    //qDebug()<<"new responder created";
 
     connect(m_responderSocket,SIGNAL(readyRead()),this,SLOT(readIncomingData()));
     connect(m_messenger_window,SIGNAL(sendMessage(QByteArray)),this,SLOT(sendData(QByteArray)));
@@ -16,43 +16,36 @@ Responder::Responder(QTcpSocket *socket, QObject *parent): QObject(parent)
 }
 void Responder::startCommunication()
 {
-    qDebug()<<"responder !!";
+    //qDebug()<<"responder !!";
 }
 void Responder::readIncomingData()
 {
     *m_incomingData = m_responderSocket->readAll();
-    m_messenger_window->displayMessage("Received : "+*m_incomingData);
+    m_messenger_window->displayMessage(Message(QString(*m_incomingData), Message::RECIEVED));
 
-    qDebug()<<"incommingData !";
-    qDebug()<<m_incomingData;
+    //qDebug() << "incommingData !" << *m_incomingData;
 }
 void Responder::sendData(QByteArray data)
 {
     if(m_responderSocket->state() == QAbstractSocket::ConnectedState)
     {
-        m_messenger_window->displayMessage("Sent : "+data);
+        m_messenger_window->displayMessage(Message(QString(data), Message::SENT));
         m_responderSocket->write(data);
     }
-    else m_messenger_window->displayMessage("!!!-"+data+"-!!!\n|Couldn't send message : Not connected.");
+    else m_messenger_window->displayMessage(Message("Couldn't send message : Not connected.", Message::ERR));
 }
 void Responder::error(QAbstractSocket::SocketError error)
 {
     qDebug()<<error;
 
-    if(error == QAbstractSocket::RemoteHostClosedError)
-    {
-
-        m_messenger_window->displayMessage("The server has disconnected...");
+    if(error == QAbstractSocket::RemoteHostClosedError){
+        m_messenger_window->displayMessage(Message("The server has disconnected...", Message::ERR));
 
     }
 }
 
-Responder::~Responder()
-{
-
+Responder::~Responder(){
     delete m_responderSocket;
     delete m_messenger_window;
     delete m_incomingData;
-
-
 }

@@ -3,7 +3,6 @@
 
 MessengerWindow::MessengerWindow(QWidget *parent) : QWidget(parent), ui(new Ui::MessengerWindow){
     ui->setupUi(this);
-    msglist = new QStringList;
 
     connect(ui->send, SIGNAL(clicked()),
             this, SLOT(onSend()));
@@ -11,15 +10,16 @@ MessengerWindow::MessengerWindow(QWidget *parent) : QWidget(parent), ui(new Ui::
             this,SLOT(onSend()));
 }
 
-void MessengerWindow::displayMessage(QString msg){
-    msglist->append(msg);
-    ui->chat->setText(msglist->join("\n"));
+void MessengerWindow::displayMessage(Message msg){
+    QString html = ui->chat->toHtml();
+    html.append(msg.html());
+    ui->chat->setHtml(html);
     this->show();
 }
 void MessengerWindow::onSend(){
     QByteArray msg = ui->input->text().toUtf8();
 
-    /****AES encryption in CFB mode***/
+    /****AES encryptimMsglistFB mode***/
     QByteArray key(16, 0x0); //16 byte = 128 bits, filled with 0x0.
     qDebug()<<"AES key:"<<key.toHex();
 

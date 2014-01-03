@@ -4,12 +4,10 @@
 #include <QWidget>
 #include <QDebug>
 #include <QByteArray>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QTextBrowser>
-#include <QStringList>
+#include <QList>
 #include "cryptopp/osrng.h"
 #include "cryptopp/modes.h"
+#include "message.h"
 
 namespace Ui {
 class MessengerWindow;
@@ -27,12 +25,13 @@ signals:
     void sendMessage(QByteArray data);
 
 public slots:
-    void displayMessage(QString);
+    void displayMessage(Message msg);
     void onSend();
 
 private:
     Ui::MessengerWindow *ui;
-    QStringList *msglist;
+    QList<Message> mMsgList;
+    void updateChat();
 };
 
 #endif // MESSERGERWINDOW_H
