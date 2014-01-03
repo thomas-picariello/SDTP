@@ -8,7 +8,6 @@
 #include "starter.h"
 #include "contact.h"
 
-
 namespace Ui {
 class ContactListWindow;
 }
@@ -22,12 +21,12 @@ public:
     ~ContactListWindow();
 
 public slots:
-    void onAddBtClick();
-    void onEditBtClick();
-    void onRemoveBtClick();
-    void onConnectBtClick();
-    void onSettingsBtClick();
-    void onExitBtClick();
+    void addContact();
+    void editContact();
+    void removeContact();
+    void connectToContact();
+    void openSettingsWindow();
+    void exitApp();
     void refreshList();
     
 private:

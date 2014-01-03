@@ -11,27 +11,29 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
     ui->list->addItems(Contact::getAllNames());
 
     connect(ui->add, SIGNAL(clicked()),
-            this, SLOT(onAddBtClick()));
+            this, SLOT(addContact()));
     connect(ui->edit, SIGNAL(clicked()),
-            this, SLOT(onEditBtClick()));
+            this, SLOT(editContact()));
     connect(ui->remove, SIGNAL(clicked()),
-            this, SLOT(onRemoveBtClick()));
+            this, SLOT(removeContact()));
     connect(ui->connect, SIGNAL(clicked()),
-            this, SLOT(onConnectBtClick()));
+            this, SLOT(connectToContact()));
+    connect(ui->list, SIGNAL(doubleClicked(QModelIndex)),
+            this, SLOT(connectToContact()));
     connect(ui->settings, SIGNAL(clicked()),
-            this, SLOT(onSettingsBtClick()));
+            this, SLOT(openSettingsWindow()));
     connect(ui->exit, SIGNAL(clicked()),
-            this, SLOT(onExitBtClick()));
+            this, SLOT(exitApp()));
 
     show();
 }
 
-void ContactListWindow::onAddBtClick(){
+void ContactListWindow::addContact(){
     mEditContactWindow = new EditContactWindow();
     connect(mEditContactWindow, SIGNAL(contactChanged()),
             this, SLOT(refreshList()));
 }
-void ContactListWindow::onEditBtClick(){
+void ContactListWindow::editContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
@@ -40,7 +42,7 @@ void ContactListWindow::onEditBtClick(){
                 this, SLOT(refreshList()));
     }
 }
-void ContactListWindow::onRemoveBtClick(){
+void ContactListWindow::removeContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
@@ -49,17 +51,17 @@ void ContactListWindow::onRemoveBtClick(){
         refreshList();
     }
 }
-void ContactListWindow::onConnectBtClick(){
+void ContactListWindow::connectToContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
         mStarter->openConnection(selectedName);
     }
 }
-void ContactListWindow::onSettingsBtClick(){
+void ContactListWindow::openSettingsWindow(){
     mSettingsWindow = new SettingsWindow();
 }
-void ContactListWindow::onExitBtClick(){
+void ContactListWindow::exitApp(){
     exit(0);
 }
 void ContactListWindow::refreshList(){
