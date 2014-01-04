@@ -55,6 +55,7 @@ void MessengerWindow::updateChat(){
     }
     html.append(footer);
     ui->chat->setHtml(html);
+    ui->chat->verticalScrollBar()->setValue(ui->chat->verticalScrollBar()->maximumHeight());
 }
 
 MessengerWindow::~MessengerWindow(){

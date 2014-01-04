@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QByteArray>
 #include <QList>
+#include <QScrollBar>
 #include "message.h"
 
 namespace Ui {
