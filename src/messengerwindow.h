@@ -5,8 +5,6 @@
 #include <QDebug>
 #include <QByteArray>
 #include <QList>
-#include "cryptopp/osrng.h"
-#include "cryptopp/modes.h"
 #include "message.h"
 
 namespace Ui {
@@ -30,6 +28,8 @@ public slots:
 
 private:
     Ui::MessengerWindow *ui;
+    QByteArray mKey;
+    QByteArray mIv;
     QList<Message> mMsgList;
     void updateChat();
 };

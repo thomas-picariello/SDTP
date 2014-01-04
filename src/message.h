@@ -13,7 +13,6 @@ public:
 
     const QString text();
     const TYPE type();
-    const QString html();
 
 private:
     QString mText;
