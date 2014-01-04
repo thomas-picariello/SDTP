@@ -51,7 +51,7 @@ void MessengerWindow::updateChat(){
             color = "gray";
             break;
         }
-        html.append("<div align='"+align+"' style='color:"+color+";'>"+msg.text()+"</div>");
+        html.append("<div align='"+align+"' style='color:"+color+"; margin: 10px;'>"+msg.text()+"</div>");
     }
     html.append(footer);
     ui->chat->setHtml(html);
