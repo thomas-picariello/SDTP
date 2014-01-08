@@ -1,10 +1,5 @@
-set(FIXED_POINT TRUE)
-
-#Tell MSVC to consider c as c++ sources to accept 'inline' keyword
-if(WIN32 AND MSVC)
-    set(CMAKE_C_FLAGS_RELEASE "/TP /fp:precise")
-    set(CMAKE_C_FLAGS_DEBUG "/TP /fp:precise")
-endif()
+set(FIXED_POINT FALSE)
+set(DISABLE_FLOAT_API FALSE)
 
 include(celt_headers.cmake)
 include(silk_headers.cmake)
@@ -20,6 +15,10 @@ if(FIXED_POINT)
 else()
     LIST(APPEND SILK_SOURCES ${SILK_SOURCES_FLOAT})
     include_directories(silk/float)
+endif()
+
+if(!DISABLE_FLOAT_API)
+    LIST(APPEND OPUS_SOURCES ${OPUS_SOURCES_FLOAT})
 endif()
 
 if(WIN32)
