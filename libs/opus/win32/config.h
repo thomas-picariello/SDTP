@@ -33,7 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define USE_ALLOCA            1
 
 /* Comment out the next line for floating-point code */
-/*#define FIXED_POINT           1 */
+#define FIXED_POINT           1
 
 #define OPUS_BUILD            1
 

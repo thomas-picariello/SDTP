@@ -1,1 +1,52 @@
-INCLUDE_EXTERNAL_MSPROJECT(opus .)
+set(FIXED_POINT TRUE)
+
+#Tell MSVC to consider c as c++ sources to accept 'inline' keyword
+if(WIN32 AND MSVC)
+    set(CMAKE_C_FLAGS_RELEASE "/TP /fp:precise")
+    set(CMAKE_C_FLAGS_DEBUG "/TP /fp:precise")
+endif()
+
+include(celt_headers.cmake)
+include(silk_headers.cmake)
+include(opus_headers.cmake)
+
+include(celt_sources.cmake)
+include(silk_sources.cmake)
+include(opus_sources.cmake)
+
+if(FIXED_POINT)
+    LIST(APPEND SILK_SOURCES ${SILK_SOURCES_FIXED})
+    include_directories(silk/fixed)
+else()
+    LIST(APPEND SILK_SOURCES ${SILK_SOURCES_FLOAT})
+    include_directories(silk/float)
+endif()
+
+if(WIN32)
+    #create version.h
+    execute_process(COMMAND genversion.bat version.h OPUS_VERSION
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/win32)
+
+    add_definitions(-DHAVE_CONFIG_H)
+    set(OPUS_CONFIG
+        win32/version.h
+        win32/config.h
+    )
+endif()
+
+include_directories(
+	include
+	celt
+        silk
+        win32
+)
+
+add_library(opus STATIC
+    ${OPUS_CONFIG}
+    ${OPUS_HEADERS}
+    ${OPUS_SOURCES}
+    ${CELT_HEAD}
+    ${CELT_SOURCES}
+    ${SILK_HEAD}
+    ${SILK_SOURCES}
+)

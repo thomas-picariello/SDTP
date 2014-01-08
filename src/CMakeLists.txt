@@ -49,7 +49,7 @@ qt5_wrap_ui(SVOIP_UI_HEADERS ${SVOIP_FORMS})
 
 add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_HEADERS})
 
-target_link_libraries(${PROJECT} cryptopp)
+target_link_libraries(${PROJECT} cryptopp opus)
 
 qt5_use_modules(${PROJECT} Widgets Multimedia)
 

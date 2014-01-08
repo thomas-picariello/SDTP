@@ -7,7 +7,7 @@ set(SUB_DIRS
     cryptopp
     #jthread
     #jrtplib
-    #opus
+    opus
 )
 
 foreach(DIR ${SUB_DIRS})
