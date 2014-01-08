@@ -1,6 +1,8 @@
 set(CELT_SOURCES
 	celt/bands.c
 	celt/celt.c
+	celt/celt_encoder.c
+	celt/celt_decoder.c
 	celt/cwrs.c
 	celt/entcode.c
 	celt/entdec.c
@@ -15,4 +17,17 @@ set(CELT_SOURCES
 	celt/quant_bands.c
 	celt/rate.c
 	celt/vq.c
+)
+
+set(CELT_SOURCES_ARM
+	celt/arm/armcpu.c
+	celt/arm/arm_celt_map.c
+)
+
+set(CELT_SOURCES_ARM_ASM
+	celt/arm/celt_pitch_xcorr_arm.s
+)
+
+set(CELT_AM_SOURCES_ARM_ASM
+	celt/arm/armopts.s.in
 )

@@ -24,7 +24,7 @@ endif()
 
 if(WIN32)
     #create version.h
-    execute_process(COMMAND genversion.bat version.h OPUS_VERSION
+    execute_process(COMMAND genversion.bat version.h PACKAGE_VERSION
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/win32)
 
     add_definitions(-DHAVE_CONFIG_H)
