@@ -42,7 +42,7 @@ include_directories(
 
 add_library(opus STATIC
     ${OPUS_CONFIG}
-    ${OPUS_HEADERS}
+    ${OPUS_HEAD}
     ${OPUS_SOURCES}
     ${CELT_HEAD}
     ${CELT_SOURCES}
