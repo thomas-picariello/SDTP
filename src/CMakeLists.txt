@@ -21,6 +21,8 @@ set(SVOIP_HEADERS
     contact.h
     message.h
     starter.h
+    voip.h
+    qopusdevice.h
 )
 set(SVOIP_SOURCES
     main.cpp
@@ -33,6 +35,8 @@ set(SVOIP_SOURCES
     contact.cpp
     message.cpp
     starter.cpp
+    voip.cpp
+    qopusdevice.cpp
 )
 set(SVOIP_FORMS
     contactlistwindow.ui
