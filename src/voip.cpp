@@ -11,26 +11,44 @@ VoIP::VoIP(QObject *parent) :
     format.setByteOrder(QAudioFormat::LittleEndian);
     format.setSampleType(QAudioFormat::UnSignedInt);
 
-    QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
+
+    QAudioDeviceInfo info;
+    info = QAudioDeviceInfo::defaultInputDevice();
     if (!info.isFormatSupported(format)) {
         qWarning() << "Default format not supported, trying to use the nearest.";
         format = info.nearestFormat(format);
     }
+
+    info = QAudioDeviceInfo::defaultOutputDevice();
+    if(info.isFormatSupported(format)){
+        qWarning() << "Default format not supported, trying to use the nearest.";
+        format = info.nearestFormat(format);
+    }
+    mAudioOutput = new QAudioOutput(format);
     mAudioInput = new QAudioInput(format);
-    //mBuffer = new QBuffer();
-    //mBuffer->open(QBuffer::ReadWrite | QBuffer::Truncate);
-    //mAudioInput->start(mBuffer);
+    mOpusIODevice = new QOpusDevice();
 }
 
-
 void VoIP::call(Contact contact){
-
+    mOpusIODevice->open(QIODevice::ReadWrite | QIODevice::Truncate);
+    mAudioInput->start(mOpusIODevice);
+    mAudioOutput->start(mOpusIODevice);
 }
 
 void VoIP::endCall(){
+    mAudioInput->stop();
+    mAudioOutput->stop();
+    mOpusIODevice->close();
+}
+
+QOpusDevice* VoIP::getOpusIODevice(){
+    return mOpusIODevice;
+}
+
+void takeIncommingCall(QIODevice* dataInterface){
 
 }
 
 VoIP::~VoIP(){
-
+    delete mOpusIODevice, mAudioInput, mAudioOutput;
 }
