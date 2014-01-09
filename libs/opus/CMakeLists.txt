@@ -17,7 +17,8 @@ else()
     include_directories(silk/float)
 endif()
 
-if(!DISABLE_FLOAT_API)
+if(DISABLE_FLOAT_API)
+else()
     LIST(APPEND OPUS_SOURCES ${OPUS_SOURCES_FLOAT})
 endif()
 
