@@ -15,25 +15,20 @@ class QOpusDevice : public QIODevice
     Q_OBJECT
 public:
     explicit QOpusDevice(QIODevice* deviceToUse = new QBuffer(),
-                         QAudioFormat* audioFormat = NULL,
                          int frameSizeInMicrosecs = 0,
                          QObject* parent = 0);
     bool open(OpenMode mode);
     void close();
     bool isSequential() const;
 
-    QAudioFormat getAudioFormat() const;
-    void setAudioFormat(const QAudioFormat& format);
     int getFrameSize() const;
     void setFrameSize(int frameSizeInMicrosecs);
-    int getSampleRate() const;
-    void setSampleRate(int sampleRate);
-    int getChannelCount() const;
-    void setChannelCount(int count);
     int getEncoderApplication() const;
     void setEncoderApplication(int application);
     quint64 getBitrate() const;
     void setBitrate(quint64 bitrate);
+    //QAudioFormat::SampleType getSampleType() const;
+    //void setSampleType(QAudioFormat::SampleType);
 
     static QString getOpusErrorDesc(int errorCode);
 

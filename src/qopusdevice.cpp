@@ -1,20 +1,17 @@
 #include "qopusdevice.h"
 
-QOpusDevice::QOpusDevice(QIODevice* deviceToUse, QAudioFormat* audioFormat, int frameSizeInMicrosecs, QObject* parent) :
+QOpusDevice::QOpusDevice(QIODevice* deviceToUse, int frameSizeInMicrosecs, QObject* parent) :
     QIODevice(parent), mUnderlyingDevice(deviceToUse)
 {
     mError = OPUS_OK;
     mApplication = OPUS_APPLICATION_VOIP;
 
-    if(audioFormat != NULL)
-        mAudioFormat = *audioFormat;
-    else{
-        mAudioFormat.setSampleRate(48000);
-        mAudioFormat.setChannelCount(2);
-        mAudioFormat.setCodec("audio/pcm");
-        mAudioFormat.setSampleSize(16);
-        mAudioFormat.setSampleType(QAudioFormat::SignedInt);
-    }
+    mAudioFormat.setSampleRate(48000);
+    mAudioFormat.setChannelCount(2);
+    mAudioFormat.setCodec("audio/pcm");
+    mAudioFormat.setSampleSize(16);
+    mAudioFormat.setSampleType(QAudioFormat::SignedInt);
+
     if(frameSizeInMicrosecs != 0)
         mOpusFrameSize = frameSizeInMicrosecs;
     else
@@ -48,27 +45,21 @@ bool QOpusDevice::isSequential() const{
 }
 
 qint64 QOpusDevice::readData(char * data, qint64 maxSize){
-    qint64 readByteNumber = mUnderlyingDevice->read(data, maxSize);
+    QByteArray payload;
+    qint64 readByteNumber = mUnderlyingDevice->read(payload.data(), maxSize);
     if (readByteNumber == -1)
         return -1;
-    //mOutputBuffer.append(data);
-    //if(mOutputBuffer.size() >= mAudioFormat.bytesForDuration(mOpusFrameSize)){ //TODO: Check encoded packet size...
-        //extract the frame
-        //QByteArray frame = mOutputBuffer.left(mAudioFormat.bytesForDuration(mOpusFrameSize));
-        //remove the frame from the buffer
-        //mOutputBuffer = mOutputBuffer.right(mAudioFormat.bytesForDuration(mOpusFrameSize));
-        //decode the frame
-        opus_decode(mDecoder,
-                    (const unsigned char*)data,
-                    maxSize,
-                    (qint16 *)data,
-                    mAudioFormat.framesForDuration(mOpusFrameSize)/mAudioFormat.channelCount(), //number of frame per channel
-                    0);
+    //assuming that Opus reassemble the packets in an internal buffer
+    mError = 0;
+    mError = opus_decode(mDecoder,
+                (const unsigned char*)payload.constData(),
+                maxSize,
+                reinterpret_cast<qint16 *>(data),
+                mAudioFormat.framesForDuration(mOpusFrameSize)/mAudioFormat.channelCount(), //number of samples per channel per frame
+                0);
 
-        if(mError < 0) emit(error(mError));
-        return mAudioFormat.framesForDuration(mOpusFrameSize)/mAudioFormat.channelCount();
-    //}
-    return 0;
+    if(mError < 0) emit(error(mError));
+    return readByteNumber;
 }
 
 qint64 QOpusDevice::writeData(const char * input, qint64 maxSize){
@@ -81,9 +72,10 @@ qint64 QOpusDevice::writeData(const char * input, qint64 maxSize){
         //remove the frame from the buffer
         mInputBuffer = mInputBuffer.right(mAudioFormat.bytesForDuration(mOpusFrameSize));
         //encode the frame
-        opus_encode(mEncoder,
+        mError = 0;
+        mError = opus_encode(mEncoder,
                     (const opus_int16*)frame.data(),
-                    mAudioFormat.framesForDuration(mOpusFrameSize)/mAudioFormat.channelCount(), //number of frame per channel
+                    mAudioFormat.framesForDuration(mOpusFrameSize)/mAudioFormat.channelCount(), //number of samples per channel per frame
                     (unsigned char*)encodedPayload.data(),
                     4000);
 
@@ -92,15 +84,6 @@ qint64 QOpusDevice::writeData(const char * input, qint64 maxSize){
         encodedByteNumber = mUnderlyingDevice->write(encodedPayload.data(), maxSize);
     }
     return encodedByteNumber;
-}
-
-QAudioFormat QOpusDevice::getAudioFormat() const{
-    return mAudioFormat;
-}
-
-void QOpusDevice::setAudioFormat(const QAudioFormat& format){
-    mAudioFormat = format;
-    //TODO: update encoder params
 }
 
 int QOpusDevice::getFrameSize() const{
