@@ -8,7 +8,6 @@ MessengerWindow::MessengerWindow(QWidget *parent) : QWidget(parent), ui(new Ui::
             this, SLOT(onSend()));
     connect(ui->input,SIGNAL(returnPressed()),
             this,SLOT(onSend()));
-
 }
 
 void MessengerWindow::displayMessage(Message msg){
@@ -16,6 +15,7 @@ void MessengerWindow::displayMessage(Message msg){
     this->updateChat();
     this->show();
 }
+
 void MessengerWindow::onSend(){
     QByteArray msg = ui->input->text().toUtf8();
 

@@ -1,7 +1,6 @@
 #include "svoip.h"
 
-SVoIP::SVoIP(QObject *parent) : QObject(parent)
-{
+SVoIP::SVoIP(QObject *parent) : QObject(parent){
     mWindow = new ContactListWindow();
 
     qint16 listenPort = QSettings().value("Settings/port").toInt();
@@ -11,13 +10,10 @@ SVoIP::SVoIP(QObject *parent) : QObject(parent)
 
     connect(mListener, SIGNAL(newConnection()),this,SLOT(acceptConnection()));
 }
-void SVoIP::acceptConnection()
-{
+void SVoIP::acceptConnection(){
     m_responderList.append(new Responder(mListener->nextPendingConnection()));
-
 }
 
-SVoIP::~SVoIP()
-{
+SVoIP::~SVoIP(){
     delete mWindow, mListener;
 }
