@@ -23,7 +23,6 @@ public:
     QOpusDevice* getOpusIODevice();
     
 signals:
-    void incommingCall();
     
 public slots:
     void takeIncommingCall(QIODevice* dataInterface);

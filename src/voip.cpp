@@ -3,14 +3,14 @@
 VoIP::VoIP(QObject *parent) :
     QObject(parent)
 {
+    mOpusIODevice = new QOpusDevice();
     QAudioFormat format;
     format.setChannelCount(1);
     format.setSampleRate(44100);
     format.setSampleSize(16);
     format.setCodec("audio/pcm");
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setSampleType(QAudioFormat::UnSignedInt);
-
+    format.setByteOrder(QAudioFormat::LittleEndian); //Requiered by Opus
+    format.setSampleType(QAudioFormat::SignedInt); //Requiered by Opus (or float if using encode_float)
 
     QAudioDeviceInfo info;
     info = QAudioDeviceInfo::defaultInputDevice();
@@ -18,6 +18,7 @@ VoIP::VoIP(QObject *parent) :
         qWarning() << "Default format not supported, trying to use the nearest.";
         format = info.nearestFormat(format);
     }
+    mAudioInput = new QAudioInput(format);
 
     info = QAudioDeviceInfo::defaultOutputDevice();
     if(info.isFormatSupported(format)){
@@ -25,8 +26,6 @@ VoIP::VoIP(QObject *parent) :
         format = info.nearestFormat(format);
     }
     mAudioOutput = new QAudioOutput(format);
-    mAudioInput = new QAudioInput(format);
-    mOpusIODevice = new QOpusDevice();
 }
 
 void VoIP::call(Contact contact){
@@ -45,8 +44,11 @@ QOpusDevice* VoIP::getOpusIODevice(){
     return mOpusIODevice;
 }
 
-void takeIncommingCall(QIODevice* dataInterface){
-
+void VoIP::takeIncommingCall(QIODevice* dataInterface){
+    //delete previously initalised Opus interface
+    delete mOpusIODevice;
+    //initialize a new one with the data interface
+    mOpusIODevice = new QOpusDevice(dataInterface);
 }
 
 VoIP::~VoIP(){
