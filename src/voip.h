@@ -16,12 +16,14 @@ class VoIP : public QObject
 {
     Q_OBJECT
 public:
+    enum CallState{ONLINE, OFFLINE};
     explicit VoIP(QObject *parent = 0);
-    ~VoIP();
-    void call(Contact contact);
+    void call(Contact const &contact);
     void endCall();
     QOpusDevice* getOpusIODevice();
-    
+    CallState getCallState();
+    ~VoIP();
+
 signals:
     
 public slots:
@@ -31,6 +33,7 @@ private:
     QAudioInput *mAudioInput;
     QAudioOutput *mAudioOutput;
     QOpusDevice *mOpusIODevice;
+    CallState mCallState;
 };
 
 #endif // VOIP_H

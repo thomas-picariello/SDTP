@@ -3,6 +3,7 @@
 VoIP::VoIP(QObject *parent) :
     QObject(parent)
 {
+    mCallState = OFFLINE;
     mOpusIODevice = new QOpusDevice();
     QAudioFormat format;
     format.setChannelCount(1);
@@ -28,13 +29,15 @@ VoIP::VoIP(QObject *parent) :
     mAudioOutput = new QAudioOutput(format);
 }
 
-void VoIP::call(Contact contact){
+void VoIP::call(const Contact &contact){
+    mCallState = ONLINE;
     mOpusIODevice->open(QIODevice::ReadWrite | QIODevice::Truncate);
     mAudioInput->start(mOpusIODevice);
     mAudioOutput->start(mOpusIODevice);
 }
 
 void VoIP::endCall(){
+    mCallState = OFFLINE;
     mAudioInput->stop();
     mAudioOutput->stop();
     mOpusIODevice->close();
@@ -49,6 +52,10 @@ void VoIP::takeIncommingCall(QIODevice* dataInterface){
     delete mOpusIODevice;
     //initialize a new one with the data interface
     mOpusIODevice = new QOpusDevice(dataInterface);
+}
+
+VoIP::CallState VoIP::getCallState(){
+    return mCallState;
 }
 
 VoIP::~VoIP(){
