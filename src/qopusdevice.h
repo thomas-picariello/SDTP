@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QIODevice>
+#include <QBuffer>
 #include <QAudioFormat>
 #include <QAudioInput>
 #include <QAudioOutput>
@@ -13,14 +14,33 @@ class QOpusDevice : public QIODevice
 {
     Q_OBJECT
 public:
-    explicit QOpusDevice(QIODevice* deviceToUse, QObject* parent = 0);
+    explicit QOpusDevice(QIODevice* deviceToUse = new QBuffer(),
+                         QAudioFormat* audioFormat = NULL,
+                         int frameSizeInMicrosecs = 0,
+                         QObject* parent = 0);
     bool open(OpenMode mode);
     void close();
     bool isSequential() const;
+
+    QAudioFormat getAudioFormat() const;
+    void setAudioFormat(const QAudioFormat& format);
+    int getFrameSize() const;
+    void setFrameSize(int frameSizeInMicrosecs);
+    int getSampleRate() const;
+    void setSampleRate(int sampleRate);
+    int getChannelCount() const;
+    void setChannelCount(int count);
+    int getEncoderApplication() const;
+    void setEncoderApplication(int application);
+    quint64 getBitrate() const;
+    void setBitrate(quint64 bitrate);
+
+    static QString getOpusErrorDesc(int errorCode);
+
     ~QOpusDevice();
 
 signals:
-    void error(int);
+    void error(const int err);
 
 protected:
     qint64 readData(char * data, qint64 maxSize);
@@ -31,10 +51,11 @@ private:
     OpusDecoder *mDecoder;
     QIODevice *mUnderlyingDevice;
     QByteArray mInputBuffer, mOutputBuffer;
-    int mFrameSizePerChannel;
-    int mFrameSizeInByte;
-    int mChannelsNumber;
+    QAudioFormat mAudioFormat;
     int mError;
+    int mOpusFrameSize;
+    int mApplication;
+
 
     Q_DISABLE_COPY(QOpusDevice)
 };
