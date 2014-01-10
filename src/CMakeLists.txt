@@ -20,7 +20,7 @@ set(SVOIP_HEADERS
     responder.h
     contact.h
     message.h
-    starter.h
+    #starter.h
     voip.h
     qopusdevice.h
     networkmanager.h
@@ -35,7 +35,7 @@ set(SVOIP_SOURCES
     responder.cpp
     contact.cpp
     message.cpp
-    starter.cpp
+    #starter.cpp
     voip.cpp
     qopusdevice.cpp
     networkmanager.cpp

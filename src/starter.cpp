@@ -28,11 +28,10 @@ Starter::Starter(QObject *parent) : QObject(parent){
 
 void Starter::onConnect(){
     QString ip = mSocket->peerAddress().toString();
-  //  mMessengerWindow->displayMessage(Message("Connected to: " + ip, Message::SERVICE));
-    //qDebug() << "Connected to:" << ip;
-    //mSocket->write("Starter connected");
+    mMessengerWindow->displayMessage(Message("Connected to: " + ip, Message::SERVICE));
+    qDebug() << "Connected to:" << ip;
+    mSocket->write("Starter connected");
 
-    m_ManagerList.append(new NetworkManager(mSocket));
 
 
 

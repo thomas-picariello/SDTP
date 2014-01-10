@@ -24,6 +24,9 @@ public:
     void openConnection(QString name);
     ~Starter();
 
+signals :
+    void connectionEstablished(QTcpSocket);
+
 
 public slots:
     void onConnect();
@@ -36,7 +39,6 @@ private :
     QTcpSocket *mSocket;
     QByteArray mAesKey;
     QByteArray mAesIv;
-    QList<NetworkManager*> m_ManagerList;
     CFB_Mode<AES>::Encryption mCfbAesEnc;
     CFB_Mode<AES>::Decryption mCfbAesDec;
 };

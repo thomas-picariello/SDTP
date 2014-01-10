@@ -3,10 +3,12 @@
 
 #include <QWidget>
 #include <QSettings>
+#include <QList>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
 #include "starter.h"
 #include "contact.h"
+#include "networkmanager.h"
 
 namespace Ui {
 class ContactListWindow;
@@ -33,7 +35,8 @@ private:
     Ui::ContactListWindow *ui;
     EditContactWindow *mEditContactWindow;
     SettingsWindow *mSettingsWindow;
-    Starter *mStarter;
+    //Starter *mStarter;
+    QList<NetworkManager*> m_ManagerList;
 };
 
 #endif // CONTACTLISTWINDOW_H

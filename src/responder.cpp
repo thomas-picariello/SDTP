@@ -13,8 +13,8 @@ Responder::Responder(QTcpSocket *socket, QObject *parent): QObject(parent){
 
     //qDebug()<<"new responder created";
 
-    connect(m_responderSocket,SIGNAL(readyRead()),this,SLOT(readIncomingData()));
-    connect(m_messenger_window,SIGNAL(sendMessage(QByteArray)),this,SLOT(sendData(QByteArray)));
+    //connect(m_responderSocket,SIGNAL(readyRead()),this,SLOT(readIncomingData()));
+    //connect(m_messenger_window,SIGNAL(sendMessage(QByteArray)),this,SLOT(sendData(QByteArray)));
     connect(m_responderSocket,SIGNAL(error(QAbstractSocket::SocketError)), this,SLOT(error(QAbstractSocket::SocketError)));
 }
 
