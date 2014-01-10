@@ -4,8 +4,12 @@
 MessengerWindow::MessengerWindow(QWidget *parent) : QWidget(parent), ui(new Ui::MessengerWindow){
     ui->setupUi(this);
 
+
+
     connect(ui->send, SIGNAL(clicked()),
             this, SLOT(onSend()));
+    connect(ui->call, SIGNAL(clicked()),
+            this, SLOT(onCall()));
     connect(ui->input,SIGNAL(returnPressed()),
             this,SLOT(onSend()));
 }
@@ -21,6 +25,12 @@ void MessengerWindow::onSend(){
 
     emit sendMessage(msg);
     ui->input->clear();
+}
+void MessengerWindow::onCall(){
+
+
+    emit callContact();
+
 }
 
 void MessengerWindow::updateChat(){

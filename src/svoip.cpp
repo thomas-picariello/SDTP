@@ -11,7 +11,9 @@ SVoIP::SVoIP(QObject *parent) : QObject(parent){
     connect(mListener, SIGNAL(newConnection()),this,SLOT(acceptConnection()));
 }
 void SVoIP::acceptConnection(){
-    m_responderList.append(new Responder(mListener->nextPendingConnection()));
+  //  m_responderList.append(new Responder(mListener->nextPendingConnection()));
+    m_ManagerList.append(new NetworkManager(mListener->nextPendingConnection()));
+
 }
 
 SVoIP::~SVoIP(){

@@ -5,11 +5,13 @@
 #include <QObject>
 #include <QString>
 #include <QtNetwork>
+#include <QList>
 #include "contact.h"
 #include "message.h"
 #include "messengerwindow.h"
 #include "cryptopp/aes.h"
 #include "cryptopp/modes.h"
+#include "networkmanager.h"
 
 using namespace CryptoPP;
 
@@ -34,6 +36,7 @@ private :
     QTcpSocket *mSocket;
     QByteArray mAesKey;
     QByteArray mAesIv;
+    QList<NetworkManager*> m_ManagerList;
     CFB_Mode<AES>::Encryption mCfbAesEnc;
     CFB_Mode<AES>::Decryption mCfbAesDec;
 };

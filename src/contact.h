@@ -5,6 +5,7 @@
 #include <QSettings>
 #include <QStringList>
 
+
 class Contact
 {
 public:

@@ -6,6 +6,7 @@
 #include <QByteArray>
 #include <QList>
 #include <QScrollBar>
+
 #include "message.h"
 
 namespace Ui {
@@ -22,10 +23,12 @@ public:
 
 signals:
     void sendMessage(QByteArray data);
+    void callContact();
 
 public slots:
     void displayMessage(Message msg);
     void onSend();
+    void onCall();
 
 private:
     Ui::MessengerWindow *ui;
