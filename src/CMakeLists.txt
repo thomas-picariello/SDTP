@@ -17,7 +17,7 @@ set(SVOIP_HEADERS
     editcontactwindow.h
     messengerwindow.h
     settingswindow.h
-    responder.h
+    #responder.h
     contact.h
     message.h
     #starter.h
@@ -32,7 +32,7 @@ set(SVOIP_SOURCES
     editcontactwindow.cpp
     messengerwindow.cpp
     settingswindow.cpp
-    responder.cpp
+    #responder.cpp
     contact.cpp
     message.cpp
     #starter.cpp

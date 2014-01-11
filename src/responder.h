@@ -20,8 +20,6 @@ public:
     ~Responder();
 
 public slots :
-    void readIncomingData();
-    void sendData(QByteArray);
     void error(QAbstractSocket::SocketError);
 
 private :
