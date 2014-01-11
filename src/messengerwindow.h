@@ -19,6 +19,7 @@ class MessengerWindow : public QWidget
     
 public:
     explicit MessengerWindow(QWidget *parent = 0);
+    void changeButtonState(bool state);
     ~MessengerWindow();
 
 signals:

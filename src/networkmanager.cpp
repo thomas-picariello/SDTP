@@ -4,6 +4,7 @@ NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(par
 {
     m_Socket = new QTcpSocket;
     m_Socket = socket;
+    voip = new VoIP;
 
     mAesKey = QByteArray(16, 0x0); //16 byte = 128 bits, filled with 0x0.
     mAesIv = QByteArray(AES::BLOCKSIZE, 0x0); //filled with 0x0.
@@ -16,12 +17,13 @@ NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(par
     QString ip = m_Socket->peerAddress().toString();
     qDebug()<<ip;
 
-    voip = new VoIP;
+
 
     m_MessengerWindow->displayMessage(Message("Connected to : "+ip, Message::SERVICE));
 
+
     connect(m_MessengerWindow,SIGNAL(callContact()),
-            this, SLOT(call()));
+            this, SLOT(voipCall()));
     connect(m_Socket, SIGNAL(readyRead()),
             this, SLOT(readIncomingData()));
     connect(m_MessengerWindow,SIGNAL(sendMessage(QByteArray)),
@@ -34,10 +36,10 @@ NetworkManager::NetworkManager(QString name, QObject *parent)
 {
     Contact contact(name);
     m_Socket = new QTcpSocket;
+    voip = new VoIP;
 
     QString ip  = contact.getIp();
 
-    //quint16 port = settings.value("Contacts/"+name+"/port").toInt();
     quint16 port = contact.getPort().toInt();
 
     QByteArray key = contact.getKey();
@@ -64,9 +66,10 @@ NetworkManager::NetworkManager(QString name, QObject *parent)
 
     m_MessengerWindow = new MessengerWindow;
 
-    voip = new VoIP;
+
+
     connect(m_MessengerWindow,SIGNAL(callContact()),
-            this, SLOT(call()));
+            this, SLOT(voipCall()));
     connect(m_Socket, SIGNAL(readyRead()),
             this, SLOT(readIncomingData()));
     connect(m_MessengerWindow,SIGNAL(sendMessage(QByteArray)),
@@ -79,7 +82,7 @@ void NetworkManager::onConnect(){
     QString ip = m_Socket->peerAddress().toString();
     m_MessengerWindow->displayMessage(Message("Connected to: " + ip, Message::SERVICE));
     qDebug() << "Connected to:" << ip;
-    m_Socket->write("Starter connected");
+    this->sendData("Hello, i am talking to you.");
 
 
 
@@ -87,8 +90,18 @@ void NetworkManager::onConnect(){
 }
 void NetworkManager::voipCall()
 {
+    qDebug()<<"works 1";
+    if(voip->getCallState() == VoIP::OFFLINE){
+        qDebug()<<"works 2";
+        m_MessengerWindow->changeButtonState(true);
+        voip->call(Contact());
+    }
+    else if (voip->getCallState() == VoIP::ONLINE){
+        qDebug()<<"works 3";
+        m_MessengerWindow->changeButtonState(false);
+        //voip->endcall();
+    }
 
-    voip->call(Contact());
 }
 
 void NetworkManager::readIncomingData()

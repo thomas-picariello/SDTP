@@ -17,10 +17,8 @@ set(SVOIP_HEADERS
     editcontactwindow.h
     messengerwindow.h
     settingswindow.h
-    #responder.h
     contact.h
     message.h
-    #starter.h
     voip.h
     qopusdevice.h
     networkmanager.h
@@ -32,10 +30,8 @@ set(SVOIP_SOURCES
     editcontactwindow.cpp
     messengerwindow.cpp
     settingswindow.cpp
-    #responder.cpp
     contact.cpp
     message.cpp
-    #starter.cpp
     voip.cpp
     qopusdevice.cpp
     networkmanager.cpp
