@@ -5,7 +5,10 @@ NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(par
     m_Socket = new QTcpSocket;
     m_Socket = socket;
 
-    this->onContact();
+    hs = new Handshake(m_Socket);
+    connect(hs,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
+    hs->startCheckKey();
+
 
 }
 NetworkManager::NetworkManager(Contact c, QObject *parent): QObject(parent)
@@ -33,13 +36,6 @@ void NetworkManager::onConnect(){
     connect(hs,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
     hs->startCheckKey();
 
-
-}
-void NetworkManager::onContact(){
-
-    hs = new Handshake(m_Socket);
-    connect(hs,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
-    hs->startCheckKey();
 
 }
 void NetworkManager::onIdentified(){

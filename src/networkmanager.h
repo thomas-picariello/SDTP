@@ -39,7 +39,6 @@ public slots :
     void voipCall();
 
     void onConnect();//for starter
-    void onContact();//for responder
     void onIdentified();
 
 
