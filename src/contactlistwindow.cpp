@@ -5,10 +5,11 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
 {
     mEditContactWindow = NULL;
     mSettingsWindow = NULL;
-//    mStarter = new Starter();
+    //mStarter = new Starter();
+    mContactList = Contact::getContactList();
     ui->setupUi(this);
 
-    ui->list->addItems(Contact::getAllNames());
+    refreshList();
 
     connect(ui->add, SIGNAL(clicked()),
             this, SLOT(addContact()));
@@ -29,7 +30,7 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
 }
 
 void ContactListWindow::addContact(){
-    mEditContactWindow = new EditContactWindow();
+    mEditContactWindow = new EditContactWindow(Contact());
     connect(mEditContactWindow, SIGNAL(contactChanged()),
             this, SLOT(refreshList()));
 }
@@ -37,7 +38,7 @@ void ContactListWindow::editContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
-        mEditContactWindow = new EditContactWindow(selectedName);
+        mEditContactWindow = new EditContactWindow(Contact::findByName(selectedName));
         connect(mEditContactWindow, SIGNAL(contactChanged()),
                 this, SLOT(refreshList()));
     }
@@ -46,8 +47,8 @@ void ContactListWindow::removeContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
-        Contact contact(selectedName);
-        contact.remove();
+        Contact contact = Contact::findByName(selectedName);
+        contact.erase();
         refreshList();
     }
 }
@@ -66,8 +67,12 @@ void ContactListWindow::exitApp(){
     exit(0);
 }
 void ContactListWindow::refreshList(){
+    mContactList = Contact::getContactList();
+    QStringList nameList;
+    foreach(Contact contact, mContactList)
+        nameList.append(contact.getName());
     ui->list->clear();
-    ui->list->addItems(Contact::getAllNames());
+    ui->list->addItems(nameList);
 }
 
 ContactListWindow::~ContactListWindow()

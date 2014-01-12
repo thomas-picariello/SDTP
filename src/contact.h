@@ -9,33 +9,37 @@
 class Contact
 {
 public:
-    Contact();
-    Contact(QString name);
-    Contact(QString name, QString ip, QString port, QByteArray key);
+    static int getNextAvailableID();
+    static int getNameID(QString name);
 
-    static QStringList getAllNames();
-    static bool nameExists(QString name);
+    Contact(QString name = QString(),
+            QString ip = QString(),
+            QString port = QString(),
+            QByteArray key = QByteArray());
+
+    static Contact findById(int id);
+    static Contact findByName(QString name);
+    static Contact findByIp(QString ip);
+    static Contact findByKey(QByteArray key);
+    static QList<Contact> getContactList();
+
     QString getName() const;
     QString getIp() const;
     QString getPort() const;
     QByteArray getKey() const;
 
+    void setId(int id);
     void setName(QString name);
     void setIp(QString ip);
     void setPort(QString port);
     void setKey(QByteArray key);
-    void remove();
-
-    ~Contact();
+    void save();
+    void erase();
 
 private :
-    QSettings mSettings;
     int mId;
     QString mName, mIp, mPort;
     QByteArray mKey;
-
-    static int getNextAvailableID();
-    static int getNameID(QString name);
 };
 
 #endif // CONTACT_H

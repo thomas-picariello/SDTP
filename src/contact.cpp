@@ -1,93 +1,159 @@
 #include "contact.h"
 
-Contact::Contact(){
-    mSettings.beginGroup("Contacts");
-    mId = getNextAvailableID();
-    mName = QString();
-}
-Contact::Contact(QString name){
-    mSettings.beginGroup("Contacts");
-    mName = name;
-    int id = getNameID(mName);
-    if(id != -1){ //contact exists, get the values
-        mId = id;
-        mName = name;
-        QString idStr = mSettings.childGroups().first();
-        mIp = mSettings.value(QString::number(mId) +"/ip").toString();
-        mPort = mSettings.value(QString::number(mId) + "/port").toString();
-        mKey = mSettings.value(QString::number(mId) + "/key").toByteArray();
-    }
-}
 Contact::Contact(QString name, QString ip, QString port, QByteArray key){
-    Contact();
-    if(nameExists(name)){
-        mId = getNextAvailableID();
-        mName = name;
-        mIp = ip;
-        mPort = port;
-        mKey = key;
-
-        setName(mName);
-        setIp(mIp);
-        setPort(mPort);
-        setKey(mKey);
-
-
-    }
+    mId = getNextAvailableID();
+    mName = name;
+    mIp = ip;
+    mPort = port;
+    mKey = key;
 }
 
-bool Contact::nameExists(QString name){
-    int id = getNameID(name);
-    if(id >= 0){
-        return true;
-    }else{
-        return false;
+Contact Contact::findById(int id){
+    Contact contact;
+    QSettings settings;
+    settings.beginGroup("Contacts");
+    for(int i=0; i<settings.childGroups().size(); i++){
+        QString actualId = settings.childGroups().at(i);
+        if(actualId.toInt() == id){
+            contact.setId(actualId.toInt());
+            contact.setName(settings.value(actualId + "/name").toString());
+            contact.setIp(settings.value(actualId + "/ip").toString());
+            contact.setPort(settings.value(actualId + "/port").toString());
+            contact.setKey(settings.value(actualId + "/key").toByteArray());
+            break; //should exit the for loop...
+        }
     }
+    settings.endGroup();
+    return contact;
 }
+
+Contact Contact::findByName(QString name){
+    Contact contact;
+    QSettings settings;
+    settings.beginGroup("Contacts");
+    for(int i=0; i<settings.childGroups().size(); i++){
+        QString id = settings.childGroups().at(i);
+        QString actualName = settings.value(id + "/name").toString();
+        if(name.compare(actualName) == 0){
+            contact.setId(id.toInt());
+            contact.setName(actualName);
+            contact.setIp(settings.value(id + "/ip").toString());
+            contact.setPort(settings.value(id + "/port").toString());
+            contact.setKey(settings.value(id + "/key").toByteArray());
+            break; //should exit the for loop...
+        }
+    }
+    settings.endGroup();
+    return contact;
+}
+
+Contact Contact::findByIp(QString ip){
+    Contact contact;
+    QSettings settings;
+    settings.beginGroup("Contacts");
+    for(int i=0; i<settings.childGroups().size(); i++){
+        QString id = settings.childGroups().at(i);
+        QString actualIp = settings.value(id + "/ip").toString();
+        if(ip.compare(actualIp) == 0){
+            contact.setId(id.toInt());
+            contact.setName(settings.value(id + "/name").toString());
+            contact.setIp(actualIp);
+            contact.setPort(settings.value(id + "/port").toString());
+            contact.setKey(settings.value(id + "/key").toByteArray());
+            break;
+        }
+    }
+    settings.endGroup();
+    return contact;
+}
+
+Contact Contact::findByKey(QByteArray key){
+    Contact contact;
+    QSettings settings;
+    settings.beginGroup("Contacts");
+    for(int i=0; i<settings.childGroups().size(); i++){
+        QString id = settings.childGroups().at(i);
+        QByteArray actualKey = settings.value(id + "/key").toByteArray();
+        if(actualKey == key){
+            contact.setId(id.toInt());
+            contact.setName(settings.value(id + "/name").toString());
+            contact.setIp(settings.value(id + "/ip").toString());
+            contact.setPort(settings.value(id + "/port").toString());
+            contact.setKey(actualKey);
+            break;
+        }
+    }
+    settings.endGroup();
+    return contact;
+}
+
+QList<Contact> Contact::getContactList(){
+    QSettings settings;
+    QList<Contact> contactList;
+    settings.beginGroup("Contacts");
+    QStringList idList = settings.childGroups();
+    foreach(QString id, idList)
+        contactList.append(Contact::findById(id.toInt()));
+
+    settings.endGroup();
+    return contactList;
+}
+
+void Contact::setId(int id){
+    mId = id;
+}
+
 QString Contact::getName() const{
     return mName;
 }
+
 QString Contact::getIp() const{
     return mIp;
 }
+
 QString Contact::getPort() const{
     return mPort;
 }
+
 QByteArray Contact::getKey() const{
     return mKey;
 }
 
 void Contact::setName(QString name){
-    if(!nameExists(name)){
-        //name doesn't exists, set a new one
-        mName = name;
-        mSettings.setValue(QString::number(mId) + "/name", mName);
-    }
-}
-void Contact::setIp(QString ip){
-    if(!mName.isEmpty()){
-        mIp = ip;
-        mSettings.setValue(QString::number(mId) + "/ip", ip);
-    }
-}
-void Contact::setPort(QString port){
-    if(!mName.isEmpty()){
-        mPort = port;
-        mSettings.setValue(QString::number(mId) + "/port", port);
-    }
-}
-void Contact::setKey(QByteArray key){
-    if(!mName.isEmpty()){
-        mKey = key;
-        mSettings.setValue(QString::number(mId) + "/key", key);
-    }
-}
-void Contact::remove(){
-    if(!mName.isEmpty()){
-        mSettings.remove(QString::number(mId));
-    }
+    mName = name;
 }
 
+void Contact::setIp(QString ip){
+    mIp = ip;
+}
+
+void Contact::setPort(QString port){
+    mPort = port;
+}
+
+void Contact::setKey(QByteArray key){
+    mKey = key;
+}
+
+void Contact::save(){
+    QSettings settings;
+    settings.beginGroup("Contacts");
+    settings.setValue(QString::number(mId) + "/name", mName);
+    settings.setValue(QString::number(mId) + "/ip", mIp);
+    settings.setValue(QString::number(mId) + "/port", mPort);
+    settings.setValue(QString::number(mId) + "/key", mKey);
+    settings.endGroup();
+}
+
+void Contact::erase(){
+    QSettings settings;
+    settings.beginGroup("Contacts");
+    if(settings.childGroups().contains(QString::number(mId)))
+        settings.remove(QString::number(mId));
+    settings.endGroup();
+}
+
+//TODO: to improve
 int Contact::getNextAvailableID(){
     QSettings settings;
     settings.beginGroup("Contacts");
@@ -95,13 +161,12 @@ int Contact::getNextAvailableID(){
     for(int i=0; i<settings.childGroups().size(); i++){
         int itemId = settings.childGroups().at(i).toInt();
         if(settings.childGroups().size() > 0 && itemId > higherId)
-        {
             higherId = itemId;
-        }
     }
     return higherId+1;
     settings.endGroup();
 }
+
 int Contact::getNameID(QString name){
     QSettings settings;
     settings.beginGroup("Contacts");
@@ -116,21 +181,4 @@ int Contact::getNameID(QString name){
     }
     settings.endGroup();
     return -1;
-}
-QStringList Contact::getAllNames(){
-    QSettings settings;
-    QStringList nameList;
-    QString id;
-    settings.beginGroup("Contacts");
-    for(int i=0; i<settings.childGroups().size(); i++){
-        id = settings.childGroups().at(i);
-        nameList.append(settings.value(id + "/name").toString());
-    }
-    settings.endGroup();
-    return nameList;
-}
-
-Contact::~Contact()
-{
-    mSettings.endGroup();
 }
