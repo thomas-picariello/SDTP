@@ -9,9 +9,6 @@
 class Contact
 {
 public:
-    static int getNextAvailableID();
-    static int getNameID(QString name);
-
     Contact(QString name = QString(),
             QString ip = QString(),
             QString port = QString(),
@@ -24,6 +21,9 @@ public:
     static Contact findByKey(QByteArray key);
     static QList<Contact> getContactList();
 
+    static int getNextAvailableID();
+
+    QString getId() const;
     QString getName() const;
     QString getIp() const;
     QString getPort() const;
