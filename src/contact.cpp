@@ -91,8 +91,8 @@ QList<Contact> Contact::getContactList(){
     return contactList;
 }
 
-void Contact::setId(int id){
-    mId = id;
+QString Contact::getId() const{
+    return mId;
 }
 
 QString Contact::getName() const{
@@ -109,6 +109,10 @@ QString Contact::getPort() const{
 
 QByteArray Contact::getKey() const{
     return mKey;
+}
+
+void Contact::setId(int id){
+    mId = id;
 }
 
 void Contact::setName(QString name){
@@ -156,20 +160,4 @@ int Contact::getNextAvailableID(){
     }
     return freeId;
     settings.endGroup();
-}
-
-int Contact::getNameID(QString name){
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    int id = -1;
-    for(int i=0; i<settings.childGroups().size(); i++){
-        id = settings.childGroups().at(i).toInt();
-        QString actualName = settings.value(QString::number(id) + "/name").toString();
-        if(actualName.compare(name) == 0){
-            settings.endGroup();
-            return id;
-        }
-    }
-    settings.endGroup();
-    return -1;
 }
