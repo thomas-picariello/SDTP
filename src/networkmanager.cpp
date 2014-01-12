@@ -35,10 +35,9 @@ NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(par
 
 
 }
-NetworkManager::NetworkManager(QString name, QObject *parent)
+NetworkManager::NetworkManager(Contact contact, QObject *parent): QObject(parent)
 {
     m_settings = new QSettings;
-    Contact contact = Contact::findByName(name);
     m_Socket = new QTcpSocket;
     voip = new VoIP;
     m_MessengerWindow = new MessengerWindow;
@@ -79,6 +78,9 @@ NetworkManager::NetworkManager(QString name, QObject *parent)
 
 }
 void NetworkManager::onConnect(){
+
+    //handshake();
+
     QString ip = m_Socket->peerAddress().toString();
     m_MessengerWindow->displayMessage(Message("Connected to: " + ip, Message::SERVICE));
     qDebug() << "Connected to:" << ip;
@@ -89,7 +91,7 @@ void NetworkManager::onConnect(){
 }
 void NetworkManager::onContact(){
 
-
+    //handshake();
 
 }
 

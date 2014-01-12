@@ -26,7 +26,7 @@ class NetworkManager : public QObject
 
 public:
     NetworkManager(QTcpSocket *socket,  QObject *parent=0);
-    NetworkManager(QString name,  QObject *parent=0);
+    NetworkManager(Contact contact,  QObject *parent=0);
     ~NetworkManager();
 
 

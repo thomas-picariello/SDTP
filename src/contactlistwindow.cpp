@@ -56,7 +56,7 @@ void ContactListWindow::connectToContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
-        m_ManagerList.append(new NetworkManager(selectedName));
+        m_ManagerList.append(new NetworkManager(Contact::findByName(selectedName)));
        // mStarter->openConnection(selectedName);
     }
 }

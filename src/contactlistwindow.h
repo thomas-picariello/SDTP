@@ -35,6 +35,7 @@ private:
     Ui::ContactListWindow *ui;
     EditContactWindow *mEditContactWindow;
     SettingsWindow *mSettingsWindow;
+
     //Starter *mStarter;
     QList<Contact> mContactList;
     QList<NetworkManager*> m_ManagerList;
