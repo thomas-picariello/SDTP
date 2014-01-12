@@ -28,6 +28,12 @@ signals :
     void connectionClosed();
     void handshakeSuccessfull();
 
+public slots :
+    void startCheckKey();
+    void startCheckCompatibility();
+    void respondCheckKey();
+    void respondCheckCompatbility();
+
 private :
     QTcpSocket *m_Socket;
     Contact contact;

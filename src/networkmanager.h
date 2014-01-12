@@ -15,6 +15,7 @@
 #include "contact.h"
 #include "cryptopp/aes.h"
 #include "cryptopp/modes.h"
+#include "handshake.h"
 
 
 using namespace CryptoPP;
@@ -39,12 +40,14 @@ public slots :
 
     void onConnect();//for starter
     void onContact();//for responder
+    void onIdentified();
 
 
 private :
     QTcpSocket *m_Socket;
     QSettings *m_settings;
     VoIP *voip;
+    Handshake *hs;
     Contact contact;
     MessengerWindow *m_MessengerWindow;
     QByteArray mAesKey;

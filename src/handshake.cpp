@@ -7,6 +7,8 @@ Handshake::Handshake(QTcpSocket *socket,  QObject *parent): QObject(parent)
     m_Socket = new QTcpSocket;
     m_Socket = socket;
 
+
+
 }
 
 Handshake::Handshake(QTcpSocket *socket,Contact contact,  QObject *parent): QObject(parent)
@@ -17,7 +19,21 @@ Handshake::Handshake(QTcpSocket *socket,Contact contact,  QObject *parent): QObj
 
 
 
+
 }
+void Handshake::startCheckKey(){
+emit handshakeSuccessfull();
+}
+void Handshake::startCheckCompatibility(){
+
+}
+void Handshake::respondCheckKey(){
+
+}
+void Handshake::respondCheckCompatbility(){
+
+}
+
 Handshake::~Handshake()
 {
 
