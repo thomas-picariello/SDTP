@@ -25,6 +25,7 @@ public:
     ~VoIP();
 
 signals:
+    void callStateChanged(CallState state);
     
 public slots:
     void takeIncommingCall(QIODevice* dataInterface);

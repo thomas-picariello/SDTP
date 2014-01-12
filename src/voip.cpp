@@ -31,16 +31,18 @@ VoIP::VoIP(QObject *parent) :
 
 void VoIP::call(const Contact &contact){
     mCallState = ONLINE;
+    emit callStateChanged(mCallState);
     mOpusIODevice->open(QIODevice::ReadWrite | QIODevice::Truncate);
     mAudioInput->start(mOpusIODevice);
     mAudioOutput->start(mOpusIODevice);
 }
 
 void VoIP::endCall(){
-    mCallState = OFFLINE;
     mAudioInput->stop();
     mAudioOutput->stop();
     mOpusIODevice->close();
+    mCallState = OFFLINE;
+    emit callStateChanged(mCallState);
 }
 
 QOpusDevice* VoIP::getOpusIODevice(){
