@@ -15,7 +15,8 @@ public:
     Contact(QString name = QString(),
             QString ip = QString(),
             QString port = QString(),
-            QByteArray key = QByteArray());
+            QByteArray key = QByteArray(),
+            int id = getNextAvailableID());
 
     static Contact findById(int id);
     static Contact findByName(QString name);
