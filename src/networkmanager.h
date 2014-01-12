@@ -8,6 +8,7 @@
 #include <QHostAddress>
 #include <QObject>
 #include <QDebug>
+#include <QSettings>
 #include "voip.h"
 #include "message.h"
 #include "messengerwindow.h"
@@ -39,7 +40,9 @@ public slots :
 
 private :
     QTcpSocket *m_Socket;
+    QSettings *m_settings;
     VoIP *voip;
+    Contact *contact;
     MessengerWindow *m_MessengerWindow;
     QByteArray mAesKey;
     QByteArray mAesIv;
