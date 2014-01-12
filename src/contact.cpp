@@ -20,7 +20,7 @@ Contact Contact::findById(int id){
             contact.setIp(settings.value(actualId + "/ip").toString());
             contact.setPort(settings.value(actualId + "/port").toString());
             contact.setKey(settings.value(actualId + "/key").toByteArray());
-            break; //should exit the for loop...
+            break;
         }
     }
     settings.endGroup();
@@ -40,7 +40,7 @@ Contact Contact::findByName(QString name){
             contact.setIp(settings.value(id + "/ip").toString());
             contact.setPort(settings.value(id + "/port").toString());
             contact.setKey(settings.value(id + "/key").toByteArray());
-            break; //should exit the for loop...
+            break;
         }
     }
     settings.endGroup();
@@ -153,17 +153,15 @@ void Contact::erase(){
     settings.endGroup();
 }
 
-//TODO: to improve
 int Contact::getNextAvailableID(){
     QSettings settings;
     settings.beginGroup("Contacts");
-    int higherId = 0 ;
-    for(int i=0; i<settings.childGroups().size(); i++){
-        int itemId = settings.childGroups().at(i).toInt();
-        if(settings.childGroups().size() > 0 && itemId > higherId)
-            higherId = itemId;
+    QStringList idList = settings.childGroups();
+    int freeId = 0;
+    while(idList.contains(QString::number(freeId))){
+        freeId++;
     }
-    return higherId+1;
+    return freeId;
     settings.endGroup();
 }
 
