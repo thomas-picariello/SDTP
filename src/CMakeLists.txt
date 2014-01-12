@@ -22,6 +22,7 @@ set(SVOIP_HEADERS
     voip.h
     qopusdevice.h
     networkmanager.h
+    handshake.cpp
 )
 set(SVOIP_SOURCES
     main.cpp
@@ -35,6 +36,8 @@ set(SVOIP_SOURCES
     voip.cpp
     qopusdevice.cpp
     networkmanager.cpp
+    handshake.h
+
 )
 set(SVOIP_FORMS
     contactlistwindow.ui

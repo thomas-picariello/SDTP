@@ -22,7 +22,7 @@ NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(par
 
     m_MessengerWindow->displayMessage(Message("Connected to : "+ip, Message::SERVICE));
 
-
+    this->onContact();
 
 
     connect(m_MessengerWindow,SIGNAL(callContact()),
@@ -87,6 +87,12 @@ void NetworkManager::onConnect(){
 
 
 }
+void NetworkManager::onContact(){
+
+
+
+}
+
 void NetworkManager::voipCall()
 {
 
