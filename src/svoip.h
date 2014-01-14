@@ -5,7 +5,6 @@
 #include <QList>
 #include <QTcpServer>
 #include "contactlistwindow.h"
-#include "responder.h"
 #include "networkmanager.h"
 
 class SVoIP : public QObject
@@ -23,7 +22,6 @@ public slots :
 private:
     ContactListWindow *mWindow;
     QTcpServer *mListener;
-    QList<Responder*> m_responderList;
     QList<NetworkManager*> m_ManagerList;
 };
 

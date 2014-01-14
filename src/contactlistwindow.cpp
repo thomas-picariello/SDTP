@@ -5,7 +5,6 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
 {
     mEditContactWindow = NULL;
     mSettingsWindow = NULL;
-    //mStarter = new Starter();
     mContactList = Contact::getContactList();
     ui->setupUi(this);
 
@@ -57,7 +56,6 @@ void ContactListWindow::connectToContact(){
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
         m_ManagerList.append(new NetworkManager(Contact::findByName(selectedName)));
-       // mStarter->openConnection(selectedName);
     }
 }
 void ContactListWindow::openSettingsWindow(){

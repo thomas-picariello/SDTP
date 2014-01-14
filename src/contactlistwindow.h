@@ -6,7 +6,6 @@
 #include <QList>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
-#include "starter.h"
 #include "contact.h"
 #include "networkmanager.h"
 
@@ -36,7 +35,6 @@ private:
     EditContactWindow *mEditContactWindow;
     SettingsWindow *mSettingsWindow;
 
-    //Starter *mStarter;
     QList<Contact> mContactList;
     QList<NetworkManager*> m_ManagerList;
 };
