@@ -35,7 +35,6 @@ public slots :
     void readIncomingData();
     void sendData(QByteArray);
     void error(QAbstractSocket::SocketError);
-
     void voipCall();
 
     void onConnect();//for starter
@@ -53,9 +52,6 @@ private :
     QByteArray mAesIv;
     CFB_Mode<AES>::Encryption mCfbAesEnc;
     CFB_Mode<AES>::Decryption mCfbAesDec;
-
-
-
 
 };
 

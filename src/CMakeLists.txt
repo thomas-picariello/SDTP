@@ -12,7 +12,6 @@ find_package(Qt5Multimedia REQUIRED)
 
 #Set variables with all the sources to compile
 set(SVOIP_HEADERS
-    svoip.h
     contactlistwindow.h
     editcontactwindow.h
     messengerwindow.h
@@ -26,7 +25,6 @@ set(SVOIP_HEADERS
 )
 set(SVOIP_SOURCES
     main.cpp
-    svoip.cpp
     contactlistwindow.cpp
     editcontactwindow.cpp
     messengerwindow.cpp

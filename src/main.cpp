@@ -1,4 +1,4 @@
-#include "svoip.h"
+#include "contactlistwindow.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -6,7 +6,10 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName("FHNW-ICS");
     QCoreApplication::setApplicationName("P5-SVoIP");
-    SVoIP svoip;
+
+    ContactListWindow contactListWindow;
+
+
 
     return a.exec();
 }

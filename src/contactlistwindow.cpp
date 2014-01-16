@@ -8,8 +8,16 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
     mContactList = Contact::getContactList();
     ui->setupUi(this);
 
+    qint16 listenPort = QSettings().value("Settings/port").toInt();
+
+    mListener = new QTcpServer();
+    mListener->listen(QHostAddress::Any, listenPort);
+
+
     refreshList();
 
+    connect(mListener, SIGNAL(newConnection()),
+            this,SLOT(acceptConnection()));
     connect(ui->add, SIGNAL(clicked()),
             this, SLOT(addContact()));
     connect(ui->edit, SIGNAL(clicked()),
@@ -26,6 +34,11 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
             this, SLOT(exitApp()));
 
     show();
+}
+void ContactListWindow::acceptConnection(){
+
+    m_ManagerList.append(new NetworkManager(mListener->nextPendingConnection()));
+
 }
 
 void ContactListWindow::addContact(){

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QSettings>
 #include <QList>
+#include <QTcpServer>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
 #include "contact.h"
@@ -22,6 +23,7 @@ public:
     ~ContactListWindow();
 
 public slots:
+    void acceptConnection();
     void addContact();
     void editContact();
     void removeContact();
@@ -34,6 +36,7 @@ private:
     Ui::ContactListWindow *ui;
     EditContactWindow *mEditContactWindow;
     SettingsWindow *mSettingsWindow;
+    QTcpServer *mListener;
 
     QList<Contact> mContactList;
     QList<NetworkManager*> m_ManagerList;
