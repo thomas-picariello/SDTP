@@ -50,7 +50,7 @@ include_directories(${LIBS_SOURCE_DIR})
 #process the ui files.
 qt5_wrap_ui(SVOIP_UI_HEADERS ${SVOIP_FORMS})
 
-add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_HEADERS})
+add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_HEADERS} svoip.rc)
 
 target_link_libraries(${PROJECT} cryptopp opus)
 
