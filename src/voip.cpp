@@ -1,13 +1,16 @@
 #include "voip.h"
 
-VoIP::VoIP(QObject *parent) :
+VoIP::VoIP(QIODevice *sourceInterface, QObject *parent) :
     QObject(parent)
 {
     mCallState = OFFLINE;
-    mOpusIODevice = new QOpusDevice();
+    mDataInterface = sourceInterface;
+    mOpus = new QOpusDevice();
+    //mOpus = new QOpusDevice(mDataInterface);
+
     QAudioFormat format;
-    format.setChannelCount(1);
-    format.setSampleRate(44100);
+    format.setChannelCount(2);
+    format.setSampleRate(48000);
     format.setSampleSize(16);
     format.setCodec("audio/pcm");
     format.setByteOrder(QAudioFormat::LittleEndian); //Requiered by Opus
@@ -16,50 +19,70 @@ VoIP::VoIP(QObject *parent) :
     QAudioDeviceInfo info;
     info = QAudioDeviceInfo::defaultInputDevice();
     if (!info.isFormatSupported(format)) {
-        qWarning() << "Default format not supported, trying to use the nearest.";
+        qWarning() << "Default input format not supported, trying to use the nearest.";
         format = info.nearestFormat(format);
     }
-    mAudioInput = new QAudioInput(format);
+    mAudioInput = new QAudioInput(format, this);
 
     info = QAudioDeviceInfo::defaultOutputDevice();
-    if(info.isFormatSupported(format)){
-        qWarning() << "Default format not supported, trying to use the nearest.";
-        format = info.nearestFormat(format);
+    if (!info.isFormatSupported(format)) {
+        qWarning() << "Raw audio format not supported by backend, cannot play audio.";
     }
-    mAudioOutput = new QAudioOutput(format);
+    mAudioOutput = new QAudioOutput(format, this);
+
+    connect(mAudioInput, SIGNAL(stateChanged(QAudio::State)),
+            this, SLOT(inputStateChanged(QAudio::State)));
+    connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)),
+            this, SLOT(outputStateChanged(QAudio::State)));
+    connect(mOpus, SIGNAL(readyRead()),
+            this, SLOT(startAudioOutput()));
 }
 
 void VoIP::call(const Contact &contact){
     mCallState = ONLINE;
     emit callStateChanged(mCallState);
-    mOpusIODevice->open(QIODevice::ReadWrite | QIODevice::Truncate);
-    mAudioInput->start(mOpusIODevice);
-    mAudioOutput->start(mOpusIODevice);
+    mOpus->open(QIODevice::ReadWrite);
+    mAudioInput->start(mOpus);
+    //mAudioOutput->start(mOpus);
 }
 
 void VoIP::endCall(){
     mAudioInput->stop();
     mAudioOutput->stop();
-    mOpusIODevice->close();
+    mOpus->close();
     mCallState = OFFLINE;
     emit callStateChanged(mCallState);
-}
-
-QOpusDevice* VoIP::getOpusIODevice(){
-    return mOpusIODevice;
-}
-
-void VoIP::takeIncommingCall(QIODevice* dataInterface){
-    //delete previously initalised Opus interface
-    delete mOpusIODevice;
-    //initialize a new one with the data interface
-    mOpusIODevice = new QOpusDevice(dataInterface);
 }
 
 VoIP::CallState VoIP::getCallState(){
     return mCallState;
 }
 
+void VoIP::takeIncommingCall(){
+    //delete previously allocated QOpusDevice instance
+    //delete mOpus;
+    //initialize a new one with the data interface
+    //mOpus = new QOpusDevice(dataInterface);
+}
+
+void VoIP::startAudioOutput(){
+    if(mCallState==ONLINE && mAudioOutput->state() != QAudio::ActiveState)
+        mAudioOutput->start(mOpus);
+}
+
+//Debug
+void VoIP::inputStateChanged(QAudio::State state){
+    qDebug() << "New input state:" << state;
+}
+
+void VoIP::outputStateChanged(QAudio::State state){
+    qDebug() << "New output state:" << state;
+}
+
+void VoIP::bufferWritten(qint64 bc){
+    qDebug() << "Written to Buffer:" << bc << "Bytes";
+}
+
 VoIP::~VoIP(){
-    delete mOpusIODevice, mAudioInput, mAudioOutput;
+    delete mOpus, mAudioInput, mAudioOutput;
 }

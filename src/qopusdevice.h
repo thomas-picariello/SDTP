@@ -1,6 +1,7 @@
 #ifndef QOPUSENCODER_H
 #define QOPUSENCODER_H
 
+#include <QDebug>
 #include <QObject>
 #include <QIODevice>
 #include <QBuffer>
@@ -14,8 +15,7 @@ class QOpusDevice : public QIODevice
 {
     Q_OBJECT
 public:
-    explicit QOpusDevice(QIODevice* deviceToUse = new QBuffer(),
-                         int frameSizeInMicrosecs = 0,
+    explicit QOpusDevice(int frameSizeInMicrosecs = 0,
                          QObject* parent = 0);
     bool open(OpenMode mode);
     void close();
@@ -27,8 +27,6 @@ public:
     void setEncoderApplication(int application);
     quint64 getBitrate() const;
     void setBitrate(quint64 bitrate);
-    //QAudioFormat::SampleType getSampleType() const;
-    //void setSampleType(QAudioFormat::SampleType);
 
     static QString getOpusErrorDesc(int errorCode);
 
@@ -39,13 +37,13 @@ signals:
 
 protected:
     qint64 readData(char * data, qint64 maxSize);
-    qint64 writeData(const char * input, qint64 maxSize);
+    qint64 writeData(const char * data, qint64 maxSize);
 
 private:
     OpusEncoder *mEncoder;
     OpusDecoder *mDecoder;
-    QIODevice *mUnderlyingDevice;
-    QByteArray mInputBuffer, mOutputBuffer;
+    //QIODevice *mUnderlyingDevice;
+    QByteArray mBuffer;
     QAudioFormat mAudioFormat;
     int mError;
     int mOpusFrameSize;
