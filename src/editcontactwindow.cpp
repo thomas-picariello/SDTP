@@ -15,7 +15,7 @@ EditContactWindow::EditContactWindow(Contact contact, QWidget *parent):
 
     ui->name->setText(mContact.getName());
     ui->ip->setText(mContact.getIp());
-    ui->port->setText(mContact.getPort());
+    ui->port->setText(QString::number(mContact.getPort()));
     ui->key->setText(QString(mContact.getKey()));
 
     this->show();
@@ -31,7 +31,7 @@ void EditContactWindow::save(){
         QMessageBox::warning(this, "Incomplete", "Please fill all the fields");
     }else{
         mContact.setName(name);
-        mContact.setPort(port);
+        mContact.setPort(port.toUInt());
         mContact.setIp(ip);
         mContact.setKey(key.toUtf8());
         mContact.save();

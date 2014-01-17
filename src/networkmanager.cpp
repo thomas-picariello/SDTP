@@ -11,13 +11,12 @@ NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(par
 
 
 }
-NetworkManager::NetworkManager(Contact c, QObject *parent): QObject(parent)
+NetworkManager::NetworkManager(Contact contact, QObject *parent): QObject(parent)
 {
     m_Socket = new QTcpSocket;
-    Contact contact = c;
 
     QString ip  = contact.getIp();
-    quint16 port = contact.getPort().toInt();
+    quint16 port = contact.getPort();
 
     //Close previous connection if already connected with this socket
     if(m_Socket->state() == QAbstractSocket::ConnectedState ||

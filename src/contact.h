@@ -11,7 +11,7 @@ class Contact
 public:
     Contact(QString name = QString(),
             QString ip = QString(),
-            QString port = QString(),
+            quint16 port = 0,
             QByteArray key = QByteArray(),
             int id = getNextAvailableID());
 
@@ -23,23 +23,24 @@ public:
 
     static int getNextAvailableID();
 
-    QString getId() const;
+    int getId() const;
     QString getName() const;
     QString getIp() const;
-    QString getPort() const;
+    quint16 getPort() const;
     QByteArray getKey() const;
 
     void setId(int id);
     void setName(QString name);
     void setIp(QString ip);
-    void setPort(QString port);
+    void setPort(quint16 port);
     void setKey(QByteArray key);
     void save();
     void erase();
 
 private :
     int mId;
-    QString mName, mIp, mPort;
+    quint16 mPort;
+    QString mName, mIp;
     QByteArray mKey;
 };
 
