@@ -92,7 +92,7 @@ QList<Contact> Contact::getContactList(){
 }
 
 QString Contact::getId() const{
-    return mId;
+    return QString::number(mId);
 }
 
 QString Contact::getName() const{
