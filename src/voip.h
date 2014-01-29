@@ -17,7 +17,7 @@ class VoIP : public QObject
 public:
     enum CallState{ONLINE, OFFLINE};
 
-    explicit VoIP(QIODevice *sourceInterface = new QBuffer(),
+    explicit VoIP(QIODevice *interfaceIODevice,
                   QObject *parent = 0);
     void call(Contact const &contact);
     void endCall();

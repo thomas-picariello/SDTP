@@ -1,13 +1,10 @@
 #include "voip.h"
 
-VoIP::VoIP(QIODevice *sourceInterface, QObject *parent) :
-    QObject(parent)
+VoIP::VoIP(QIODevice *interfaceIODevice, QObject *parent) :
+    QObject(parent),
+    mCallState(OFFLINE),
+    mOpus(new QOpusDevice(interfaceIODevice))
 {
-    mCallState = OFFLINE;
-    mDataInterface = sourceInterface;
-    mOpus = new QOpusDevice();
-    //mOpus = new QOpusDevice(mDataInterface);
-
     QAudioFormat format;
     format.setChannelCount(2);
     format.setSampleRate(48000);
@@ -41,9 +38,8 @@ VoIP::VoIP(QIODevice *sourceInterface, QObject *parent) :
 void VoIP::call(const Contact &contact){
     mCallState = ONLINE;
     emit callStateChanged(mCallState);
-    mOpus->open(QIODevice::ReadWrite);
+    //mOpus->open(QIODevice::ReadWrite);
     mAudioInput->start(mOpus);
-    //mAudioOutput->start(mOpus);
 }
 
 void VoIP::endCall(){

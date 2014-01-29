@@ -15,7 +15,8 @@ class QOpusDevice : public QIODevice
 {
     Q_OBJECT
 public:
-    explicit QOpusDevice(int frameSizeInMicrosecs = 0,
+    explicit QOpusDevice(QIODevice *deviceToUse,
+                         int frameSizeInMicrosecs = 0,
                          QObject* parent = 0);
     bool open(OpenMode mode);
     void close();
@@ -42,7 +43,7 @@ protected:
 private:
     OpusEncoder *mEncoder;
     OpusDecoder *mDecoder;
-    //QIODevice *mUnderlyingDevice;
+    QIODevice *mUnderlyingDevice;
     QByteArray mBuffer;
     QAudioFormat mAudioFormat;
     int mError;

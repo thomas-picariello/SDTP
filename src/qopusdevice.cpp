@@ -1,7 +1,7 @@
 #include "qopusdevice.h"
 
-QOpusDevice::QOpusDevice(int frameSizeInMicrosecs, QObject* parent) :
-    QIODevice(parent)//, mUnderlyingDevice(deviceToUse)
+QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QObject* parent) :
+    QIODevice(parent), mUnderlyingDevice(deviceToUse)
 {
     mError = OPUS_OK;
     mApplication = OPUS_APPLICATION_VOIP;
@@ -22,21 +22,21 @@ QOpusDevice::QOpusDevice(int frameSizeInMicrosecs, QObject* parent) :
 }
 
 bool QOpusDevice::open(OpenMode mode){
-    /*bool underlyingOk;
+    bool underlyingOk;
     if (mUnderlyingDevice->isOpen()){
         underlyingOk = (mUnderlyingDevice->openMode() != mode);
     }else{
         underlyingOk = mUnderlyingDevice->open(mode);
     }
-    if (underlyingOk){*/
+    if (underlyingOk){
         setOpenMode(mode);
         return true;
-    /*}
-    return false;*/
+    }
+    return false;
 }
 
 void QOpusDevice::close(){
-    //mUnderlyingDevice->close();
+    mUnderlyingDevice->close();
     setOpenMode(NotOpen);
 }
 
@@ -46,7 +46,7 @@ bool QOpusDevice::isSequential() const{
 
 qint64 QOpusDevice::readData(char * data, qint64 maxSize){
     //QByteArray payload;
-    //qint64 readByteNumber = mUnderlyingDevice->read(data, maxSize);
+    qint64 readByteNumber = mUnderlyingDevice->read(data, maxSize);
     //if (readByteNumber == -1)
     //    return -1;
     //assuming that Opus reassemble the packets in an internal buffer
@@ -59,18 +59,19 @@ qint64 QOpusDevice::readData(char * data, qint64 maxSize){
 //                0);
 
 //    if(mError < 0) emit(error(mError));
-    qint64 bufferSize = mBuffer.size();
+    return readByteNumber;
+
+    /*qint64 bufferSize = mBuffer.size();
     qint64 i = 0;
     while(i<maxSize && i<bufferSize){
         data[i] = mBuffer.at(i);
         i++;
     }
-    //return readByteNumber;
-    return i;
+    return i;*/
 }
 
 qint64 QOpusDevice::writeData(const char * data, qint64 maxSize){
-    //qint64 processedByteCount = 0;
+    qint64 processedByteCount = 0;
     //QByteArray payload;
     //mInputBuffer.append(input, maxSize);
     //qDebug() << mAudioFormat.bytesForDuration(mOpusFrameSize);
@@ -89,13 +90,14 @@ qint64 QOpusDevice::writeData(const char * data, qint64 maxSize){
 
 //        if(mError < 0) emit(error(mError));
         //write the encoded frame (payload) to the output
-        //processedByteCount = mUnderlyingDevice->write(data, maxSize);
+        processedByteCount = mUnderlyingDevice->write(data, maxSize);
     //}
-    mBuffer.clear();
+
+    /*mBuffer.clear();
     mBuffer.append(data, maxSize);
     emit readyRead();
-    return mBuffer.size();
-    //return processedByteCount;
+    return mBuffer.size();*/
+    return processedByteCount;
 }
 
 int QOpusDevice::getFrameSize() const{
@@ -132,7 +134,7 @@ quint64 QOpusDevice::getBitrate() const{
 }
 
 void QOpusDevice::setBitrate(quint64 bitrate){
-    if(bitrate >= 500 || bitrate <= 512000){
+    if(bitrate >= 500 && bitrate <= 512000){
         opus_encoder_ctl(mEncoder, OPUS_SET_BITRATE(bitrate));
     }
 }
@@ -163,5 +165,5 @@ static QString getOpusErrorDesc(int errorCode){
 QOpusDevice::~QOpusDevice(){
     //opus_encoder_destroy(mEncoder);
     //opus_decoder_destroy(mDecoder);
-    //delete mUnderlyingDevice;
+    delete mUnderlyingDevice;
 }

@@ -40,7 +40,7 @@ void NetworkManager::onConnect(){
 void NetworkManager::onIdentified(){
 
     m_settings = new QSettings;
-    voip = new VoIP;
+    voip = new VoIP(m_Socket);
 
     mAesKey = QByteArray(16, 0x0); //16 byte = 128 bits, filled with 0x0.
     mAesIv = QByteArray(AES::BLOCKSIZE, 0x0); //filled with 0x0.

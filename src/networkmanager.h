@@ -9,12 +9,12 @@
 #include <QObject>
 #include <QDebug>
 #include <QSettings>
+#include <cryptopp/aes.h>
+#include <cryptopp/modes.h>
 #include "voip.h"
 #include "message.h"
 #include "messengerwindow.h"
 #include "contact.h"
-#include "cryptopp/aes.h"
-#include "cryptopp/modes.h"
 #include "handshake.h"
 
 
