@@ -6,9 +6,12 @@ set(CMAKE_AUTOMOC ON)
 # to always look for includes there:
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# Widgets finds its own dependencies.
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Multimedia REQUIRED)
+
+find_package(Cryptopp REQUIRED)
+find_package(Opus REQUIRED)
+find_package(Jrtplib REQUIRED)
 
 #Set variables with all the sources to compile
 set(SVOIP_HEADERS
@@ -45,14 +48,19 @@ set(SVOIP_FORMS
 )
 
 #add libs as include dirs
-include_directories(${LIBS_SOURCE_DIR})
+include_directories(../libs)
 
 #process the ui files.
 qt5_wrap_ui(SVOIP_UI_HEADERS ${SVOIP_FORMS})
 
 add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_HEADERS} svoip.rc)
 
-target_link_libraries(${PROJECT} cryptopp opus)
+target_link_libraries(${PROJECT}
+    ${CRYPTOPP_LIBRARIES}
+    ${OPUS_LIBRARIES}
+    ${JRTPLIB_LIBRARIES}
+    opus
+)
 
 qt5_use_modules(${PROJECT} Widgets Multimedia)
 

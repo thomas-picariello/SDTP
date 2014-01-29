@@ -9,7 +9,7 @@
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QByteArray>
-#include "opus/include/opus.h"
+#include <opus/opus.h>
 
 class QOpusDevice : public QIODevice
 {

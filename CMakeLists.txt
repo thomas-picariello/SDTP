@@ -3,12 +3,19 @@
 # Authors:
 # 	Felix Kletti, Thomas Picariello
 #######################################
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.9)
 
 set(PROJECT "SVoIP")
 project(${PROJECT})
 
+include(${PROJECT_SOURCE_DIR}/cmake/macros.cmake)
+
+#add cmake macros
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+
 set(CMAKE_BUILD_TYPE Debug)
 
-add_subdirectory(libs)
+#Set MSVC runtime linking
+setMsvcLinkType(static)
+
 add_subdirectory(src)
