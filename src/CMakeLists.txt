@@ -46,22 +46,19 @@ set(SVOIP_FORMS
     settingswindow.ui
     messengerwindow.ui
 )
-
-#add libs as include dirs
-include_directories(../libs)
+set(SVOIP_RES
+    res/svoip.rc
+)
 
 #process the ui files.
 qt5_wrap_ui(SVOIP_UI_HEADERS ${SVOIP_FORMS})
 
-add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_HEADERS} svoip.rc)
+add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_HEADERS} ${SVOIP_RES})
 
 target_link_libraries(${PROJECT}
     ${CRYPTOPP_LIBRARIES}
     ${OPUS_LIBRARIES}
     ${JRTPLIB_LIBRARIES}
-    opus
 )
 
 qt5_use_modules(${PROJECT} Widgets Multimedia)
-
-
