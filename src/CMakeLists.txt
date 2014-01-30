@@ -47,7 +47,7 @@ set(SVOIP_FORMS
     messengerwindow.ui
 )
 set(SVOIP_RES
-    res/svoip.rc
+    ../res/svoip.rc
 )
 
 #process the ui files.

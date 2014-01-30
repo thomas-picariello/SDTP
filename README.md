@@ -14,13 +14,21 @@ It is still in pre-alpha, some functionality might not work at all.
 
 This program should NOT be considered as secure or reliable !
 
-It has been tested with QCreator and MSVC on Windows,
+It has been tested with QCreator and MSVC 2012 on Windows,
 other compilers and other platforms might work.
 
-Library Dependencies:
+To build this project you need the following dependencies:
+
+Build tool:
+ - cmake 2.8.x: http://www.cmake.org/
+
+Framework:
+ - Qt 5.x: http://qt-project.org/
+ 
+Libraries:
  - libopus: http://www.opus-codec.org/
  - jrtplib: http://research.edm.uhasselt.be/~jori/page/index.php?n=CS.Jrtplib
- - crypto++: http://www.cryptopp.com/
+ - cryptopp: http://www.cryptopp.com/
 
 Reviews, advices, and bug reports are welcome.
 
