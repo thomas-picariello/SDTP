@@ -1,9 +1,6 @@
 #ifndef NETWORKMANAGER_H
 #define NETWORKMANAGER_H
 
-
-
-
 #include <QTcpSocket>
 #include <QHostAddress>
 #include <QObject>
@@ -22,14 +19,12 @@ using namespace CryptoPP;
 
 class NetworkManager : public QObject
 {
-
     Q_OBJECT
 
 public:
     NetworkManager(QTcpSocket *socket,  QObject *parent=0);
     NetworkManager(Contact contact,  QObject *parent=0);
     ~NetworkManager();
-
 
 public slots :
     void readIncomingData();
@@ -39,7 +34,6 @@ public slots :
 
     void onConnect();//for starter
     void onIdentified();
-
 
 private :
     QTcpSocket *m_Socket;
@@ -52,7 +46,6 @@ private :
     QByteArray mAesIv;
     CFB_Mode<AES>::Encryption mCfbAesEnc;
     CFB_Mode<AES>::Decryption mCfbAesDec;
-
 };
 
 #endif // NETWORKMANAGER_H

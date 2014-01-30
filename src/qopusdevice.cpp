@@ -1,6 +1,6 @@
 #include "qopusdevice.h"
 
-QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QObject* parent) :
+QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QIODevice* parent) :
     QIODevice(parent), mUnderlyingDevice(deviceToUse)
 {
     mError = OPUS_OK;

@@ -17,7 +17,7 @@ class QOpusDevice : public QIODevice
 public:
     explicit QOpusDevice(QIODevice *deviceToUse,
                          int frameSizeInMicrosecs = 0,
-                         QObject* parent = 0);
+                         QIODevice* parent = 0);
     bool open(OpenMode mode);
     void close();
     bool isSequential() const;
