@@ -18,7 +18,7 @@ public:
     explicit QOpusDevice(QIODevice *deviceToUse,
                          int frameSizeInMicrosecs = 0,
                          QIODevice* parent = 0);
-    bool open(OpenMode mode);
+    bool open();
     void close();
     bool isSequential() const;
 

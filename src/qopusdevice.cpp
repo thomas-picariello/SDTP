@@ -21,22 +21,15 @@ QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QIODe
     //mDecoder = opus_decoder_create(mAudioFormat.sampleRate(), mAudioFormat.channelCount(), &mError);
 }
 
-bool QOpusDevice::open(OpenMode mode){
-    if(mUnderlyingDevice->openMode() != mode){
-        if(mUnderlyingDevice->open(mode)){ //open succeed
-            setOpenMode(mode);
-            return true;
-        }else{   //open failed
-            return false;
-        }
-    }else{ //already open in the same mode
-        setOpenMode(mode);
+bool QOpusDevice::open(){
+    if(mUnderlyingDevice->openMode() == ReadWrite){
+        setOpenMode(ReadWrite);
         return true;
     }
+    return false;
 }
 
 void QOpusDevice::close(){
-    mUnderlyingDevice->close();
     setOpenMode(NotOpen);
 }
 
