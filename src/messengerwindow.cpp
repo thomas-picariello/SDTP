@@ -8,17 +8,16 @@ MessengerWindow::MessengerWindow(QWidget *parent) : QWidget(parent), ui(new Ui::
     connect(ui->send, SIGNAL(clicked()),
             this, SLOT(onSend()));
     connect(ui->call, SIGNAL(clicked()),
-            this, SLOT(onCall()));
+            this, SIGNAL(callContact()));
     connect(ui->input,SIGNAL(returnPressed()),
             this,SLOT(onSend()));
 }
-void MessengerWindow::changeButtonState(bool state)
-{
 
-    if(state == true)ui->call->setText("Call");
-    else if (state == false)ui->call->setText("Hang up");
-    else ui->call->setText("ERROR");
-
+void MessengerWindow::changeButtonState(bool state){
+    if(state)
+        ui->call->setText("Call");
+    else
+        ui->call->setText("Hang up");
 }
 
 void MessengerWindow::displayMessage(Message msg){
@@ -29,16 +28,8 @@ void MessengerWindow::displayMessage(Message msg){
 
 void MessengerWindow::onSend(){
     QByteArray msg = ui->input->text().toUtf8();
-
     emit sendMessage(msg);
     ui->input->clear();
-}
-void MessengerWindow::onCall(){
-
-    qDebug()<<"callcontact : emit";
-    emit callContact();
-
-
 }
 
 void MessengerWindow::updateChat(){

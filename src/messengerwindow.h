@@ -29,7 +29,6 @@ signals:
 public slots:
     void displayMessage(Message msg);
     void onSend();
-    void onCall();
 
 private:
     Ui::MessengerWindow *ui;
