@@ -31,11 +31,10 @@ public slots:
     void openSettingsWindow();
     void exitApp();
     void refreshList();
+    void restartListener();
     
 private:
     Ui::ContactListWindow *ui;
-    EditContactWindow *mEditContactWindow;
-    SettingsWindow *mSettingsWindow;
     QTcpServer *mListener;
 
     QList<Contact> mContactList;

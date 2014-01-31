@@ -1,10 +1,7 @@
 #include "contactlistwindow.h"
 #include "ui_contactlistwindow.h"
 
-ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new Ui::ContactListWindow)
-{
-    mEditContactWindow = NULL;
-    mSettingsWindow = NULL;
+ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new Ui::ContactListWindow){
     mContactList = Contact::getContactList();
     ui->setupUi(this);
 
@@ -35,26 +32,27 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
 
     show();
 }
+
 void ContactListWindow::acceptConnection(){
-
     m_ManagerList.append(new NetworkManager(mListener->nextPendingConnection()));
-
 }
 
 void ContactListWindow::addContact(){
-    mEditContactWindow = new EditContactWindow(Contact());
-    connect(mEditContactWindow, SIGNAL(contactChanged()),
+    EditContactWindow *ecw = new EditContactWindow(Contact());
+    connect(ecw, SIGNAL(contactChanged()),
             this, SLOT(refreshList()));
 }
+
 void ContactListWindow::editContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
-        mEditContactWindow = new EditContactWindow(Contact::findByName(selectedName));
-        connect(mEditContactWindow, SIGNAL(contactChanged()),
+        EditContactWindow *ecw = new EditContactWindow(Contact::findByName(selectedName));
+        connect(ecw, SIGNAL(contactChanged()),
                 this, SLOT(refreshList()));
     }
 }
+
 void ContactListWindow::removeContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
@@ -64,6 +62,7 @@ void ContactListWindow::removeContact(){
         refreshList();
     }
 }
+
 void ContactListWindow::connectToContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
@@ -71,12 +70,17 @@ void ContactListWindow::connectToContact(){
         m_ManagerList.append(new NetworkManager(Contact::findByName(selectedName)));
     }
 }
+
 void ContactListWindow::openSettingsWindow(){
-    mSettingsWindow = new SettingsWindow();
+    SettingsWindow *setWin = new SettingsWindow();
+    connect(setWin, SIGNAL(settingsUpdated()),
+            this, SLOT(restartListener()));
 }
+
 void ContactListWindow::exitApp(){
     exit(0);
 }
+
 void ContactListWindow::refreshList(){
     mContactList = Contact::getContactList();
     QStringList nameList;
@@ -86,7 +90,13 @@ void ContactListWindow::refreshList(){
     ui->list->addItems(nameList);
 }
 
-ContactListWindow::~ContactListWindow()
-{
-    delete ui, mEditContactWindow, mSettingsWindow;
+void ContactListWindow::restartListener(){
+    qint16 listenPort = QSettings().value("Settings/port").toInt();
+    qDebug()<<"Listener restart with port:"<<listenPort;
+    mListener->close();
+    mListener->listen(QHostAddress::Any, listenPort);
+}
+
+ContactListWindow::~ContactListWindow(){
+    delete ui;
 }

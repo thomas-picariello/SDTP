@@ -25,6 +25,7 @@ void SettingsWindow::save(){
     }else{
         mSettings.setValue("port", ui->port->text());
         mSettings.setValue("key", ui->key->toPlainText().toUtf8());
+        emit settingsUpdated();
         this->hide();
     }
 }

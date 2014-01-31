@@ -17,6 +17,9 @@ public:
     explicit SettingsWindow(QWidget *parent = 0);
     ~SettingsWindow();
 
+signals:
+    void settingsUpdated();
+
 public slots:
     void save();
     void cancel();
