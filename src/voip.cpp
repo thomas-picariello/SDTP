@@ -38,7 +38,7 @@ VoIP::VoIP(QIODevice *interfaceIODevice, QObject *parent) :
 void VoIP::call(const Contact &contact){
     mCallState = ONLINE;
     emit callStateChanged(mCallState);
-    qDebug()<<mOpus->open(QIODevice::ReadWrite);
+    mOpus->open(QIODevice::ReadWrite);
     mAudioInput->start(mOpus);
 }
 

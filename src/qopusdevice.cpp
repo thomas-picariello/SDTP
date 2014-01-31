@@ -22,17 +22,17 @@ QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QIODe
 }
 
 bool QOpusDevice::open(OpenMode mode){
-    bool underlyingOk;
-    if (mUnderlyingDevice->isOpen()){
-        underlyingOk = (mUnderlyingDevice->openMode() != mode);
-    }else{
-        underlyingOk = mUnderlyingDevice->open(mode);
-    }
-    if (underlyingOk){
+    if(mUnderlyingDevice->openMode() != mode){
+        if(mUnderlyingDevice->open(mode)){ //open succeed
+            setOpenMode(mode);
+            return true;
+        }else{   //open failed
+            return false;
+        }
+    }else{ //already open in the same mode
         setOpenMode(mode);
         return true;
     }
-    return false;
 }
 
 void QOpusDevice::close(){
