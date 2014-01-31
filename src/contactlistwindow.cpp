@@ -47,7 +47,7 @@ void ContactListWindow::editContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
-        EditContactWindow *ecw = new EditContactWindow(Contact::findByName(selectedName));
+        EditContactWindow *ecw = new EditContactWindow(Contact::findByName(selectedName).first());
         connect(ecw, SIGNAL(contactChanged()),
                 this, SLOT(refreshList()));
     }
@@ -57,7 +57,7 @@ void ContactListWindow::removeContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
-        Contact contact = Contact::findByName(selectedName);
+        Contact contact = Contact::findByName(selectedName).first();
         contact.erase();
         refreshList();
     }
@@ -67,7 +67,7 @@ void ContactListWindow::connectToContact(){
     QList<QListWidgetItem*> selectedLines = ui->list->selectedItems();
     if(selectedLines.count()>0){
         QString selectedName = selectedLines.first()->text();
-        m_ManagerList.append(new NetworkManager(Contact::findByName(selectedName)));
+        m_ManagerList.append(new NetworkManager(Contact::findByName(selectedName).first()));
     }
 }
 

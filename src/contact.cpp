@@ -27,42 +27,40 @@ Contact Contact::findById(int id){
     return Contact(cName, cIp, cPort, cKey, cId.toInt());
 }
 
-Contact Contact::findByName(QString name){
-    quint16 cPort;
-    QString cId, cName, cIp;
-    QByteArray cKey;
+QList<Contact> Contact::findByName(QString name){
+    QList<Contact> matchList;
+    QString cId, cName;
     QSettings settings;
     settings.beginGroup("Contacts");
     foreach(cId, settings.childGroups()){
         cName = settings.value(cId + "/name").toString();
         if(cName.compare(name) == 0){
-            cIp = settings.value(cId + "/ip").toString();
-            cPort = settings.value(cId + "/port").toUInt();
-            cKey = settings.value(cId + "/key").toByteArray();
-            break;
+            QString cIp = settings.value(cId + "/ip").toString();
+            quint16 cPort = settings.value(cId + "/port").toUInt();
+            QByteArray cKey = settings.value(cId + "/key").toByteArray();
+            matchList.append(Contact(cName, cIp, cPort, cKey, cId.toInt()));
         }
     }
     settings.endGroup();
-    return Contact(cName, cIp, cPort, cKey, cId.toInt());
+    return matchList;
 }
 
-Contact Contact::findByIp(QString ip){
-    quint16 cPort;
-    QString cId, cName, cIp;
-    QByteArray cKey;
+QList<Contact> Contact::findByIp(QString ip){
+    QList<Contact> matchList;
+    QString cId, cIp;
     QSettings settings;
     settings.beginGroup("Contacts");
     foreach(cId, settings.childGroups()){
         cIp = settings.value(cId + "/ip").toString();
         if(cIp.compare(ip) == 0){
-            cName = settings.value(cId + "/name").toString();
-            cPort = settings.value(cId + "/port").toUInt();
-            cKey = settings.value(cId + "/key").toByteArray();
-            break;
+            QString cName = settings.value(cId + "/name").toString();
+            quint16 cPort = settings.value(cId + "/port").toUInt();
+            QByteArray cKey = settings.value(cId + "/key").toByteArray();
+            matchList.append(Contact(cName, cIp, cPort, cKey, cId.toInt()));
         }
     }
     settings.endGroup();
-    return Contact(cName, cIp, cPort, cKey, cId.toInt());
+    return matchList;
 }
 
 Contact Contact::findByKey(QByteArray key){
