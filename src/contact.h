@@ -14,11 +14,11 @@ public:
             QByteArray key = QByteArray(),
             int id = getNextAvailableID());
 
-    static Contact findById(int id);
-    static QList<Contact> findByName(QString name);
-    static QList<Contact> findByIp(QString ip);
-    static Contact findByKey(QByteArray key);
-    static QList<Contact> getContactList();
+    static Contact* findById(int id);
+    static QList<Contact*> findByName(QString name);
+    static QList<Contact*> findByIp(QString ip);
+    static Contact* findByKey(QByteArray key);
+    static QList<Contact*> getContactList();
 
     static int getNextAvailableID();
 

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QSettings>
 #include <QList>
+#include <QListWidgetItem>
 #include <QTcpServer>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
@@ -19,6 +20,10 @@ class ContactListWindow : public QWidget
     Q_OBJECT
     
 public:
+    enum ItemDataRole{
+        IdRole = 0x0101
+    };
+
     explicit ContactListWindow(QWidget *parent = 0);
     ~ContactListWindow();
 
@@ -36,9 +41,11 @@ public slots:
 private:
     Ui::ContactListWindow *ui;
     QTcpServer *mListener;
+    QList<QListWidgetItem*> mItemList;
+    QList<Contact*> mContactList;
+    QList<NetworkManager*> mManagerList;
 
-    QList<Contact> mContactList;
-    QList<NetworkManager*> m_ManagerList;
+    Contact* getSelectedContact();
 };
 
 #endif // CONTACTLISTWINDOW_H

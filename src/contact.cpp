@@ -8,7 +8,7 @@ Contact::Contact(QString name, QString ip, quint16 port, QByteArray key, int id)
     mKey = key;
 }
 
-Contact Contact::findById(int id){
+Contact* Contact::findById(int id){
     quint16 cPort;
     QString cId, cName, cIp;
     QByteArray cKey;
@@ -24,11 +24,11 @@ Contact Contact::findById(int id){
         }
     }
     settings.endGroup();
-    return Contact(cName, cIp, cPort, cKey, cId.toInt());
+    return new Contact(cName, cIp, cPort, cKey, cId.toInt());
 }
 
-QList<Contact> Contact::findByName(QString name){
-    QList<Contact> matchList;
+QList<Contact*> Contact::findByName(QString name){
+    QList<Contact*> matchList;
     QString cId, cName;
     QSettings settings;
     settings.beginGroup("Contacts");
@@ -38,15 +38,15 @@ QList<Contact> Contact::findByName(QString name){
             QString cIp = settings.value(cId + "/ip").toString();
             quint16 cPort = settings.value(cId + "/port").toUInt();
             QByteArray cKey = settings.value(cId + "/key").toByteArray();
-            matchList.append(Contact(cName, cIp, cPort, cKey, cId.toInt()));
+            matchList.append(new Contact(cName, cIp, cPort, cKey, cId.toInt()));
         }
     }
     settings.endGroup();
     return matchList;
 }
 
-QList<Contact> Contact::findByIp(QString ip){
-    QList<Contact> matchList;
+QList<Contact*> Contact::findByIp(QString ip){
+    QList<Contact*> matchList;
     QString cId, cIp;
     QSettings settings;
     settings.beginGroup("Contacts");
@@ -56,14 +56,14 @@ QList<Contact> Contact::findByIp(QString ip){
             QString cName = settings.value(cId + "/name").toString();
             quint16 cPort = settings.value(cId + "/port").toUInt();
             QByteArray cKey = settings.value(cId + "/key").toByteArray();
-            matchList.append(Contact(cName, cIp, cPort, cKey, cId.toInt()));
+            matchList.append(new Contact(cName, cIp, cPort, cKey, cId.toInt()));
         }
     }
     settings.endGroup();
     return matchList;
 }
 
-Contact Contact::findByKey(QByteArray key){
+Contact* Contact::findByKey(QByteArray key){
     quint16 cPort;
     QString cId, cName, cIp;
     QByteArray cKey;
@@ -79,12 +79,12 @@ Contact Contact::findByKey(QByteArray key){
         }
     }
     settings.endGroup();
-    return Contact(cName, cIp, cPort, cKey, cId.toInt());
+    return new Contact(cName, cIp, cPort, cKey, cId.toInt());
 }
 
-QList<Contact> Contact::getContactList(){
+QList<Contact*> Contact::getContactList(){
     QSettings settings;
-    QList<Contact> contactList;
+    QList<Contact*> contactList;
     settings.beginGroup("Contacts");
     QStringList idList = settings.childGroups();
     foreach(QString id, idList)
