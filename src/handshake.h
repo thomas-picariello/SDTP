@@ -21,7 +21,7 @@ class Handshake : public QObject
 public:
 
     Handshake(QTcpSocket *socket, QObject *parent=0);
-    Handshake(QTcpSocket *socket, Contact contact,  QObject *parent=0);
+    Handshake(QTcpSocket *socket, Contact *contact,  QObject *parent=0);
     ~Handshake();
 
 signals :
@@ -36,7 +36,7 @@ public slots :
 
 private :
     QTcpSocket *m_Socket;
-    Contact contact;
+    Contact *contact;
 };
 
 #endif // HANDSHAKE_H

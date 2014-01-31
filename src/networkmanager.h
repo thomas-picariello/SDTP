@@ -13,6 +13,7 @@
 #include "messengerwindow.h"
 #include "contact.h"
 #include "handshake.h"
+#include "qjrtp.h"
 
 
 using namespace CryptoPP;
@@ -22,13 +23,15 @@ class NetworkManager : public QObject
     Q_OBJECT
 
 public:
+    enum AppID{MESSENGER,VOIP,SYSTEM,UNKNOWN}; // 0-10 are reserved IDs.
+
     NetworkManager(QTcpSocket *socket,  QObject *parent=0);
-    NetworkManager(Contact contact,  QObject *parent=0);
+    NetworkManager(Contact *contact,  QObject *parent=0);
     ~NetworkManager();
 
 public slots :
     void readIncomingData();
-    void sendData(QByteArray);
+    void sendData(QByteArray,qint8);
     void error(QAbstractSocket::SocketError);
     void voipCall();
 
@@ -36,11 +39,12 @@ public slots :
     void onIdentified();
 
 private :
+    Qjrtp *m_Qjrtp;
     QTcpSocket *m_Socket;
     QSettings *m_settings;
     VoIP *voip;
     Handshake *hs;
-    Contact contact;
+    Contact *contact;
     MessengerWindow *m_MessengerWindow;
     QByteArray mAesKey;
     QByteArray mAesIv;

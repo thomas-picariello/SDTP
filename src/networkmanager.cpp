@@ -8,11 +8,11 @@ NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(par
     hs->startCheckKey();
 }
 
-NetworkManager::NetworkManager(Contact contact, QObject *parent): QObject(parent){
+NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(parent){
     m_Socket = new QTcpSocket;
 
-    QString ip  = contact.getIp();
-    quint16 port = contact.getPort();
+    QString ip  = contact->getIp();
+    quint16 port = contact->getPort();
 
     //Close previous connection if already connected with this socket
     if(m_Socket->state() == QAbstractSocket::ConnectedState ||
@@ -40,7 +40,7 @@ void NetworkManager::onIdentified(){
     mCfbAesEnc.SetKeyWithIV((byte*)mAesKey.data(), mAesKey.size(), (byte*)mAesIv.data());
     mCfbAesDec.SetKeyWithIV((byte*)mAesKey.data(), mAesKey.size(), (byte*)mAesIv.data());
 
-     m_MessengerWindow = new MessengerWindow;
+    m_MessengerWindow = new MessengerWindow((qint8)MESSENGER);
      QString ip = m_Socket->peerAddress().toString();
 
      m_MessengerWindow->displayMessage(Message("Connected to : "+ip, Message::SERVICE));
@@ -49,8 +49,8 @@ void NetworkManager::onIdentified(){
              this, SLOT(voipCall()));
      connect(m_Socket, SIGNAL(readyRead()),
              this, SLOT(readIncomingData()));
-     connect(m_MessengerWindow,SIGNAL(sendMessage(QByteArray)),
-                     this, SLOT(sendData(QByteArray)));
+     connect(m_MessengerWindow,SIGNAL(sendMessage(QByteArray,qint8)),
+                     this, SLOT(sendData(QByteArray,qint8)));
 }
 
 void NetworkManager::voipCall(){
@@ -68,11 +68,22 @@ void NetworkManager::readIncomingData(){
     //decrypt AES
     mCfbAesDec.ProcessString((byte*)data.data(), data.length());
 
-    m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
-}
+    qint8 appIDparse = data.at(0);
+    data.remove(0,1);
 
-void NetworkManager::sendData(QByteArray data){
+    qDebug()<<appIDparse;
+
+    if (appIDparse == (qint8)MESSENGER ){
+
+        m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
+        qDebug()<<"ID = M :)";
+    }
+    else qDebug()<<"ID != M :(";
+}
+void NetworkManager::sendData(QByteArray data, qint8 appID){
+    data = data.prepend(appID);
     if(m_Socket->state() == QAbstractSocket::ConnectedState){
+        qDebug()<<appID+"sent a message.";
         m_MessengerWindow->displayMessage(Message(QString(data), Message::SENT));
         //encrypt AES
         mCfbAesEnc.ProcessString((byte*)data.data(), data.length());
@@ -81,6 +92,7 @@ void NetworkManager::sendData(QByteArray data){
     }else{
         m_MessengerWindow->displayMessage(Message("Couldn't send message : Not connected.", Message::ERR));
     }
+
 }
 
 void NetworkManager::error(QAbstractSocket::SocketError error){

@@ -1,7 +1,7 @@
 #include "messengerwindow.h"
 #include "ui_messengerwindow.h"
 
-MessengerWindow::MessengerWindow(QWidget *parent) : QWidget(parent), ui(new Ui::MessengerWindow){
+MessengerWindow::MessengerWindow(qint8 appID,QWidget *parent) : QWidget(parent), ui(new Ui::MessengerWindow){
     ui->setupUi(this);
 
 
@@ -11,6 +11,7 @@ MessengerWindow::MessengerWindow(QWidget *parent) : QWidget(parent), ui(new Ui::
             this, SIGNAL(callContact()));
     connect(ui->input,SIGNAL(returnPressed()),
             this,SLOT(onSend()));
+
 }
 
 void MessengerWindow::changeButtonState(bool state){
@@ -28,7 +29,7 @@ void MessengerWindow::displayMessage(Message msg){
 
 void MessengerWindow::onSend(){
     QByteArray msg = ui->input->text().toUtf8();
-    emit sendMessage(msg);
+    emit sendMessage(msg,appID);
     ui->input->clear();
 }
 

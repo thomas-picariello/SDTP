@@ -18,12 +18,12 @@ class MessengerWindow : public QWidget
     Q_OBJECT
     
 public:
-    explicit MessengerWindow(QWidget *parent = 0);
+    explicit MessengerWindow(qint8,QWidget *parent = 0);
     void changeButtonState(bool state);
     ~MessengerWindow();
 
 signals:
-    void sendMessage(QByteArray data);
+    void sendMessage(QByteArray data,qint8 appID);
     void callContact();
 
 public slots:
@@ -32,6 +32,7 @@ public slots:
 
 private:
     Ui::MessengerWindow *ui;
+    qint8 appID;
     QByteArray mKey;
     QByteArray mIv;
     QList<Message> mMsgList;

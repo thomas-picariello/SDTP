@@ -11,7 +11,7 @@ Handshake::Handshake(QTcpSocket *socket,  QObject *parent): QObject(parent)
 
 }
 
-Handshake::Handshake(QTcpSocket *socket,Contact contact,  QObject *parent): QObject(parent)
+Handshake::Handshake(QTcpSocket *socket,Contact *contact,  QObject *parent): QObject(parent)
 {
     //starter
     m_Socket = new QTcpSocket;
