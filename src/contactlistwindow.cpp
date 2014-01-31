@@ -2,7 +2,6 @@
 #include "ui_contactlistwindow.h"
 
 ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new Ui::ContactListWindow){
-    mContactList = Contact::getContactList();
     ui->setupUi(this);
 
     qint16 listenPort = QSettings().value("Settings/port").toInt();
@@ -11,9 +10,6 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
     mListener->listen(QHostAddress::Any, listenPort);
 
     refreshList();
-    for(int i=0; i<mItemList.size();i++){
-        ui->list->addItem(mItemList.at(i));
-    }
 
     connect(mListener, SIGNAL(newConnection()),
             this,SLOT(acceptConnection()));
@@ -41,14 +37,14 @@ void ContactListWindow::acceptConnection(){
 
 void ContactListWindow::addContact(){
     EditContactWindow *ecw = new EditContactWindow(new Contact());
-    connect(ecw, SIGNAL(contactChanged()),
+    connect(ecw, SIGNAL(contactChanged(Contact*)),
             this, SLOT(refreshList()));
 }
 
 void ContactListWindow::editContact(){
     if(getSelectedContact()){
         EditContactWindow *ecw = new EditContactWindow(getSelectedContact());
-        connect(ecw, SIGNAL(contactChanged()),
+        connect(ecw, SIGNAL(contactChanged(Contact*)),
                 this, SLOT(refreshList()));
     }
 }
@@ -56,6 +52,7 @@ void ContactListWindow::editContact(){
 void ContactListWindow::removeContact(){
     if(getSelectedContact()){
         getSelectedContact()->erase();
+        refreshList();
     }
 }
 
@@ -84,11 +81,14 @@ void ContactListWindow::refreshList(){
         item->setData(IdRole, contact->getId());
         mItemList.append(item);
     }
+    ui->list->clear();
+    for(int i=0; i<mItemList.size();i++){
+        ui->list->addItem(mItemList.at(i));
+    }
 }
 
 void ContactListWindow::restartListener(){
     qint16 listenPort = QSettings().value("Settings/port").toInt();
-    qDebug()<<"Listener restart with port:"<<listenPort;
     mListener->close();
     mListener->listen(QHostAddress::Any, listenPort);
 }
@@ -103,5 +103,7 @@ Contact* ContactListWindow::getSelectedContact(){
 }
 
 ContactListWindow::~ContactListWindow(){
+    qDeleteAll(mItemList);
+    qDeleteAll(mContactList);
     delete ui;
 }
