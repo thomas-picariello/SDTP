@@ -33,7 +33,12 @@ void NetworkManager::onConnect(){
 
 void NetworkManager::onIdentified(){
     m_settings = new QSettings;
+
     voip = new VoIP();
+    //m_QJrtp = new QJrtp();
+    m_Opusdevice = new QOpusDevice();
+    m_Opusdevice = voip->getOpusDevice();
+
 
     mAesKey = QByteArray(16, 0x0); //16 byte = 128 bits, filled with 0x0.
     mAesIv = QByteArray(AES::BLOCKSIZE, 0x0); //filled with 0x0.
@@ -45,6 +50,8 @@ void NetworkManager::onIdentified(){
 
      m_MessengerWindow->displayMessage(Message("Connected to : "+ip, Message::SERVICE));
 
+     connect(m_Opusdevice,SIGNAL(readyRead()),
+             this, SLOT(onVoIPReadyRead()));
      connect(m_MessengerWindow,SIGNAL(callContact()),
              this, SLOT(voipCall()));
      connect(m_Socket, SIGNAL(readyRead()),
@@ -52,8 +59,8 @@ void NetworkManager::onIdentified(){
      connect(m_MessengerWindow,SIGNAL(sendMessage(QByteArray,quint8)),
                      this, SLOT(sendData(QByteArray,quint8)));
 }
-
 void NetworkManager::voipCall(){
+
     if(voip->getCallState() == VoIP::OFFLINE){
         m_MessengerWindow->changeButtonState(false);
         voip->call(Contact());
@@ -65,6 +72,13 @@ void NetworkManager::voipCall(){
     }
 
 }
+
+void NetworkManager::onVoIPReadyRead()
+{
+    sendData(m_Opusdevice->readAll(),VOIP);
+
+}
+
 
 void NetworkManager::readIncomingData(){
     QByteArray data = m_Socket->readAll();
@@ -80,33 +94,20 @@ void NetworkManager::readIncomingData(){
     else if (appIDparse == SYSTEM) m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
     else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
 
-
-    if (appIDparse == MESSENGER ){
-        //m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
-        qDebug()<<"ID confirmed";
+    if (appIDparse == VOIP){
+        m_Opusdevice->write(data);
     }
-    else if (appIDparse == VOIP)
-    {
-        qDebug()<<"0";
-        qDebug()<<"1";
-        qDebug()<<"2";
-    }
-    else if (appIDparse == SYSTEM)
-    {
-        if(data == "VOIP")
-        {
+    else if (appIDparse == SYSTEM){
+        if(data == "VOIP"){
             if(voip->getCallState() == VoIP::OFFLINE){
                 m_MessengerWindow->changeButtonState(false);
                 voip->takeIncommingCall();
-            }else if (voip->getCallState() == VoIP::ONLINE){
-                sendData("VOIPoff",SYSTEM);
             }
+            else if (voip->getCallState() == VoIP::ONLINE)sendData("VOIPoff",SYSTEM);
         }
-        else if (data == "VOIPoff")
-        {
+        else if (data == "VOIPoff"){
             m_MessengerWindow->changeButtonState(true);
             voip->endCall();
-            qDebug()<<"endcall...";
         }
     }
     else qDebug()<<"ID unknown...";

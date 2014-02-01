@@ -13,7 +13,8 @@
 #include "messengerwindow.h"
 #include "contact.h"
 #include "handshake.h"
-#include "qjrtp.h"
+//#include "qjrtp.h"
+#include "qopusdevice.h"
 
 
 using namespace CryptoPP;
@@ -35,12 +36,15 @@ public slots :
     void error(QAbstractSocket::SocketError);
     void voipCall();
 
+    void onVoIPReadyRead();
     void onConnect();//for starter
     void onIdentified();
 
 private :
+    QOpusDevice *m_Opusdevice;
     QTcpSocket *m_Socket;
     QSettings *m_settings;
+    //QJrtp *m_QJrtp;
     VoIP *voip;
     Handshake *hs;
     Contact *contact;
