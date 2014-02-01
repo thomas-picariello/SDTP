@@ -5,8 +5,6 @@ MessengerWindow::MessengerWindow(quint8 newappID,QWidget *parent) : QWidget(pare
     ui->setupUi(this);
     appID = newappID;
 
-    qDebug()<<"appID(b) : "<<appID;
-
     connect(ui->send, SIGNAL(clicked()),
             this, SLOT(onSend()));
     connect(ui->call, SIGNAL(clicked()),

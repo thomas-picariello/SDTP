@@ -57,10 +57,13 @@ void NetworkManager::voipCall(){
     if(voip->getCallState() == VoIP::OFFLINE){
         m_MessengerWindow->changeButtonState(false);
         voip->call(Contact());
+        sendData("VOIP",SYSTEM);
     }else if (voip->getCallState() == VoIP::ONLINE){
         m_MessengerWindow->changeButtonState(true);
         voip->endCall();
+        sendData("VOIP",SYSTEM);
     }
+
 }
 
 void NetworkManager::readIncomingData(){
@@ -71,21 +74,36 @@ void NetworkManager::readIncomingData(){
     quint8 appIDparse = data.at(0);
     data.remove(0,1);
 
-    qDebug()<<"appID(c) : "<<appIDparse;
-    qDebug()<<"MESSENGER : "<<(quint8)MESSENGER;
-
     if (appIDparse == MESSENGER ){
-
         m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
         qDebug()<<"ID confirmed";
+    }
+    else if (appIDparse == VOIP)
+    {
+        qDebug()<<"0";
+        qDebug()<<"1";
+        qDebug()<<"2";
+    }
+    else if (appIDparse == SYSTEM)
+    {
+        if(data == "VOIP")
+        {
+            if(voip->getCallState() == VoIP::OFFLINE){
+                m_MessengerWindow->changeButtonState(false);
+                voip->call(Contact());
+            }else if (voip->getCallState() == VoIP::ONLINE){
+                sendData("VOIPoff",SYSTEM);
+            }
+        }
+        else if (data == "VOIPoff") voip->endCall();
+
     }
     else qDebug()<<"ID unknown...";
 }
 void NetworkManager::sendData(QByteArray data, quint8 appID){
     data = data.prepend(appID);
-    qDebug()<<"appID(a) : "<<appID;
     if(m_Socket->state() == QAbstractSocket::ConnectedState){
-        //qDebug()<<appID+"sent a message.";
+
         m_MessengerWindow->displayMessage(Message(QString(data), Message::SENT));
         //encrypt AES
         mCfbAesEnc.ProcessString((byte*)data.data(), data.length());
@@ -94,7 +112,6 @@ void NetworkManager::sendData(QByteArray data, quint8 appID){
     }else{
         m_MessengerWindow->displayMessage(Message("Couldn't send message : Not connected.", Message::ERR));
     }
-
 }
 
 void NetworkManager::error(QAbstractSocket::SocketError error){
