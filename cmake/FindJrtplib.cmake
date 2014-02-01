@@ -4,8 +4,8 @@ if (NOT JRTPLIB_FOUND) # Config file could not be found
         find_path(JRTPLIB_INCLUDE_DIR jrtplib/rtpsession.h)
 	set(JRTPLIB_INCLUDE_DIRS ${JRTPLIB_INCLUDE_DIR})
 	if (WIN32)
-		find_library(JRTPLIB_LIB_RELEASE jrtplib)
-		find_library(JRTPLIB_LIB_DEBUG jrtplibd)
+                find_library(JRTPLIB_LIB_RELEASE jrtplib)
+                find_library(JRTPLIB_LIB_DEBUG jrtplibd)
 		
 		if(JRTPLIB_LIB_RELEASE OR JRTPLIB_LIB_DEBUG)
 			set(JRTPLIB_LIBRARIES "")
@@ -15,6 +15,7 @@ if (NOT JRTPLIB_FOUND) # Config file could not be found
 			if(JRTPLIB_LIB_DEBUG)
 				list(APPEND JRTPLIB_LIBRARIES debug ${JRTPLIB_LIB_DEBUG})
 			endif()
+                        list(APPEND JRTPLIB_LIBRARIES wsock32 ws2_32)
 		endif()
 	endif()
 endif()

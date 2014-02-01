@@ -9,9 +9,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Multimedia REQUIRED)
 
-find_package(Cryptopp REQUIRED)
+find_package(Cryptlib REQUIRED)
 find_package(Opus REQUIRED)
 find_package(Jrtplib REQUIRED)
+find_package(JThread REQUIRED)
 
 #Set variables with all the sources to compile
 set(SVOIP_HEADERS
@@ -25,8 +26,9 @@ set(SVOIP_HEADERS
     qopusdevice.h
     networkmanager.h
     handshake.h
-    #qjrtp.h
+    qjrtp.h
 )
+
 set(SVOIP_SOURCES
     main.cpp
     contactlistwindow.cpp
@@ -39,17 +41,18 @@ set(SVOIP_SOURCES
     qopusdevice.cpp
     networkmanager.cpp
     handshake.cpp
-    #qjrtp.cpp
-
+    qjrtp.cpp
 )
+
 set(SVOIP_FORMS
     contactlistwindow.ui
     editcontactwindow.ui
     settingswindow.ui
     messengerwindow.ui
 )
+
 set(SVOIP_RES
-    res/svoip.rc
+   ../res/svoip.rc
 )
 
 #process the ui files.
@@ -58,9 +61,10 @@ qt5_wrap_ui(SVOIP_UI_HEADERS ${SVOIP_FORMS})
 add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_HEADERS} ${SVOIP_RES})
 
 target_link_libraries(${PROJECT}
-    ${CRYPTOPP_LIBRARIES}
+    ${CRYPTLIB_LIBRARIES}
     ${OPUS_LIBRARIES}
     ${JRTPLIB_LIBRARIES}
+    ${JTHREAD_LIBRARIES}
 )
 
 qt5_use_modules(${PROJECT} Widgets Multimedia)
