@@ -1,8 +1,27 @@
 #include "qopusdevice.h"
 
 QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QIODevice* parent) :
-    QIODevice(parent), mUnderlyingDevice(deviceToUse)
+    QIODevice(parent),
+    mUnderlyingDevice(deviceToUse)
 {
+    initOpus();
+    connect(mUnderlyingDevice, SIGNAL(readyRead()),
+            this, SIGNAL(readyRead()));
+}
+
+QOpusDevice::QOpusDevice(int frameSizeInMicrosecs, QIODevice* parent) :
+    QIODevice(parent),
+    mUnderlyingDevice(new QBuffer())
+{
+    initOpus();
+
+    connect(this, SIGNAL(readyRead()),
+            this, SIGNAL(readyRead()));
+    mUnderlyingDevice->open(ReadWrite);
+    setOpenMode(ReadWrite);
+}
+
+void QOpusDevice::initOpus(){
     mError = OPUS_OK;
     mApplication = OPUS_APPLICATION_VOIP;
 
@@ -11,11 +30,6 @@ QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QIODe
     mAudioFormat.setCodec("audio/pcm");
     mAudioFormat.setSampleSize(16);
     mAudioFormat.setSampleType(QAudioFormat::SignedInt);
-
-    if(frameSizeInMicrosecs != 0)
-        mOpusFrameSize = frameSizeInMicrosecs;
-    else
-        mOpusFrameSize = 200; //in microsecs
 
     //mEncoder = opus_encoder_create(mAudioFormat.sampleRate(), mAudioFormat.channelCount(), mApplication, &mError);
     //mDecoder = opus_decoder_create(mAudioFormat.sampleRate(), mAudioFormat.channelCount(), &mError);

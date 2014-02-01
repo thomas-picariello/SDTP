@@ -3,7 +3,7 @@
 VoIP::VoIP(QIODevice *interfaceIODevice, QObject *parent) :
     QObject(parent),
     mCallState(OFFLINE),
-    mOpus(new QOpusDevice(interfaceIODevice))
+    mOpus(new QOpusDevice())
 {
     QAudioFormat format;
     format.setChannelCount(2);

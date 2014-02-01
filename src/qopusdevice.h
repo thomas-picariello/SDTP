@@ -16,7 +16,9 @@ class QOpusDevice : public QIODevice
     Q_OBJECT
 public:
     explicit QOpusDevice(QIODevice *deviceToUse,
-                         int frameSizeInMicrosecs = 0,
+                         int frameSizeInMicrosecs = 200,
+                         QIODevice* parent = 0);
+    explicit QOpusDevice(int frameSizeInMicrosecs = 200,
                          QIODevice* parent = 0);
     bool open();
     void close();
@@ -36,6 +38,9 @@ public:
 signals:
     void error(const int err);
 
+public slots:
+
+
 protected:
     qint64 readData(char * data, qint64 maxSize);
     qint64 writeData(const char * data, qint64 maxSize);
@@ -50,6 +55,7 @@ private:
     int mOpusFrameSize;
     int mApplication;
 
+    void initOpus();
 
     Q_DISABLE_COPY(QOpusDevice)
 };
