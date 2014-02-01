@@ -23,7 +23,7 @@ class NetworkManager : public QObject
     Q_OBJECT
 
 public:
-    enum AppID{MESSENGER,VOIP,SYSTEM,UNKNOWN}; // 0-10 are reserved IDs.
+    enum AppID{MESSENGER = 000000000,VOIP,SYSTEM,UNKNOWN}; // 0-10 are reserved IDs.
 
     NetworkManager(QTcpSocket *socket,  QObject *parent=0);
     NetworkManager(Contact *contact,  QObject *parent=0);
@@ -31,7 +31,7 @@ public:
 
 public slots :
     void readIncomingData();
-    void sendData(QByteArray,qint8);
+    void sendData(QByteArray,quint8);
     void error(QAbstractSocket::SocketError);
     void voipCall();
 

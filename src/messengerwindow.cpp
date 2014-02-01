@@ -1,9 +1,11 @@
 #include "messengerwindow.h"
 #include "ui_messengerwindow.h"
 
-MessengerWindow::MessengerWindow(qint8 appID,QWidget *parent) : QWidget(parent), ui(new Ui::MessengerWindow){
+MessengerWindow::MessengerWindow(quint8 newappID,QWidget *parent) : QWidget(parent), ui(new Ui::MessengerWindow){
     ui->setupUi(this);
+    appID = newappID;
 
+    qDebug()<<"appID(b) : "<<appID;
 
     connect(ui->send, SIGNAL(clicked()),
             this, SLOT(onSend()));

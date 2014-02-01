@@ -49,8 +49,8 @@ void NetworkManager::onIdentified(){
              this, SLOT(voipCall()));
      connect(m_Socket, SIGNAL(readyRead()),
              this, SLOT(readIncomingData()));
-     connect(m_MessengerWindow,SIGNAL(sendMessage(QByteArray,qint8)),
-                     this, SLOT(sendData(QByteArray,qint8)));
+     connect(m_MessengerWindow,SIGNAL(sendMessage(QByteArray,quint8)),
+                     this, SLOT(sendData(QByteArray,quint8)));
 }
 
 void NetworkManager::voipCall(){
@@ -68,22 +68,24 @@ void NetworkManager::readIncomingData(){
     //decrypt AES
     mCfbAesDec.ProcessString((byte*)data.data(), data.length());
 
-    qint8 appIDparse = data.at(0);
+    quint8 appIDparse = data.at(0);
     data.remove(0,1);
 
-    qDebug()<<appIDparse;
+    qDebug()<<"appID(c) : "<<appIDparse;
+    qDebug()<<"MESSENGER : "<<(quint8)MESSENGER;
 
-    if (appIDparse == (qint8)MESSENGER ){
+    if (appIDparse == MESSENGER ){
 
         m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
-        qDebug()<<"ID = M :)";
+        qDebug()<<"ID confirmed";
     }
-    else qDebug()<<"ID != M :(";
+    else qDebug()<<"ID unknown...";
 }
-void NetworkManager::sendData(QByteArray data, qint8 appID){
+void NetworkManager::sendData(QByteArray data, quint8 appID){
     data = data.prepend(appID);
+    qDebug()<<"appID(a) : "<<appID;
     if(m_Socket->state() == QAbstractSocket::ConnectedState){
-        qDebug()<<appID+"sent a message.";
+        //qDebug()<<appID+"sent a message.";
         m_MessengerWindow->displayMessage(Message(QString(data), Message::SENT));
         //encrypt AES
         mCfbAesEnc.ProcessString((byte*)data.data(), data.length());
