@@ -57,6 +57,8 @@ VoIP::CallState VoIP::getCallState(){
 void VoIP::takeIncommingCall(){
     mCallState= ONLINE;
     emit callStateChanged(mCallState);
+    mOpus->open();
+    mAudioInput->start(mOpus);
     //delete previously allocated QOpusDevice instance
     //delete mOpus;
     //initialize a new one with the data interface

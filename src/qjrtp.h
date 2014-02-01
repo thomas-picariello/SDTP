@@ -3,13 +3,13 @@
 
 #include <QIODevice>
 
-class Qjrtp : public QIODevice
+class QJrtp : public QIODevice
 {
     Q_OBJECT
 
 public:
-    Qjrtp(QIODevice* deviceToUse, QObject* parent = 0);
-    ~Qjrtp();
+    QJrtp(QIODevice* deviceToUse, QObject* parent = 0);
+    ~QJrtp();
 
 private :
     QIODevice* underlyingDevice;
