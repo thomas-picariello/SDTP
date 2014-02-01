@@ -17,6 +17,7 @@ class VoIP : public QObject
 public:
     enum CallState{ONLINE, OFFLINE};
 
+    explicit VoIP(QObject *parent = 0);
     explicit VoIP(QIODevice *interfaceIODevice,
                   QObject *parent = 0);
     void call(Contact const &contact);
@@ -42,6 +43,8 @@ private:
     QOpusDevice *mOpus;
     QIODevice *mDataInterface;
     CallState mCallState;
+
+    void initAudio();
 };
 
 #endif // VOIP_H

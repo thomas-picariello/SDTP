@@ -5,6 +5,7 @@ QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QIODe
     mUnderlyingDevice(deviceToUse)
 {
     initOpus();
+
     connect(mUnderlyingDevice, SIGNAL(readyRead()),
             this, SIGNAL(readyRead()));
 }

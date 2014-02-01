@@ -1,10 +1,22 @@
 #include "voip.h"
 
-VoIP::VoIP(QIODevice *interfaceIODevice, QObject *parent) :
+VoIP::VoIP(QObject *parent):
     QObject(parent),
     mCallState(OFFLINE),
     mOpus(new QOpusDevice())
 {
+    initAudio();
+}
+
+VoIP::VoIP(QIODevice *interfaceIODevice, QObject *parent) :
+    QObject(parent),
+    mCallState(OFFLINE),
+    mOpus(new QOpusDevice(interfaceIODevice))
+{
+    initAudio();
+}
+
+void VoIP::initAudio(){
     QAudioFormat format;
     format.setChannelCount(2);
     format.setSampleRate(48000);
