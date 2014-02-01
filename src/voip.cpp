@@ -62,6 +62,10 @@ void VoIP::endCall(){
     emit callStateChanged(mCallState);
 }
 
+QOpusDevice* VoIP::getOpusDevice(){
+    return mOpus;
+}
+
 VoIP::CallState VoIP::getCallState(){
     return mCallState;
 }
