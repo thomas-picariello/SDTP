@@ -39,7 +39,6 @@ public slots :
     void onIdentified();
 
 private :
-    Qjrtp *m_Qjrtp;
     QTcpSocket *m_Socket;
     QSettings *m_settings;
     VoIP *voip;

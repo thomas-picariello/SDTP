@@ -33,7 +33,7 @@ void NetworkManager::onConnect(){
 
 void NetworkManager::onIdentified(){
     m_settings = new QSettings;
-    voip = new VoIP(m_Socket);
+    voip = new VoIP();
 
     mAesKey = QByteArray(16, 0x0); //16 byte = 128 bits, filled with 0x0.
     mAesIv = QByteArray(AES::BLOCKSIZE, 0x0); //filled with 0x0.
@@ -61,7 +61,7 @@ void NetworkManager::voipCall(){
     }else if (voip->getCallState() == VoIP::ONLINE){
         m_MessengerWindow->changeButtonState(true);
         voip->endCall();
-        sendData("VOIP",SYSTEM);
+        sendData("VOIPoff",SYSTEM);
     }
 
 }
@@ -74,8 +74,15 @@ void NetworkManager::readIncomingData(){
     quint8 appIDparse = data.at(0);
     data.remove(0,1);
 
+
+
+    if (appIDparse == MESSENGER) m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
+    else if (appIDparse == SYSTEM) m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
+    else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
+
+
     if (appIDparse == MESSENGER ){
-        m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
+        //m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
         qDebug()<<"ID confirmed";
     }
     else if (appIDparse == VOIP)
@@ -90,24 +97,30 @@ void NetworkManager::readIncomingData(){
         {
             if(voip->getCallState() == VoIP::OFFLINE){
                 m_MessengerWindow->changeButtonState(false);
-                voip->call(Contact());
+                voip->takeIncommingCall();
             }else if (voip->getCallState() == VoIP::ONLINE){
                 sendData("VOIPoff",SYSTEM);
             }
         }
-        else if (data == "VOIPoff") voip->endCall();
-
+        else if (data == "VOIPoff")
+        {
+            m_MessengerWindow->changeButtonState(true);
+            voip->endCall();
+            qDebug()<<"endcall...";
+        }
     }
     else qDebug()<<"ID unknown...";
 }
 void NetworkManager::sendData(QByteArray data, quint8 appID){
-    data = data.prepend(appID);
+
     if(m_Socket->state() == QAbstractSocket::ConnectedState){
 
-        m_MessengerWindow->displayMessage(Message(QString(data), Message::SENT));
+        if (appID == MESSENGER) m_MessengerWindow->displayMessage(Message(QString(data), Message::SENT));
+        else if (appID == SYSTEM) m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
+        else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
+        data = data.prepend(appID);
         //encrypt AES
         mCfbAesEnc.ProcessString((byte*)data.data(), data.length());
-
         m_Socket->write(data);
     }else{
         m_MessengerWindow->displayMessage(Message("Couldn't send message : Not connected.", Message::ERR));
