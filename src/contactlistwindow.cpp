@@ -73,7 +73,7 @@ void ContactListWindow::exitApp(){
 }
 
 void ContactListWindow::refreshList(){
-    mContactList = Contact::getContactList();
+    mContactList = ContactFactory::getContactList();
     qDeleteAll(mItemList);
     mItemList.clear();
     foreach(Contact *contact, mContactList){
@@ -97,7 +97,7 @@ Contact* ContactListWindow::getSelectedContact(){
     QListWidgetItem *currentItem = ui->list->currentItem();
     if(currentItem){
         int currentId = currentItem->data(IdRole).toInt();
-        return Contact::findById(currentId);
+        return ContactFactory::findById(currentId);
     }
     return NULL;
 }

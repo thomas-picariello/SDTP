@@ -21,6 +21,7 @@ set(SVOIP_HEADERS
     messengerwindow.h
     settingswindow.h
     contact.h
+    contactfactory.h
     message.h
     voip.h
     qopusdevice.h
@@ -36,6 +37,7 @@ set(SVOIP_SOURCES
     messengerwindow.cpp
     settingswindow.cpp
     contact.cpp
+    contactfactory.cpp
     message.cpp
     voip.cpp
     qopusdevice.cpp

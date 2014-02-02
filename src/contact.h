@@ -5,10 +5,12 @@
 #include <QSettings>
 #include <QStringList>
 #include <QHostAddress>
+#include <QHostInfo>
 //#include <QSharedData>
 
-class Contact//: public QSharedData
+class Contact: public QObject
 {
+    Q_OBJECT
 public: 
     Contact(int id = getNextAvailableID(),
             QString name = QString(),
@@ -16,13 +18,6 @@ public:
             QHostAddress ip = QHostAddress(),
             quint16 port = 0,
             QByteArray key = QByteArray());
-
-    static Contact* findById(int id);
-    static QList<Contact*> findByName(QString name);
-    static QList<Contact*> findByIp(QHostAddress ip);
-    static QList<Contact*> findByHostName(QString hostName);
-    static Contact* findByKey(QByteArray key);
-    static QList<Contact*> getContactList();
 
     static int getNextAvailableID();
 
@@ -42,12 +37,20 @@ public:
     void save();
     void erase();
 
+signals:
+    void unableToResolve(QString error);
+
+public slots:
+    void onResolve(QHostInfo &hostInfo);
+
 private :
     int mId;
     quint16 mPort;
     QString mName, mHostName;
     QHostAddress mIp;
     QByteArray mKey;
+
+    Q_DISABLE_COPY(Contact)
 };
 
 #endif // CONTACT_H
