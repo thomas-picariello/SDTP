@@ -46,6 +46,8 @@ protected:
     qint64 writeData(const char * data, qint64 maxSize);
 
 private:
+    const bool internalBufferFlag;
+
     OpusEncoder *mEncoder;
     OpusDecoder *mDecoder;
     QIODevice *mUnderlyingDevice;

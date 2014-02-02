@@ -2,7 +2,8 @@
 
 QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QIODevice* parent) :
     QIODevice(parent),
-    mUnderlyingDevice(deviceToUse)
+    mUnderlyingDevice(deviceToUse),
+    internalBufferFlag(false)
 {
     initOpus();
 
@@ -12,7 +13,8 @@ QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QIODe
 
 QOpusDevice::QOpusDevice(int frameSizeInMicrosecs, QIODevice* parent) :
     QIODevice(parent),
-    mUnderlyingDevice(new QBuffer())
+    mUnderlyingDevice(new QBuffer()),
+    internalBufferFlag(true)
 {
     initOpus();
 
@@ -173,5 +175,6 @@ static QString getOpusErrorDesc(int errorCode){
 QOpusDevice::~QOpusDevice(){
     //opus_encoder_destroy(mEncoder);
     //opus_decoder_destroy(mDecoder);
-    delete mUnderlyingDevice;
+    if(internalBufferFlag)
+        delete mUnderlyingDevice;
 }

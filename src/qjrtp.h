@@ -9,8 +9,6 @@
 #include <jrtplib/rtpipv4address.h>
 #include <jrtplib/rtptimeutilities.h>
 #include <jrtplib/rtppacket.h>
-//#include <stdlib.h>
-//#include <iostream>
 
 using namespace jrtplib;
 
