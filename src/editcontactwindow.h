@@ -23,7 +23,7 @@ public:
     void clear();
 
 signals:
-    void contactChanged(Contact *contact);
+    void contactChanged();
 
 public slots:
     void save();

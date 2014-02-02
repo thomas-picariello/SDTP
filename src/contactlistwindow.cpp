@@ -37,14 +37,14 @@ void ContactListWindow::acceptConnection(){
 
 void ContactListWindow::addContact(){
     EditContactWindow *ecw = new EditContactWindow(new Contact());
-    connect(ecw, SIGNAL(contactChanged(Contact*)),
+    connect(ecw, SIGNAL(contactChanged()),
             this, SLOT(refreshList()));
 }
 
 void ContactListWindow::editContact(){
     if(getSelectedContact()){
         EditContactWindow *ecw = new EditContactWindow(getSelectedContact());
-        connect(ecw, SIGNAL(contactChanged(Contact*)),
+        connect(ecw, SIGNAL(contactChanged()),
                 this, SLOT(refreshList()));
     }
 }

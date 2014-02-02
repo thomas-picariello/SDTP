@@ -38,7 +38,7 @@ void EditContactWindow::save(){
         mContact->setIp(ip);
         mContact->setKey(key.toUtf8());
         mContact->save();
-        emit contactChanged(mContact);
+        emit contactChanged();
 
         close();
         deleteLater();
@@ -51,5 +51,5 @@ void EditContactWindow::cancel(){
 }
 
 EditContactWindow::~EditContactWindow(){
-    delete ui;
+    delete ui, mContact;
 }
