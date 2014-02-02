@@ -28,6 +28,7 @@ Framework:
  
 Libraries:
  - libopus: http://www.opus-codec.org/
+ - jthread: http://research.edm.uhasselt.be/~jori/page/index.php?n=CS.Jthread
  - jrtplib: http://research.edm.uhasselt.be/~jori/page/index.php?n=CS.Jrtplib
  - cryptopp: http://www.cryptopp.com/
 
