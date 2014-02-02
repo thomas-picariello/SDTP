@@ -5,6 +5,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QString>
+#include <QIntValidator>
 #include "contact.h"
 
 namespace Ui {
@@ -31,6 +32,7 @@ public slots:
 private:
     Ui::EditContactWindow *ui;
     Contact *mContact;
+    QIntValidator mPortValidator;
 };
 
 #endif // EDITCONTACTWINDOW_H

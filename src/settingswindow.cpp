@@ -10,6 +10,9 @@ SettingsWindow::SettingsWindow(QWidget *parent) :QWidget(parent), ui(new Ui::Set
     ui->port->setText(mSettings.value("port").toString());
     ui->key->setText(mSettings.value("key").toString());
 
+    mPortValidator.setRange(0, 65535);
+    ui->port->setValidator(&mPortValidator);
+
     connect(ui->save, SIGNAL(clicked()),
             this, SLOT(save()));
     connect(ui->cancel, SIGNAL(clicked()),

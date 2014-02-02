@@ -18,6 +18,9 @@ EditContactWindow::EditContactWindow(Contact *contact, QWidget *parent):
     ui->port->setText(QString::number(mContact->getPort()));
     ui->key->setText(QString(mContact->getKey()));
 
+    mPortValidator.setRange(0, 65535);
+    ui->port->setValidator(&mPortValidator);
+
     this->show();
 }
 
