@@ -11,7 +11,7 @@ NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(par
 NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(parent){
     m_Socket = new QTcpSocket;
 
-    QString ip  = contact->getIp();
+    QString ip  = contact->getIpAddress().toString();
     quint16 port = contact->getPort();
 
     //Close previous connection if already connected with this socket
@@ -28,7 +28,7 @@ NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(paren
 void NetworkManager::onConnect(){
     hs = new Handshake(m_Socket,contact);
     connect(hs,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
-    hs->startCheckKey();
+    //hs->startCheckKey();
 }
 
 void NetworkManager::onIdentified(){

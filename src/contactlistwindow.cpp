@@ -105,5 +105,6 @@ Contact* ContactListWindow::getSelectedContact(){
 ContactListWindow::~ContactListWindow(){
     qDeleteAll(mItemList);
     qDeleteAll(mContactList);
-    delete ui;
+    qDeleteAll(mManagerList);
+    delete ui, mListener;
 }

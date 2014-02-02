@@ -14,7 +14,7 @@ EditContactWindow::EditContactWindow(Contact *contact, QWidget *parent):
             this, SLOT(cancel()));
 
     ui->name->setText(mContact->getName());
-    ui->ip->setText(mContact->getIp());
+    ui->ip->setText(mContact->getIpAddress().toString());
     ui->port->setText(QString::number(mContact->getPort()));
     ui->key->setText(QString(mContact->getKey()));
 
@@ -35,7 +35,8 @@ void EditContactWindow::save(){
     }else{
         mContact->setName(name);
         mContact->setPort(port.toUInt());
-        mContact->setIp(ip);
+        //TODO use validators to decide to define ip or hostname
+        mContact->setIpAddress(QHostAddress(ip));
         mContact->setKey(key.toUtf8());
         mContact->save();
         emit contactChanged();

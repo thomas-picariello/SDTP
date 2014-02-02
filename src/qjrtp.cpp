@@ -1,12 +1,21 @@
 #include "qjrtp.h"
 
-QJrtp::QJrtp(QObject *parent):
-    QIODevice(parent)
+QJrtp::QJrtp(Contact *contact, QObject *parent):
+    QIODevice(parent),
+    mContact(contact)
 {
     mSessionparams.SetOwnTimestampUnit(1.0/8000.0);
+    mTransparams.SetPortbase(8000);
 }
 
 bool QJrtp::open(){
+    int status = mSession.Create(mSessionparams,&mTransparams);
+    if (status < 0){
+        qWarning()<< QString::fromStdString(RTPGetErrorString(status));
+        return false;
+    }
+    QHostAddress addr = mContact->getIpAddress();
+    //TODO: define addr in rtp
     setOpenMode(ReadWrite);
     return true;
 }

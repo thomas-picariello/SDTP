@@ -4,19 +4,23 @@
 #include <QDebug>
 #include <QSettings>
 #include <QStringList>
+#include <QHostAddress>
+//#include <QSharedData>
 
-class Contact
+class Contact//: public QSharedData
 {
-public:
-    Contact(QString name = QString(),
-            QString ip = QString(),
+public: 
+    Contact(int id = getNextAvailableID(),
+            QString name = QString(),
+            QString hostName = QString(),
+            QHostAddress ip = QHostAddress(),
             quint16 port = 0,
-            QByteArray key = QByteArray(),
-            int id = getNextAvailableID());
+            QByteArray key = QByteArray());
 
     static Contact* findById(int id);
     static QList<Contact*> findByName(QString name);
-    static QList<Contact*> findByIp(QString ip);
+    static QList<Contact*> findByIp(QHostAddress ip);
+    static QList<Contact*> findByHostName(QString hostName);
     static Contact* findByKey(QByteArray key);
     static QList<Contact*> getContactList();
 
@@ -24,13 +28,15 @@ public:
 
     int getId() const;
     QString getName() const;
-    QString getIp() const;
+    QHostAddress getIpAddress() const;
+    QString getHostName() const;
     quint16 getPort() const;
     QByteArray getKey() const;
 
     void setId(int id);
     void setName(QString name);
-    void setIp(QString ip);
+    void setIpAddress(QHostAddress ip);
+    void setHostName(QString hostName);
     void setPort(quint16 port);
     void setKey(QByteArray key);
     void save();
@@ -39,7 +45,8 @@ public:
 private :
     int mId;
     quint16 mPort;
-    QString mName, mIp;
+    QString mName, mHostName;
+    QHostAddress mIp;
     QByteArray mKey;
 };
 

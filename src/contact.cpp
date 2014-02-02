@@ -1,8 +1,9 @@
 #include "contact.h"
 
-Contact::Contact(QString name, QString ip, quint16 port, QByteArray key, int id){
+Contact::Contact(int id, QString name, QString hostName, QHostAddress ip, quint16 port, QByteArray key){
     mId = id;
     mName = name;
+    mHostName = hostName;
     mIp = ip;
     mPort = port;
     mKey = key;
@@ -10,21 +11,23 @@ Contact::Contact(QString name, QString ip, quint16 port, QByteArray key, int id)
 
 Contact* Contact::findById(int id){
     quint16 cPort;
-    QString cId, cName, cIp;
+    QString cId, cName, cHostName;
+    QHostAddress cIp;
     QByteArray cKey;
     QSettings settings;
     settings.beginGroup("Contacts");
     foreach(cId, settings.childGroups()){
         if(cId.toInt() == id){
             cName = settings.value(cId + "/name").toString();
-            cIp = settings.value(cId + "/ip").toString();
+            cHostName = settings.value(cId + "/hname").toString();
+            cIp = QHostAddress(settings.value(cId + "/ip").toString());
             cPort = settings.value(cId + "/port").toUInt();
             cKey = settings.value(cId + "/key").toByteArray();
             break;
         }
     }
     settings.endGroup();
-    return new Contact(cName, cIp, cPort, cKey, cId.toInt());
+    return new Contact(cId.toInt(),cName, cHostName, cIp, cPort, cKey);
 }
 
 QList<Contact*> Contact::findByName(QString name){
@@ -35,28 +38,31 @@ QList<Contact*> Contact::findByName(QString name){
     foreach(cId, settings.childGroups()){
         cName = settings.value(cId + "/name").toString();
         if(cName.compare(name) == 0){
-            QString cIp = settings.value(cId + "/ip").toString();
+            QString cHostName = settings.value(cId + "/hname").toString();
+            QHostAddress cIp = QHostAddress(settings.value(cId + "/ip").toString());
             quint16 cPort = settings.value(cId + "/port").toUInt();
             QByteArray cKey = settings.value(cId + "/key").toByteArray();
-            matchList.append(new Contact(cName, cIp, cPort, cKey, cId.toInt()));
+            matchList.append(new Contact(cId.toInt(),cName, cHostName, cIp, cPort, cKey));
         }
     }
     settings.endGroup();
     return matchList;
 }
 
-QList<Contact*> Contact::findByIp(QString ip){
+QList<Contact*> Contact::findByIp(QHostAddress ip){
     QList<Contact*> matchList;
-    QString cId, cIp;
+    QString cId;
+    QHostAddress cIp;
     QSettings settings;
     settings.beginGroup("Contacts");
     foreach(cId, settings.childGroups()){
-        cIp = settings.value(cId + "/ip").toString();
-        if(cIp.compare(ip) == 0){
+        cIp = QHostAddress(settings.value(cId + "/ip").toString());
+        if(cIp == ip){
             QString cName = settings.value(cId + "/name").toString();
+            QString cHostName = settings.value(cId + "/hname").toString();
             quint16 cPort = settings.value(cId + "/port").toUInt();
             QByteArray cKey = settings.value(cId + "/key").toByteArray();
-            matchList.append(new Contact(cName, cIp, cPort, cKey, cId.toInt()));
+            matchList.append(new Contact(cId.toInt(),cName, cHostName, cIp, cPort, cKey));
         }
     }
     settings.endGroup();
@@ -65,21 +71,23 @@ QList<Contact*> Contact::findByIp(QString ip){
 
 Contact* Contact::findByKey(QByteArray key){
     quint16 cPort;
-    QString cId, cName, cIp;
+    QString cId, cName, cHostName;
+    QHostAddress cIp;
     QByteArray cKey;
     QSettings settings;
     settings.beginGroup("Contacts");
     foreach(cId, settings.childGroups()){
         cKey = settings.value(cId + "/key").toByteArray();
-        if(cKey == key){ //TODO: test use cases
+        if(cKey == key){ //TODO: test
             cName = settings.value(cId + "/name").toString();
-            cIp = settings.value(cId + "/ip").toString();
+            cHostName = settings.value(cId + "/hname").toString();
+            cIp = QHostAddress(settings.value(cId + "/ip").toString());
             cPort = settings.value(cId + "/port").toUInt();
             break;
         }
     }
     settings.endGroup();
-    return new Contact(cName, cIp, cPort, cKey, cId.toInt());
+    return new Contact(cId.toInt(),cName, cHostName, cIp, cPort, cKey);
 }
 
 QList<Contact*> Contact::getContactList(){
@@ -101,7 +109,11 @@ QString Contact::getName() const{
     return mName;
 }
 
-QString Contact::getIp() const{
+QString Contact::getHostName() const{
+    return mHostName;
+}
+
+QHostAddress Contact::getIpAddress() const{
     return mIp;
 }
 
@@ -121,7 +133,13 @@ void Contact::setName(QString name){
     mName = name;
 }
 
-void Contact::setIp(QString ip){
+void Contact::setHostName(QString hostName){
+    //TODO: retrieve and store Ip
+    mHostName = hostName;
+}
+
+void Contact::setIpAddress(QHostAddress ip){
+    //TODO: retrieve and store host name
     mIp = ip;
 }
 
@@ -138,7 +156,8 @@ void Contact::save(){
     QSettings settings;
     settings.beginGroup("Contacts");
     settings.setValue(id + "/name", mName);
-    settings.setValue(id + "/ip", mIp);
+    settings.setValue(id + "/hname", mHostName);
+    settings.setValue(id + "/ip", mIp.toString());
     settings.setValue(id + "/port", QString::number(mPort));
     settings.setValue(id + "/key", mKey);
     settings.endGroup();
