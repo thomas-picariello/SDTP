@@ -27,6 +27,7 @@ public:
     QString getHostName() const;
     quint16 getPort() const;
     QByteArray getKey() const;
+    bool isResolving() const;
 
     void setId(int id);
     void setName(QString name);
@@ -38,12 +39,13 @@ public:
     void erase();
 
 signals:
-    void unableToResolve(QString error);
+    void resolveResult(QString result);
 
 public slots:
-    void onResolve(QHostInfo &hostInfo);
+    void onResolve(QHostInfo hostInfo);
 
 private :
+    bool flag_isResolving;
     int mId;
     quint16 mPort;
     QString mName, mHostName;

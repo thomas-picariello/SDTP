@@ -32,7 +32,7 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Adress:</string>
+        <string>Host:</string>
        </property>
       </widget>
      </item>
@@ -48,7 +48,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1">
      <item>
-      <widget class="QLineEdit" name="ip"/>
+      <widget class="QLineEdit" name="host"/>
      </item>
      <item>
       <widget class="QLineEdit" name="port"/>
