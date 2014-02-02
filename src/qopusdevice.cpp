@@ -39,19 +39,28 @@ void QOpusDevice::initOpus(){
 }
 
 bool QOpusDevice::open(){
-    if(mUnderlyingDevice->openMode() == ReadWrite){
+    bool underlyingOpen;
+    if(internalBufferFlag)
+        underlyingOpen = mUnderlyingDevice->open(ReadWrite);
+    else
+        underlyingOpen = (mUnderlyingDevice->openMode() == ReadWrite);
+    if(underlyingOpen)
         setOpenMode(ReadWrite);
-        return true;
-    }
-    return false;
+    return underlyingOpen;
 }
 
 void QOpusDevice::close(){
+    if(internalBufferFlag)
+        mUnderlyingDevice->close();
     setOpenMode(NotOpen);
 }
 
 bool QOpusDevice::isSequential() const{
     return true;
+}
+
+bool QOpusDevice::hasInternalBuffer() const{
+    return internalBufferFlag;
 }
 
 qint64 QOpusDevice::readData(char * data, qint64 maxSize){

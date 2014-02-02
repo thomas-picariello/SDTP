@@ -24,6 +24,7 @@ public:
     void close();
     bool isSequential() const;
 
+    bool hasInternalBuffer() const;
     int getFrameSize() const;
     void setFrameSize(int frameSizeInMicrosecs);
     int getEncoderApplication() const;
