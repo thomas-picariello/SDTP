@@ -1,11 +1,9 @@
 #include "contact.h"
 
-Contact::Contact(int id, QString name, QString hostName, QHostAddress ip, quint16 port, QByteArray key){
-    flag_isResolving = false;
+Contact::Contact(int id, QString name, QString host, quint16 port, QByteArray key){
     mId = id;
     mName = name;
-    mHostName = hostName;
-    mIp = ip;
+    mHost = host;
     mPort = port;
     mKey = key;
 }
@@ -18,12 +16,8 @@ QString Contact::getName() const{
     return mName;
 }
 
-QString Contact::getHostName() const{
-    return mHostName;
-}
-
-QHostAddress Contact::getIpAddress() const{
-    return mIp;
+QString Contact::getHost() const{
+    return mHost;
 }
 
 quint16 Contact::getPort() const{
@@ -34,10 +28,6 @@ QByteArray Contact::getKey() const{
     return mKey;
 }
 
-bool Contact::isResolving() const{
-    return flag_isResolving;
-}
-
 void Contact::setId(int id){
     mId = id;
 }
@@ -46,18 +36,8 @@ void Contact::setName(QString name){
     mName = name;
 }
 
-void Contact::setHostName(QString hostName){
-    flag_isResolving = true;
-    QHostInfo::lookupHost(hostName,
-                          this, SLOT(onResolve(QHostInfo)));
-    mHostName = hostName;
-}
-
-void Contact::setIpAddress(QHostAddress ip){
-    flag_isResolving = true;
-    QHostInfo::lookupHost(ip.toString(),
-                          this, SLOT(onResolve(QHostInfo)));
-    mIp = ip;
+void Contact::setHost(QString host){
+    mHost = host;
 }
 
 void Contact::setPort(quint16 port){
@@ -73,8 +53,7 @@ void Contact::save(){
     QSettings settings;
     settings.beginGroup("Contacts");
     settings.setValue(id + "/name", mName);
-    settings.setValue(id + "/hname", mHostName);
-    settings.setValue(id + "/ip", mIp.toString());
+    settings.setValue(id + "/host", mHost);
     settings.setValue(id + "/port", QString::number(mPort));
     settings.setValue(id + "/key", mKey);
     settings.endGroup();
@@ -86,20 +65,6 @@ void Contact::erase(){
     if(settings.childGroups().contains(QString::number(mId)))
         settings.remove(QString::number(mId));
     settings.endGroup();
-}
-
-void Contact::onResolve(QHostInfo hostInfo){
-    if(hostInfo.error() != QHostInfo::NoError){
-        qDebug()<<hostInfo.errorString();
-        emit resolveResult(hostInfo.errorString());
-    }else{
-        if(mHostName.size()==0)
-            mHostName = hostInfo.hostName();
-        if(mIp.isNull())
-            mIp = hostInfo.addresses().first();
-        emit resolveResult(mHostName+":"+mIp.toString());
-    }
-    flag_isResolving = false;
 }
 
 int Contact::getNextAvailableID(){

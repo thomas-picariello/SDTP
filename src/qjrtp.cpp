@@ -14,7 +14,7 @@ bool QJrtp::open(){
         qWarning()<< QString::fromStdString(RTPGetErrorString(status));
         return false;
     }
-    QHostAddress addr = mContact->getIpAddress();
+    QString addr = mContact->getHost();
     //TODO: define addr in rtp
     setOpenMode(ReadWrite);
     return true;

@@ -29,16 +29,11 @@ signals:
 public slots:
     void save();
     void cancel();
-    void saveAfterResolving();
     
 private:
     Ui::EditContactWindow *ui;
     Contact *mContact;
     QIntValidator mPortValidator;
-    QRegExpValidator mIpValidator;
-
-    bool isIpAddress(QString host);
-
 };
 
 #endif // EDITCONTACTWINDOW_H

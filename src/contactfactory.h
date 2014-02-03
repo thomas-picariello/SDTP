@@ -12,8 +12,7 @@ class ContactFactory
 public:
     static Contact* findById(int id);
     static QList<Contact*> findByName(QString name);
-    static QList<Contact*> findByIp(QHostAddress ip);
-    static QList<Contact*> findByHostName(QString hostName);
+    static QList<Contact*> findByHost(QString host);
     static Contact* findByKey(QByteArray key);
     static QList<Contact*> getContactList();
 };
