@@ -2,9 +2,13 @@
 
 VoIP::VoIP(QObject *parent):
     QObject(parent),
-    mCallState(OFFLINE),
-    mOpus(new QOpusDevice())
+    mCallState(OFFLINE)
 {
+    //debug
+    mJrtp = new QJrtp();
+    mJrtp->open();
+    mOpus = new QOpusDevice(mJrtp);
+    //
     initAudio();
 }
 
@@ -47,11 +51,15 @@ void VoIP::initAudio(){
             this, SLOT(startAudioOutput()));
 }
 
-void VoIP::call(const Contact &contact){
-    mCallState = ONLINE;
-    emit callStateChanged(mCallState);
-    mOpus->open();
-    mAudioInput->start(mOpus);
+void VoIP::call(){
+    if(mOpus->open()){
+        mAudioInput->start(mOpus);
+        mCallState = ONLINE;
+        emit callStateChanged(mCallState);
+    }else{
+        emit error(UNDERLYING_DEVICE_CLOSED);
+        qDebug()<<"underlying device closed";
+    }
 }
 
 void VoIP::endCall(){
@@ -95,10 +103,6 @@ void VoIP::outputStateChanged(QAudio::State state){
     qDebug() << "New output state:" << state;
 }
 
-void VoIP::bufferWritten(qint64 bc){
-    qDebug() << "Written to Buffer:" << bc << "Bytes";
-}
-
 VoIP::~VoIP(){
-    delete mOpus, mAudioInput, mAudioOutput;
+    delete mOpus, mAudioInput, mAudioOutput, mJrtp;
 }

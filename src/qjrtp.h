@@ -20,7 +20,7 @@ class QJrtp : public QIODevice
     Q_OBJECT
 
 public:
-    explicit QJrtp(Contact *contact, QObject* parent = 0);
+    explicit QJrtp(/*Contact *contact,*/ QObject* parent = 0);
     ~QJrtp();
 
     bool open();
@@ -32,7 +32,7 @@ protected:
     qint64 writeData(const char * data, qint64 maxSize);
 
 private :
-    Contact *mContact;
+    //Contact *mContact;
     RTPSession mSession;
     RTPSessionParams mSessionparams;
     RTPUDPv4TransmissionParams mTransparams;

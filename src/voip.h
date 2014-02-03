@@ -10,17 +10,19 @@
 #include <QBuffer>
 #include "contact.h"
 #include "qopusdevice.h"
+#include "qjrtp.h"
 
 class VoIP : public QObject
 {
     Q_OBJECT
 public:
     enum CallState{ONLINE, OFFLINE};
+    enum Error{UNDERLYING_DEVICE_CLOSED};
 
     explicit VoIP(QObject *parent = 0);
     explicit VoIP(QIODevice *interfaceIODevice,
                   QObject *parent = 0);
-    void call(Contact const &contact);
+    void call();
     void endCall();
     QOpusDevice* getOpusDevice();
     CallState getCallState();
@@ -28,6 +30,7 @@ public:
 
 signals:
     void callStateChanged(CallState state);
+    void error(Error err);
     
 public slots:
     void takeIncommingCall();
@@ -35,12 +38,12 @@ public slots:
     //Debug
     void inputStateChanged(QAudio::State state);
     void outputStateChanged(QAudio::State state);
-    void bufferWritten(qint64 bc);
 
 private:
     QAudioInput *mAudioInput;
     QAudioOutput *mAudioOutput;
     QOpusDevice *mOpus;
+    QJrtp *mJrtp;
     QIODevice *mDataInterface;
     CallState mCallState;
 
