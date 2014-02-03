@@ -15,10 +15,10 @@ class QOpusDevice : public QIODevice
 {
     Q_OBJECT
 public:
+    explicit QOpusDevice(int frameSizeInMicrosecs = 200,
+                         QIODevice* parent = 0);
     explicit QOpusDevice(QIODevice *deviceToUse,
                          int frameSizeInMicrosecs = 200,
-                         QIODevice* parent = 0);
-    explicit QOpusDevice(int frameSizeInMicrosecs = 200,
                          QIODevice* parent = 0);
     bool open();
     void close();
