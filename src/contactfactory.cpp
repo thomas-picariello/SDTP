@@ -12,11 +12,11 @@ Contact* ContactFactory::findById(int id, QObject *parent){
             cHost = settings.value(cId + "/host").toString();
             cPort = settings.value(cId + "/port").toUInt();
             cKey = settings.value(cId + "/key").toByteArray();
-            break;
+            return new Contact(cId.toInt(),cName, cHost, cPort, cKey, parent);
         }
     }
     settings.endGroup();
-    return new Contact(cId.toInt(),cName, cHost, cPort, cKey, parent);
+    return NULL;
 }
 
 QList<Contact*> ContactFactory::findByName(QString name, QObject *parent){
@@ -68,11 +68,11 @@ Contact* ContactFactory::findByKey(QByteArray key, QObject *parent){
             cName = settings.value(cId + "/name").toString();
             cHost = settings.value(cId + "/host").toString();
             cPort = settings.value(cId + "/port").toUInt();
-            break;
+            return new Contact(cId.toInt(),cName, cHost, cPort, cKey, parent);
         }
     }
     settings.endGroup();
-    return new Contact(cId.toInt(),cName, cHost, cPort, cKey, parent);
+    return NULL;
 }
 
 QList<Contact*> ContactFactory::getContactList(QObject *parent){
