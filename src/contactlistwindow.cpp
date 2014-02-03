@@ -6,7 +6,7 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
 
     qint16 listenPort = QSettings().value("Settings/port").toInt();
 
-    mListener = new QTcpServer();
+    mListener = new QTcpServer(this);
     mListener->listen(QHostAddress::Any, listenPort);
 
     refreshList();
@@ -32,11 +32,11 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
 }
 
 void ContactListWindow::acceptConnection(){
-    mManagerList.append(new NetworkManager(mListener->nextPendingConnection()));
+    mManagerList.append(new NetworkManager(mListener->nextPendingConnection(), this));
 }
 
 void ContactListWindow::addContact(){
-    EditContactWindow *ecw = new EditContactWindow(new Contact());
+    EditContactWindow *ecw = new EditContactWindow(new Contact(this));
     connect(ecw, SIGNAL(contactChanged()),
             this, SLOT(refreshList()));
 }
@@ -97,7 +97,7 @@ Contact* ContactListWindow::getSelectedContact(){
     QListWidgetItem *currentItem = ui->list->currentItem();
     if(currentItem){
         int currentId = currentItem->data(IdRole).toInt();
-        return ContactFactory::findById(currentId);
+        return ContactFactory::findById(currentId, this);
     }
     return NULL;
 }

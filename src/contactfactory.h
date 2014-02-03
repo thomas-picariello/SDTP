@@ -10,11 +10,11 @@
 class ContactFactory
 {
 public:
-    static Contact* findById(int id);
-    static QList<Contact*> findByName(QString name);
-    static QList<Contact*> findByHost(QString host);
-    static Contact* findByKey(QByteArray key);
-    static QList<Contact*> getContactList();
+    static Contact* findById(int id, QObject *parent = 0);
+    static QList<Contact*> findByName(QString name, QObject *parent = 0);
+    static QList<Contact*> findByHost(QString host, QObject *parent = 0);
+    static Contact* findByKey(QByteArray key, QObject *parent = 0);
+    static QList<Contact*> getContactList(QObject *parent = 0);
 };
 
 #endif // CONTACTFACTORY_H

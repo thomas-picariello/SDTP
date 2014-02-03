@@ -11,13 +11,15 @@ class Contact: public QObject
 {
     Q_OBJECT
 public: 
-    Contact(int id = getNextAvailableID(),
-            QString name = QString(),
-            QString host = QString(),
-            quint16 port = 0,
-            QByteArray key = QByteArray());
+    explicit Contact(QObject *parent = 0);
+    explicit Contact(int id,
+            QString name,
+            QString host,
+            quint16 port,
+            QByteArray key,
+            QObject *parent = 0);
 
-    static int getNextAvailableID();
+    int getNextAvailableID();
 
     int getId() const;
     QString getName() const;
