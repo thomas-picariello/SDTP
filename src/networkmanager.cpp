@@ -28,6 +28,8 @@ NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(paren
 void NetworkManager::onConnect(){
     m_handshake = new Handshake(m_Socket,contact);
     connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
+    connect(m_handshake,SIGNAL(connectionClosed()),
+            this,SLOT(deleteLater()));
     m_handshake->startCheckKey();
 
 }
@@ -36,6 +38,7 @@ void NetworkManager::onIdentified(){
 
     m_handshake = 0;
     delete m_handshake;
+
     m_settings = new QSettings;
 
     voip = new VoIP();
@@ -67,7 +70,7 @@ void NetworkManager::voipCall(){
 
     if(voip->getCallState() == VoIP::OFFLINE){
         m_MessengerWindow->changeButtonState(false);
-        voip->call(Contact());
+        voip->call();
         sendData("VOIP",SYSTEM);
     }else if (voip->getCallState() == VoIP::ONLINE){
         m_MessengerWindow->changeButtonState(true);
@@ -141,5 +144,10 @@ void NetworkManager::error(QAbstractSocket::SocketError error){
 }
 
 NetworkManager::~NetworkManager(){
+
+    m_Socket->close();
+
+    delete m_Socket;
+
 
 }

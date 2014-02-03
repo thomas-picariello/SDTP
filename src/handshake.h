@@ -9,6 +9,7 @@
 #include "cryptopp/aes.h"
 #include "cryptopp/modes.h"
 #include "contact.h"
+#include "contactfactory.h"
 #include <QSettings>
 
 
@@ -41,6 +42,7 @@ private :
     QSettings *m_Settings;
     QByteArray *m_StarterMsg;
     QByteArray *m_ResponderMsg;
+
 };
 
 #endif // HANDSHAKE_H
