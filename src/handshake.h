@@ -9,6 +9,7 @@
 #include "cryptopp/aes.h"
 #include "cryptopp/modes.h"
 #include "contact.h"
+#include <QSettings>
 
 
 using namespace CryptoPP;
@@ -36,7 +37,10 @@ public slots :
 
 private :
     QTcpSocket *m_Socket;
-    Contact *contact;
+    Contact *m_contact;
+    QSettings *m_Settings;
+    QByteArray *m_StarterMsg;
+    QByteArray *m_ResponderMsg;
 };
 
 #endif // HANDSHAKE_H

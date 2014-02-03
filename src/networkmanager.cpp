@@ -3,15 +3,15 @@
 NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(parent){
     m_Socket = socket;
 
-    hs = new Handshake(m_Socket);
-    connect(hs,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
-    hs->startCheckKey();
+    m_handshake = new Handshake(m_Socket);
+    connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
+
 }
 
 NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(parent){
     m_Socket = new QTcpSocket;
 
-    QString ip  = contact->getIpAddress().toString();
+    QString ip  = contact->getHost();
     quint16 port = contact->getPort();
 
     //Close previous connection if already connected with this socket
@@ -26,12 +26,16 @@ NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(paren
 }
 
 void NetworkManager::onConnect(){
-    hs = new Handshake(m_Socket,contact);
-    connect(hs,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
-    //hs->startCheckKey();
+    m_handshake = new Handshake(m_Socket,contact);
+    connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
+    m_handshake->startCheckKey();
+
 }
 
 void NetworkManager::onIdentified(){
+
+    m_handshake = 0;
+    delete m_handshake;
     m_settings = new QSettings;
 
     voip = new VoIP();
@@ -84,6 +88,8 @@ void NetworkManager::readIncomingData(){
     QByteArray data = m_Socket->readAll();
     //decrypt AES
     mCfbAesDec.ProcessString((byte*)data.data(), data.length());
+
+    qDebug()<<data;
 
     quint8 appIDparse = data.at(0);
     data.remove(0,1);
