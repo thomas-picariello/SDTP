@@ -5,6 +5,7 @@ EditContactWindow::EditContactWindow(Contact *contact, QWidget *parent):
     QWidget(parent), ui(new Ui::EditContactWindow)
 {
     mContact = contact;
+    mContact->setParent(this);
     ui->setupUi(this);
 
     connect(ui->save, SIGNAL(clicked()),
@@ -49,5 +50,5 @@ void EditContactWindow::cancel(){
 }
 
 EditContactWindow::~EditContactWindow(){
-    delete ui, mContact;
+    delete ui;
 }

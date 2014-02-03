@@ -1,6 +1,6 @@
 #include "contactfactory.h"
 
-Contact* ContactFactory::findById(int id){
+Contact* ContactFactory::findById(int id, QObject *parent){
     quint16 cPort;
     QString cId, cName, cHost;
     QByteArray cKey;
@@ -16,10 +16,10 @@ Contact* ContactFactory::findById(int id){
         }
     }
     settings.endGroup();
-    return new Contact(cId.toInt(),cName, cHost, cPort, cKey);
+    return new Contact(cId.toInt(),cName, cHost, cPort, cKey, parent);
 }
 
-QList<Contact*> ContactFactory::findByName(QString name){
+QList<Contact*> ContactFactory::findByName(QString name, QObject *parent){
     QList<Contact*> matchList;
     QString cId, cName;
     QSettings settings;
@@ -30,14 +30,14 @@ QList<Contact*> ContactFactory::findByName(QString name){
             QString cHost = settings.value(cId + "/host").toString();
             quint16 cPort = settings.value(cId + "/port").toUInt();
             QByteArray cKey = settings.value(cId + "/key").toByteArray();
-            matchList.append(new Contact(cId.toInt(),cName, cHost, cPort, cKey));
+            matchList.append(new Contact(cId.toInt(),cName, cHost, cPort, cKey, parent));
         }
     }
     settings.endGroup();
     return matchList;
 }
 
-QList<Contact*> ContactFactory::findByHost(QString host){
+QList<Contact*> ContactFactory::findByHost(QString host, QObject *parent){
     QList<Contact*> matchList;
     QString cId;
     QString cHost;
@@ -49,14 +49,14 @@ QList<Contact*> ContactFactory::findByHost(QString host){
             QString cName = settings.value(cId + "/name").toString();
             quint16 cPort = settings.value(cId + "/port").toUInt();
             QByteArray cKey = settings.value(cId + "/key").toByteArray();
-            matchList.append(new Contact(cId.toInt(),cName, cHost, cPort, cKey));
+            matchList.append(new Contact(cId.toInt(),cName, cHost, cPort, cKey, parent));
         }
     }
     settings.endGroup();
     return matchList;
 }
 
-Contact* ContactFactory::findByKey(QByteArray key){
+Contact* ContactFactory::findByKey(QByteArray key, QObject *parent){
     quint16 cPort;
     QString cId, cName, cHost;
     QByteArray cKey;
@@ -72,16 +72,16 @@ Contact* ContactFactory::findByKey(QByteArray key){
         }
     }
     settings.endGroup();
-    return new Contact(cId.toInt(),cName, cHost, cPort, cKey);
+    return new Contact(cId.toInt(),cName, cHost, cPort, cKey, parent);
 }
 
-QList<Contact*> ContactFactory::getContactList(){
+QList<Contact*> ContactFactory::getContactList(QObject *parent){
     QSettings settings;
     QList<Contact*> contactList;
     settings.beginGroup("Contacts");
     QStringList idList = settings.childGroups();
     foreach(QString id, idList)
-        contactList.append(ContactFactory::findById(id.toInt()));
+        contactList.append(ContactFactory::findById(id.toInt(), parent));
     settings.endGroup();
     return contactList;
 }

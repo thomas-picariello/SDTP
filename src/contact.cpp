@@ -1,11 +1,19 @@
 #include "contact.h"
 
-Contact::Contact(int id, QString name, QString host, quint16 port, QByteArray key){
-    mId = id;
-    mName = name;
-    mHost = host;
-    mPort = port;
-    mKey = key;
+Contact::Contact(QObject *parent):
+    QObject(parent),
+    mId(getNextAvailableID())
+{
+}
+
+Contact::Contact(int id, QString name, QString host, quint16 port, QByteArray key, QObject *parent):
+    QObject(parent),
+    mId(id),
+    mName(name),
+    mHost(host),
+    mPort(port),
+    mKey(key)
+{
 }
 
 int Contact::getId() const{

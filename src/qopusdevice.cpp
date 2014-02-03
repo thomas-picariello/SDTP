@@ -1,5 +1,18 @@
 #include "qopusdevice.h"
 
+QOpusDevice::QOpusDevice(int frameSizeInMicrosecs, QIODevice* parent) :
+    QIODevice(parent),
+    mUnderlyingDevice(new QBuffer()),
+    internalBufferFlag(true)
+{
+    initOpus();
+
+    connect(mUnderlyingDevice, SIGNAL(readyRead()),
+            this, SIGNAL(readyRead()));
+    mUnderlyingDevice->open(ReadWrite);
+    setOpenMode(ReadWrite);
+}
+
 QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QIODevice* parent) :
     QIODevice(parent),
     mUnderlyingDevice(deviceToUse),
@@ -9,19 +22,6 @@ QOpusDevice::QOpusDevice(QIODevice *deviceToUse, int frameSizeInMicrosecs, QIODe
 
     connect(mUnderlyingDevice, SIGNAL(readyRead()),
             this, SIGNAL(readyRead()));
-}
-
-QOpusDevice::QOpusDevice(int frameSizeInMicrosecs, QIODevice* parent) :
-    QIODevice(parent),
-    mUnderlyingDevice(new QBuffer()),
-    internalBufferFlag(true)
-{
-    initOpus();
-
-    connect(this, SIGNAL(readyRead()),
-            this, SIGNAL(readyRead()));
-    mUnderlyingDevice->open(ReadWrite);
-    setOpenMode(ReadWrite);
 }
 
 void QOpusDevice::initOpus(){
