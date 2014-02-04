@@ -91,7 +91,8 @@ void NetworkManager::voipCall(){
 
 void NetworkManager::onVoIPReadyRead()
 {
-    sendData(m_Opusdevice->readAll(),VOIP);
+    //sendData(m_Opusdevice->readAll(),VOIP);
+    m_Opusdevice->write(m_Opusdevice->readAll());
 
 }
 

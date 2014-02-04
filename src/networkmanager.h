@@ -13,7 +13,7 @@
 #include "messengerwindow.h"
 #include "contact.h"
 #include "handshake.h"
-//#include "qjrtp.h"
+#include "qjrtp.h"
 #include "qopusdevice.h"
 
 
@@ -44,7 +44,7 @@ private :
     QOpusDevice *m_Opusdevice;
     QTcpSocket *m_Socket;
     QSettings *m_settings;
-    //QJrtp *m_QJrtp;
+    QJrtp *m_QJrtp;
     VoIP *voip;
     Handshake *m_handshake;
     Contact *m_contact;
