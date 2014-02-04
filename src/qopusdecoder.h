@@ -14,8 +14,7 @@ class QOpusDecoder : public QIODevice
     Q_OBJECT
 public:
     explicit QOpusDecoder(QIODevice* parent = 0);
-    bool open();
-    void close();
+
     bool isSequential() const;
 
     static QString getOpusErrorDesc(int errorCode);

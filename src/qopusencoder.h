@@ -15,8 +15,7 @@ class QOpusEncoder : public QIODevice
 public:
     explicit QOpusEncoder(int frameSizeInMicrosecs = 200,
                          QIODevice* parent = 0);
-    bool open();
-    void close();
+
     bool isSequential() const;
 
     int getFrameSize() const;

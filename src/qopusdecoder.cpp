@@ -8,23 +8,11 @@ QOpusDecoder::QOpusDecoder(QIODevice* parent): QIODevice(parent){
     mAudioFormat.setCodec("audio/pcm");
     mAudioFormat.setSampleSize(16);
     mAudioFormat.setSampleType(QAudioFormat::SignedInt);
-}
 
-bool QOpusDecoder::open(){
     mDecoder = opus_decoder_create(mAudioFormat.sampleRate(),
                                    mAudioFormat.channelCount(),
                                    &mError);
-    if(mError){
-        return false;
-    }else{
-        setOpenMode(ReadWrite);
-        return true;
-    }
-}
-
-void QOpusDecoder::close(){
-    opus_decoder_destroy(mDecoder);
-    setOpenMode(NotOpen);
+    setOpenMode(ReadWrite);
 }
 
 bool QOpusDecoder::isSequential() const{
@@ -107,5 +95,5 @@ static QString getOpusErrorDesc(int errorCode){
 }
 
 QOpusDecoder::~QOpusDecoder(){
-    close();
+    opus_decoder_destroy(mDecoder);
 }

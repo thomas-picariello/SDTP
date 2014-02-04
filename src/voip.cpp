@@ -6,7 +6,7 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
 
     QAudioFormat format;
     format.setChannelCount(2);
-    format.setSampleRate(44000);
+    format.setSampleRate(48000);
     format.setSampleSize(16);
     format.setCodec("audio/pcm");
     format.setByteOrder(QAudioFormat::LittleEndian); //Requiered by Opus
@@ -32,23 +32,19 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
     connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)),
             this, SLOT(outputStateChanged(QAudio::State)));
     /**/
-    connect(mOpusEncoder, SIGNAL(readyRead()),
-            this, SLOT(startAudioOutput()));
+    /*connect(mOpusEncoder, SIGNAL(readyRead()),
+            this, SLOT(startAudioOutput()));*/
 }
 
 void VoIP::start(){
-    mOpusDecoder->open();
-    mOpusEncoder->open();
     mAudioInput->start(mOpusDecoder);
     mAudioOutput->start(mOpusEncoder);
     setOpenMode(ReadWrite);
 }
 
 void VoIP::stop(){
-    mOpusDecoder->close();
     mAudioInput->stop();
     mAudioOutput->stop();
-    mOpusEncoder->close();
     setOpenMode(NotOpen);
 }
 
@@ -58,11 +54,13 @@ void VoIP::stop(){
 }*/
 
 qint64 VoIP::readData(char * data, qint64 maxSize){
-    return maxSize;
+    qint64 read = mOpusEncoder->read(data, maxSize);
+    return read;
 }
 
 qint64 VoIP::writeData(const char * data, qint64 maxSize){
-    return maxSize;
+    qint64 written = mOpusEncoder->write(data, maxSize);
+    return written;
 }
 
 /*debug*/
