@@ -57,6 +57,14 @@ void VoIP::stop(){
         mAudioOutput->start(mOpus);
 }*/
 
+qint64 VoIP::readData(char * data, qint64 maxSize){
+    return maxSize;
+}
+
+qint64 VoIP::writeData(const char * data, qint64 maxSize){
+    return maxSize;
+}
+
 /*debug*/
 void VoIP::inputStateChanged(QAudio::State state){
     qDebug() << "New input state:" << state;
