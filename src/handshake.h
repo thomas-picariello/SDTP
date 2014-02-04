@@ -26,6 +26,7 @@ public:
     Handshake(QTcpSocket *socket, QObject *parent=0);
     Handshake(QTcpSocket *socket, Contact *contact,  QObject *parent=0);
     Contact* getContact();
+    QByteArray getkey();
     ~Handshake();
 
 signals :
@@ -44,8 +45,7 @@ private :
     QTcpSocket *m_Socket;
     Contact *m_contact;
     QSettings *m_Settings;
-    QByteArray *m_StarterMsg;
-    QByteArray *m_ResponderMsg;
+    QByteArray *m_key;
     QStringList *m_CompatibleVersions;
 
 };

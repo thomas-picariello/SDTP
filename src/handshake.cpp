@@ -3,6 +3,7 @@
 Handshake::Handshake(QTcpSocket *socket,  QObject *parent): QObject(parent)
 {
     //responder
+    m_key = new QByteArray;
 
     m_Socket = socket;
 
@@ -10,7 +11,6 @@ Handshake::Handshake(QTcpSocket *socket,  QObject *parent): QObject(parent)
     m_Settings->beginGroup("Settings");
 
 
-     m_ResponderMsg = new QByteArray;
 
      m_CompatibleVersions = new QStringList();
 
@@ -27,12 +27,12 @@ Handshake::Handshake(QTcpSocket *socket,  QObject *parent): QObject(parent)
 Handshake::Handshake(QTcpSocket *socket,Contact *contact,  QObject *parent): QObject(parent)
 {
     //starter
+    m_key = new QByteArray;
     m_Socket = socket;
 
     m_Settings = new QSettings;
     m_Settings->beginGroup("Settings");
 
-    m_StarterMsg = new QByteArray;
 
     m_CompatibleVersions = new QStringList();
 
@@ -59,13 +59,14 @@ void Handshake::startCheckKey(){
 }
 void Handshake::startCheckCompatibility(){
 
-    m_StarterMsg->append(m_Socket->readAll());
+    QByteArray Msg;
+    Msg.append(m_Socket->readAll());
 
-    if(m_StarterMsg->data() == (QByteArray)"Bye"){
+    if(Msg.data() == (QByteArray)"Bye"){
         qDebug()<<"Bad Key";
         emit connectionClosed();
     }
-    else if(m_StarterMsg->data() == (QByteArray)"1"){
+    else if(Msg.data() == (QByteArray)"1"){
 
         qDebug()<<"starter handshakesuccesfull";
         disconnect(m_Socket,SIGNAL(readyRead()),
@@ -84,11 +85,12 @@ void Handshake::startCheckCompatibility(){
 }
 void Handshake::respondCheckKey(){
 
-    m_ResponderMsg->append(m_Socket->readAll());
-    qDebug()<<"message recieved"<<m_ResponderMsg->data();
+    QByteArray msg;
+    msg.append(m_Socket->readAll());
+    qDebug()<<"message recieved"<<msg.data();
 
 
-    m_contact = ContactFactory::findByKey(m_ResponderMsg->data());
+    m_contact = ContactFactory::findByKey(msg.data());
 
     if(m_contact == NULL)
     {
@@ -139,7 +141,19 @@ Contact* Handshake::getContact(){
 
     return m_contact;
 }
+QByteArray Handshake::getkey()
+{
 
+    QByteArray key = QByteArray(16, 0x0);
+
+
+
+    if(key.length() != 16){
+        qDebug()<<key.length();
+        return QByteArray(16,0x0);
+    }
+    else return key;
+}
 
 Handshake::~Handshake()
 {

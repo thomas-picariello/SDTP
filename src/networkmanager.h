@@ -41,11 +41,11 @@ public slots :
     void onIdentified();
 
 private :
-    QOpusDevice *m_Opusdevice;
+    //QOpusDevice *m_Opusdevice;
     QTcpSocket *m_Socket;
     QSettings *m_settings;
     QJrtp *m_QJrtp;
-    VoIP *voip;
+    VoIP *m_voip;
     Handshake *m_handshake;
     Contact *m_contact;
     MessengerWindow *m_MessengerWindow;
