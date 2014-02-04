@@ -3,6 +3,7 @@
 QOpusEncoder::QOpusEncoder(int frameSizeInMicrosecs, QIODevice* parent): QIODevice(parent){
     mError = OPUS_OK;
     mApplication = OPUS_APPLICATION_VOIP;
+    mOpusFrameSize = frameSizeInMicrosecs;
 
     mAudioFormat.setSampleRate(48000);
     mAudioFormat.setChannelCount(2);
@@ -28,6 +29,9 @@ qint64 QOpusEncoder::readData(char * data, qint64 maxSize){
         data[i] = mBuffer.at(i);
         i++;
     }
+    mBuffer.remove(0,i);
+    //TODO: find multiple call reason
+    qDebug()<<bufferSize<<mBuffer.size();
     return i;
     //assuming that Opus reassemble the packets in an internal buffer
 //    mError = 0;
@@ -42,10 +46,9 @@ qint64 QOpusEncoder::readData(char * data, qint64 maxSize){
 }
 
 qint64 QOpusEncoder::writeData(const char * data, qint64 maxSize){
-    mBuffer.clear();
+    //TODO: Buffer max size check
     mBuffer.append(data, maxSize);
-    emit readyRead();
-    return mBuffer.size();
+    return maxSize;
 
     //QByteArray payload;
     //mInputBuffer.append(input, maxSize);
@@ -133,6 +136,11 @@ static QString getOpusErrorDesc(int errorCode){
     default:
         return "Unknown error code";
     }
+}
+
+void QOpusEncoder::encode(){
+    qDebug()<<"encode...";
+    emit readyRead();
 }
 
 QOpusEncoder::~QOpusEncoder(){

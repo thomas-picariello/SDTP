@@ -24,7 +24,6 @@ public:
 signals:
     
 public slots:
-    //void startAudioOutput();
     //Debug
     void inputStateChanged(QAudio::State state);
     void outputStateChanged(QAudio::State state);

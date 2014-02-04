@@ -33,7 +33,7 @@ signals:
     void error(const int err);
 
 public slots:
-
+    void encode();
 
 protected:
     qint64 readData(char * data, qint64 maxSize);

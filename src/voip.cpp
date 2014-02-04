@@ -19,6 +19,10 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
         format = info.nearestFormat(format);
     }
     mAudioInput = new QAudioInput(format, this);
+    mAudioInput->setNotifyInterval(mOpusEncoder->getFrameSize()/10);
+    connect(mAudioInput, SIGNAL(notify()),
+            mOpusEncoder, SLOT(encode()));
+
 
     info = QAudioDeviceInfo::defaultOutputDevice();
     if (!info.isFormatSupported(format)) {
@@ -26,19 +30,20 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
     }
     mAudioOutput = new QAudioOutput(format, this);
 
+    connect(mOpusEncoder, SIGNAL(readyRead()),
+            this, SIGNAL(readyRead()));
+
     /*debug*/
     connect(mAudioInput, SIGNAL(stateChanged(QAudio::State)),
             this, SLOT(inputStateChanged(QAudio::State)));
     connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)),
             this, SLOT(outputStateChanged(QAudio::State)));
     /**/
-    /*connect(mOpusEncoder, SIGNAL(readyRead()),
-            this, SLOT(startAudioOutput()));*/
 }
 
 void VoIP::start(){
-    mAudioInput->start(mOpusDecoder);
-    mAudioOutput->start(mOpusEncoder);
+    mAudioInput->start(mOpusEncoder);
+    mAudioOutput->start(mOpusDecoder);
     setOpenMode(ReadWrite);
 }
 
@@ -48,18 +53,15 @@ void VoIP::stop(){
     setOpenMode(NotOpen);
 }
 
-/*void VoIP::startAudioOutput(){
-    if(mCallState==ONLINE && mAudioOutput->state() != QAudio::ActiveState)
-        mAudioOutput->start(mOpus);
-}*/
-
 qint64 VoIP::readData(char * data, qint64 maxSize){
     qint64 read = mOpusEncoder->read(data, maxSize);
     return read;
 }
 
 qint64 VoIP::writeData(const char * data, qint64 maxSize){
-    qint64 written = mOpusEncoder->write(data, maxSize);
+    if(mAudioOutput->state() != QAudio::ActiveState)
+        mAudioOutput->start(mOpusDecoder);
+    qint64 written = mOpusDecoder->write(data, maxSize);
     return written;
 }
 

@@ -26,6 +26,7 @@ qint64 QOpusDecoder::readData(char * data, qint64 maxSize){
         data[i] = mBuffer.at(i);
         i++;
     }
+    mBuffer.remove(0,i);
     return i;
     //assuming that Opus reassemble the packets in an internal buffer
 //    mError = 0;
@@ -40,9 +41,8 @@ qint64 QOpusDecoder::readData(char * data, qint64 maxSize){
 }
 
 qint64 QOpusDecoder::writeData(const char * data, qint64 maxSize){
-    mBuffer.clear();
+    //TODO: Buffer max size check
     mBuffer.append(data, maxSize);
-    emit readyRead();
     return mBuffer.size();
 
     //QByteArray payload;
