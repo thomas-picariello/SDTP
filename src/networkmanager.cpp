@@ -83,14 +83,18 @@ void NetworkManager::onIdentified(){
 }
 void NetworkManager::voipCall(){
 
-        if(m_voip->openMode() == VoIP::ReadWrite){
+        if(m_voip->openMode() != VoIP::ReadWrite){
             m_MessengerWindow->changeButtonState(false);
+            qDebug()<<m_voip->openMode()<<"1";
             m_voip->start();
+            qDebug()<<m_voip->openMode()<<"2";
             sendData("VOIP",SYSTEM);
         }
         else{
             m_MessengerWindow->changeButtonState(true);
+            qDebug()<<m_voip->openMode()<<"3";
             m_voip->stop();
+            qDebug()<<m_voip->openMode()<<"4";
             sendData("VOIPoff",SYSTEM);
         }
 
@@ -99,6 +103,7 @@ void NetworkManager::voipCall(){
 void NetworkManager::onVoIPReadyRead()
 {
     qDebug()<<"new data from m_voip";
+    qDebug()<<m_voip->openMode();
     sendData(m_voip->readAll(),VOIP);
 
 }
@@ -116,15 +121,16 @@ void NetworkManager::readIncomingData(){
 
     if (appIDparse == MESSENGER) m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
     else if (appIDparse == VOIP){
-        //m_Opusdevice->write(data);
         m_voip->write(data);
     }
     else if (appIDparse == SYSTEM){
         m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
         if(data == "VOIP"){
-            if(m_voip->openMode() == VoIP::ReadWrite){
+            qDebug()<<m_voip->openMode()<<"5";
+            if(m_voip->openMode() != VoIP::ReadWrite){
                 m_MessengerWindow->changeButtonState(false);
                 m_voip->start();
+                qDebug()<<m_voip->openMode()<<"6";
             }
             else sendData("VOIPoff",SYSTEM);
         }
