@@ -2,52 +2,42 @@
 #define VOIP_H
 
 #include <QDebug>
-#include <QObject>
+#include <QIODevice>
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QAudioFormat>
 #include <QAudioDeviceInfo>
-#include <QBuffer>
-#include "contact.h"
-#include "qopusdevice.h"
-#include "qjrtp.h"
+#include "qopusencoder.h"
+#include "qopusdecoder.h"
 
-class VoIP : public QObject
+class VoIP : public QIODevice
 {
     Q_OBJECT
-public:
-    enum CallState{ONLINE, OFFLINE};
-    enum Error{UNDERLYING_DEVICE_CLOSED};
 
-    explicit VoIP(QObject *parent = 0);
-    explicit VoIP(QIODevice *interfaceIODevice,
-                  QObject *parent = 0);
-    void call();
-    void endCall();
-    QOpusDevice* getOpusDevice();
-    CallState getCallState();
+public:
+    explicit VoIP(QIODevice *parent = 0);
+
+    void start();
+    void stop();
     ~VoIP();
 
 signals:
-    void callStateChanged(CallState state);
-    void error(Error err);
     
 public slots:
-    void takeIncommingCall();
-    void startAudioOutput();
+    //void startAudioOutput();
     //Debug
     void inputStateChanged(QAudio::State state);
     void outputStateChanged(QAudio::State state);
 
+protected:
+    qint64 readData(char * data, qint64 maxSize);
+    qint64 writeData(const char * data, qint64 maxSize);
+
 private:
     QAudioInput *mAudioInput;
     QAudioOutput *mAudioOutput;
-    QOpusDevice *mOpus;
-    QJrtp *mJrtp;
-    QIODevice *mDataInterface;
-    CallState mCallState;
-
-    void initAudio();
+    QOpusEncoder *mOpusEncoder;
+    QOpusDecoder *mOpusDecoder;
 };
 
 #endif // VOIP_H

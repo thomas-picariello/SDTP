@@ -1,29 +1,12 @@
 #include "voip.h"
 
-VoIP::VoIP(QObject *parent):
-    QObject(parent),
-    mCallState(OFFLINE)
-{
-    //debug
-    mJrtp = new QJrtp();
-    mJrtp->open();
-    mOpus = new QOpusDevice(mJrtp);
-    //
-    initAudio();
-}
+VoIP::VoIP(QIODevice *parent): QIODevice(parent){
+    mOpusDecoder = new QOpusDecoder();
+    mOpusEncoder = new QOpusEncoder();
 
-VoIP::VoIP(QIODevice *interfaceIODevice, QObject *parent) :
-    QObject(parent),
-    mCallState(OFFLINE),
-    mOpus(new QOpusDevice(interfaceIODevice))
-{
-    initAudio();
-}
-
-void VoIP::initAudio(){
     QAudioFormat format;
     format.setChannelCount(2);
-    format.setSampleRate(48000);
+    format.setSampleRate(44000);
     format.setSampleSize(16);
     format.setCodec("audio/pcm");
     format.setByteOrder(QAudioFormat::LittleEndian); //Requiered by Opus
@@ -43,58 +26,38 @@ void VoIP::initAudio(){
     }
     mAudioOutput = new QAudioOutput(format, this);
 
+    /*debug*/
     connect(mAudioInput, SIGNAL(stateChanged(QAudio::State)),
             this, SLOT(inputStateChanged(QAudio::State)));
     connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)),
             this, SLOT(outputStateChanged(QAudio::State)));
-    connect(mOpus, SIGNAL(readyRead()),
+    /**/
+    connect(mOpusEncoder, SIGNAL(readyRead()),
             this, SLOT(startAudioOutput()));
 }
 
-void VoIP::call(){
-    if(mOpus->open()){
-        mAudioInput->start(mOpus);
-        mCallState = ONLINE;
-        emit callStateChanged(mCallState);
-    }else{
-        emit error(UNDERLYING_DEVICE_CLOSED);
-        qDebug()<<"underlying device closed";
-    }
+void VoIP::start(){
+    mOpusDecoder->open();
+    mOpusEncoder->open();
+    mAudioInput->start(mOpusDecoder);
+    mAudioOutput->start(mOpusEncoder);
+    setOpenMode(ReadWrite);
 }
 
-void VoIP::endCall(){
+void VoIP::stop(){
+    mOpusDecoder->close();
     mAudioInput->stop();
     mAudioOutput->stop();
-    mOpus->close();
-    mCallState = OFFLINE;
-    emit callStateChanged(mCallState);
+    mOpusEncoder->close();
+    setOpenMode(NotOpen);
 }
 
-QOpusDevice* VoIP::getOpusDevice(){
-    return mOpus;
-}
-
-VoIP::CallState VoIP::getCallState(){
-    return mCallState;
-}
-
-void VoIP::takeIncommingCall(){
-    mCallState= ONLINE;
-    emit callStateChanged(mCallState);
-    mOpus->open();
-    mAudioInput->start(mOpus);
-    //delete previously allocated QOpusDevice instance
-    //delete mOpus;
-    //initialize a new one with the data interface
-    //mOpus = new QOpusDevice(dataInterface);
-}
-
-void VoIP::startAudioOutput(){
+/*void VoIP::startAudioOutput(){
     if(mCallState==ONLINE && mAudioOutput->state() != QAudio::ActiveState)
         mAudioOutput->start(mOpus);
-}
+}*/
 
-//Debug
+/*debug*/
 void VoIP::inputStateChanged(QAudio::State state){
     qDebug() << "New input state:" << state;
 }
@@ -102,7 +65,7 @@ void VoIP::inputStateChanged(QAudio::State state){
 void VoIP::outputStateChanged(QAudio::State state){
     qDebug() << "New output state:" << state;
 }
-
+/**/
 VoIP::~VoIP(){
-    delete mOpus, mAudioInput, mAudioOutput, mJrtp;
+    delete mOpusEncoder, mOpusDecoder, mAudioInput, mAudioOutput;
 }
