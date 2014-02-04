@@ -55,7 +55,6 @@ void NetworkManager::onIdentified(){
 
     m_voip = new VoIP();
     //m_QJrtp = new QJrtp();
-    //m_Opusdevice = m_voip->getOpusDevice();
 
     mAesKey = key; //16 byte = 128 bits, filled with 0x0.
 
@@ -73,8 +72,8 @@ void NetworkManager::onIdentified(){
 
 
 
-//     connect(m_Opusdevice,SIGNAL(readyRead()),
-//             this, SLOT(onVoIPReadyRead()));
+     connect(m_voip,SIGNAL(readyRead()),
+             this, SLOT(onVoIPReadyRead()));
      connect(m_MessengerWindow,SIGNAL(callContact()),
              this, SLOT(voipCall()));
      connect(m_Socket, SIGNAL(readyRead()),
@@ -84,22 +83,24 @@ void NetworkManager::onIdentified(){
 }
 void NetworkManager::voipCall(){
 
-    //    if(m_voip->getCallState() == VoIP::OFFLINE){
-    //        m_MessengerWindow->changeButtonState(false);
-    //        m_voip->call();
-    //        sendData("VOIP",SYSTEM);
-    //    }else if (m_voip->getCallState() == VoIP::ONLINE){
-    //        m_MessengerWindow->changeButtonState(true);
-    //        m_voip->endCall();
-    //        sendData("VOIPoff",SYSTEM);
-    //    }
+        if(m_voip->openMode() == VoIP::ReadWrite){
+            m_MessengerWindow->changeButtonState(false);
+            m_voip->start();
+            sendData("VOIP",SYSTEM);
+        }
+        else{
+            m_MessengerWindow->changeButtonState(true);
+            m_voip->stop();
+            sendData("VOIPoff",SYSTEM);
+        }
 
 }
 
 void NetworkManager::onVoIPReadyRead()
 {
-    //sendData(m_Opusdevice->readAll(),VOIP);
-    //m_Opusdevice->write(m_Opusdevice->readAll());
+    qDebug()<<"new data from m_voip";
+    sendData(m_voip->readAll(),VOIP);
+
 }
 
 
@@ -116,19 +117,20 @@ void NetworkManager::readIncomingData(){
     if (appIDparse == MESSENGER) m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
     else if (appIDparse == VOIP){
         //m_Opusdevice->write(data);
+        m_voip->write(data);
     }
     else if (appIDparse == SYSTEM){
         m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
         if(data == "VOIP"){
-//            if(m_voip->getCallState() == VoIP::OFFLINE){
-//                m_MessengerWindow->changeButtonState(false);
-//                //m_voip->takeIncommingCall();
-//            }
-//            else if (m_voip->getCallState() == VoIP::ONLINE)sendData("VOIPoff",SYSTEM);
+            if(m_voip->openMode() == VoIP::ReadWrite){
+                m_MessengerWindow->changeButtonState(false);
+                m_voip->start();
+            }
+            else sendData("VOIPoff",SYSTEM);
         }
         else if (data == "VOIPoff"){
             m_MessengerWindow->changeButtonState(true);
-//            m_voip->endCall();
+            m_voip->stop();
         }
     }
     else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
@@ -159,7 +161,7 @@ NetworkManager::~NetworkManager(){
 
     m_Socket->close();
 
-    delete m_Socket,/*m_Opusdevice,*/m_settings,m_voip,m_handshake,m_contact,m_MessengerWindow,mAesIv
+    delete m_Socket,m_settings,m_voip,m_handshake,m_contact,m_MessengerWindow,mAesIv
             ,mAesKey,mCfbAesDec,mCfbAesEnc;
 
 
