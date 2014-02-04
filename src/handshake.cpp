@@ -12,6 +12,11 @@ Handshake::Handshake(QTcpSocket *socket,  QObject *parent): QObject(parent)
 
      m_ResponderMsg = new QByteArray;
 
+     m_CompatibleVersions = new QStringList();
+
+     m_CompatibleVersions->append(QCoreApplication::applicationVersion());
+     m_CompatibleVersions->append("BetaTestingVersion");
+
 
      qDebug()<<"responder constructor";
     connect(m_Socket,SIGNAL(readyRead()),
@@ -28,6 +33,15 @@ Handshake::Handshake(QTcpSocket *socket,Contact *contact,  QObject *parent): QOb
     m_Settings->beginGroup("Settings");
 
     m_StarterMsg = new QByteArray;
+
+    m_CompatibleVersions = new QStringList();
+
+    m_CompatibleVersions->append(QCoreApplication::applicationVersion());
+    m_CompatibleVersions->append("BetaTestingVersion");
+
+
+    m_contact = contact;
+
 
 }
 void Handshake::startCheckKey(){
@@ -51,12 +65,15 @@ void Handshake::startCheckCompatibility(){
         qDebug()<<"Bad Key";
         emit connectionClosed();
     }
-    else if(m_StarterMsg->data() == (QByteArray)"OKAY"){
+    else if(m_StarterMsg->data() == (QByteArray)"1"){
 
         qDebug()<<"starter handshakesuccesfull";
         disconnect(m_Socket,SIGNAL(readyRead()),
                    this,SLOT(startCheckCompatibility()));
-        emit handshakeSuccessfull();
+        connect(m_Socket,SIGNAL(readyRead()),
+                this,SLOT(finishHandshake()));
+        m_Socket->write(QCoreApplication::applicationVersion().toUtf8());
+
 
     }
     else qDebug()<<"startcheckCompatibility ERROR.";
@@ -73,8 +90,6 @@ void Handshake::respondCheckKey(){
 
     m_contact = ContactFactory::findByKey(m_ResponderMsg->data());
 
-    //qDebug()<<"contactKey : "<<m_contact->getName()<<"Starter Key : "<<m_ResponderMsg->data();
-
     if(m_contact == NULL)
     {
         m_Socket->write("Bye");
@@ -83,17 +98,48 @@ void Handshake::respondCheckKey(){
     else
     {
         qDebug()<<"OKAY";
-        m_Socket->write("OKAY");
+        m_Socket->write("1");
 
         qDebug()<<"Responder handshake succesfull";
         disconnect(m_Socket,SIGNAL(readyRead()),
                    this,SLOT(respondCheckKey()));
-        emit handshakeSuccessfull();
+        connect(m_Socket,SIGNAL(readyRead()),
+                this,SLOT(respondCheckCompatbility()));
     }
 }
 void Handshake::respondCheckCompatbility(){
 
+    disconnect(m_Socket,SIGNAL(readyRead()),
+               this,SLOT(respondCheckCompatbility()));
+    if(m_CompatibleVersions->contains(m_Socket->readAll()))
+    {
+        m_Socket->write("OKAY");
+        emit handshakeSuccessfull();
+    }
+    else{
+
+        m_Socket->write("ERROR");
+        emit connectionClosed();
+    }
 }
+
+void Handshake::finishHandshake()
+{
+    disconnect(m_Socket,SIGNAL(readyRead()),
+               this,SLOT(finishHandshake()));
+    if(m_Socket->readAll() == "OKAY"){
+        emit handshakeSuccessfull();
+    }
+    else emit connectionClosed();
+
+}
+
+Contact* Handshake::getContact(){
+
+
+    return m_contact;
+}
+
 
 Handshake::~Handshake()
 {

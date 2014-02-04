@@ -2,17 +2,22 @@
 
 NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(parent){
     m_Socket = socket;
-
+    m_contact = new Contact();
     m_handshake = new Handshake(m_Socket);
     connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
+
 
 }
 
 NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(parent){
     m_Socket = new QTcpSocket;
 
-    QString ip  = contact->getHost();
-    quint16 port = contact->getPort();
+    m_contact = contact;
+
+    QString ip  = m_contact->getHost();
+    quint16 port = m_contact->getPort();
+
+
 
     //Close previous connection if already connected with this socket
     if(m_Socket->state() == QAbstractSocket::ConnectedState ||
@@ -26,7 +31,7 @@ NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(paren
 }
 
 void NetworkManager::onConnect(){
-    m_handshake = new Handshake(m_Socket,contact);
+    m_handshake = new Handshake(m_Socket,m_contact);
     connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
     connect(m_handshake,SIGNAL(connectionClosed()),
             this,SLOT(deleteLater()));
@@ -35,6 +40,10 @@ void NetworkManager::onConnect(){
 }
 
 void NetworkManager::onIdentified(){
+
+    m_contact = m_handshake->getContact();
+
+    qDebug()<<m_contact->getName();
 
     m_handshake = 0;
     delete m_handshake;
@@ -55,7 +64,7 @@ void NetworkManager::onIdentified(){
     m_MessengerWindow = new MessengerWindow((qint8)MESSENGER);
      QString ip = m_Socket->peerAddress().toString();
 
-     m_MessengerWindow->displayMessage(Message("Connected to : "+ip, Message::SERVICE));
+     m_MessengerWindow->displayMessage(Message("Connected to : "+m_contact->getName()+"("+ip+")", Message::SERVICE));
 
      connect(m_Opusdevice,SIGNAL(readyRead()),
              this, SLOT(onVoIPReadyRead()));
@@ -92,21 +101,17 @@ void NetworkManager::readIncomingData(){
     //decrypt AES
     mCfbAesDec.ProcessString((byte*)data.data(), data.length());
 
-    qDebug()<<data;
-
     quint8 appIDparse = data.at(0);
     data.remove(0,1);
 
 
 
     if (appIDparse == MESSENGER) m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
-    else if (appIDparse == SYSTEM) m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
-    else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
-
-    if (appIDparse == VOIP){
+    else if (appIDparse == VOIP){
         m_Opusdevice->write(data);
     }
     else if (appIDparse == SYSTEM){
+        m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
         if(data == "VOIP"){
             if(voip->getCallState() == VoIP::OFFLINE){
                 m_MessengerWindow->changeButtonState(false);
@@ -119,7 +124,7 @@ void NetworkManager::readIncomingData(){
             voip->endCall();
         }
     }
-    else qDebug()<<"ID unknown...";
+    else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
 }
 void NetworkManager::sendData(QByteArray data, quint8 appID){
 
@@ -147,7 +152,8 @@ NetworkManager::~NetworkManager(){
 
     m_Socket->close();
 
-    delete m_Socket;
+    delete m_Socket,m_Opusdevice,m_settings,voip,m_handshake,m_contact,m_MessengerWindow,mAesIv
+            ,mAesKey,mCfbAesDec,mCfbAesEnc;
 
 
 }

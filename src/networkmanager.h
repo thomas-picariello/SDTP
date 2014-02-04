@@ -47,7 +47,7 @@ private :
     //QJrtp *m_QJrtp;
     VoIP *voip;
     Handshake *m_handshake;
-    Contact *contact;
+    Contact *m_contact;
     MessengerWindow *m_MessengerWindow;
     QByteArray mAesKey;
     QByteArray mAesIv;
