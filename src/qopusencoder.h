@@ -2,29 +2,23 @@
 #define QOPUSENCODER_H
 
 #include <QDebug>
-#include <QObject>
 #include <QIODevice>
-#include <QBuffer>
 #include <QAudioFormat>
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QByteArray>
 #include <opus/opus.h>
 
-class QOpusDevice : public QIODevice
+class QOpusEncoder : public QIODevice
 {
     Q_OBJECT
 public:
-    explicit QOpusDevice(int frameSizeInMicrosecs = 200,
-                         QIODevice* parent = 0);
-    explicit QOpusDevice(QIODevice *deviceToUse,
-                         int frameSizeInMicrosecs = 200,
+    explicit QOpusEncoder(int frameSizeInMicrosecs = 200,
                          QIODevice* parent = 0);
     bool open();
     void close();
     bool isSequential() const;
 
-    bool hasInternalBuffer() const;
     int getFrameSize() const;
     void setFrameSize(int frameSizeInMicrosecs);
     int getEncoderApplication() const;
@@ -34,7 +28,7 @@ public:
 
     static QString getOpusErrorDesc(int errorCode);
 
-    ~QOpusDevice();
+    ~QOpusEncoder();
 
 signals:
     void error(const int err);
@@ -47,20 +41,14 @@ protected:
     qint64 writeData(const char * data, qint64 maxSize);
 
 private:
-    const bool internalBufferFlag;
-
     OpusEncoder *mEncoder;
-    OpusDecoder *mDecoder;
-    QIODevice *mUnderlyingDevice;
     QByteArray mBuffer;
     QAudioFormat mAudioFormat;
     int mError;
     int mOpusFrameSize;
     int mApplication;
 
-    void initOpus();
-
-    Q_DISABLE_COPY(QOpusDevice)
+    Q_DISABLE_COPY(QOpusEncoder)
 };
 
 #endif // QOPUSENCODER_H
