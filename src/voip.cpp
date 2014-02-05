@@ -19,7 +19,7 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
         format = info.nearestFormat(format);
     }
     mAudioInput = new QAudioInput(format, this);
-    mAudioInput->setNotifyInterval(mOpusEncoder->getFrameSize()/10);
+    mAudioInput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
     connect(mAudioInput, SIGNAL(notify()),
             mOpusEncoder, SLOT(encode()));
 
@@ -29,6 +29,7 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
         qWarning() << "Raw audio format not supported by backend, cannot play audio.";
     }
     mAudioOutput = new QAudioOutput(format, this);
+    mAudioOutput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
 
     connect(mOpusEncoder, SIGNAL(readyRead()),
             this, SIGNAL(readyRead()));
@@ -43,7 +44,7 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
 
 void VoIP::start(){
     mAudioInput->start(mOpusEncoder);
-    mAudioOutput->start(mOpusDecoder);
+    //mAudioOutput->start(mOpusDecoder);
     setOpenMode(ReadWrite);
 }
 
@@ -59,7 +60,7 @@ qint64 VoIP::readData(char * data, qint64 maxSize){
 }
 
 qint64 VoIP::writeData(const char * data, qint64 maxSize){
-    if(mAudioOutput->state() != QAudio::ActiveState)
+    if(mAudioOutput->state() != QAudio::ActiveState && openMode() == ReadWrite)
         mAudioOutput->start(mOpusDecoder);
     qint64 written = mOpusDecoder->write(data, maxSize);
     return written;

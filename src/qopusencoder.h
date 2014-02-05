@@ -13,13 +13,15 @@ class QOpusEncoder : public QIODevice
 {
     Q_OBJECT
 public:
-    explicit QOpusEncoder(int frameSizeInMicrosecs = 200,
+    explicit QOpusEncoder(float frameSizeInMs = 20.0,
                          QIODevice* parent = 0);
 
     bool isSequential() const;
 
-    int getFrameSize() const;
-    void setFrameSize(int frameSizeInMicrosecs);
+    float getBufferLength() const;
+    void setBufferLength(float lengthInMs);
+    float getOpusFrameSize() const;
+    void setOpusFrameSize(float frameSizeInMs);
     int getEncoderApplication() const;
     void setEncoderApplication(int application);
     quint64 getBitrate() const;
@@ -41,10 +43,11 @@ protected:
 
 private:
     OpusEncoder *mEncoder;
-    QByteArray mBuffer;
+    QByteArray mRawBuffer;
     QAudioFormat mAudioFormat;
     int mError;
-    int mOpusFrameSize;
+    float mOpusFrameSize;
+    float mBufferLength;
     int mApplication;
 
     Q_DISABLE_COPY(QOpusEncoder)

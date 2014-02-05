@@ -16,6 +16,8 @@ public:
     explicit QOpusDecoder(QIODevice* parent = 0);
 
     bool isSequential() const;
+    quint64 getBufferMaxSize() const;
+    void setBufferMaxSize(quint64 bytesCount);
 
     static QString getOpusErrorDesc(int errorCode);
 
@@ -25,6 +27,7 @@ signals:
     void error(const int err);
 
 public slots:
+    void decode();
 
 
 protected:
@@ -32,8 +35,9 @@ protected:
     qint64 writeData(const char * data, qint64 maxSize);
 
 private:
+    quint64 mBufferMaxSize;
     OpusDecoder *mDecoder;
-    QByteArray mBuffer;
+    QByteArray mEncodedBuffer;
     QAudioFormat mAudioFormat;
     int mError;
 
