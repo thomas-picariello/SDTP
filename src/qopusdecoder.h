@@ -37,6 +37,7 @@ protected:
 private:
     quint64 mBufferMaxSize;
     OpusDecoder *mDecoder;
+    QByteArray mRawBuffer;
     QByteArray mEncodedBuffer;
     QAudioFormat mAudioFormat;
     int mError;

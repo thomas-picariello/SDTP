@@ -44,6 +44,7 @@ protected:
 private:
     OpusEncoder *mEncoder;
     QByteArray mRawBuffer;
+    QByteArray mEncodedBuffer;
     QAudioFormat mAudioFormat;
     int mError;
     float mOpusFrameSize;
