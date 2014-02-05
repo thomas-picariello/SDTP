@@ -8,12 +8,18 @@
 #include <QSettings>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
+#include <QTime>
+#include <QDateTime>
+#include <QDataStream>
+#include <QtEndian>
+
 #include "voip.h"
 #include "message.h"
 #include "messengerwindow.h"
 #include "contact.h"
 #include "handshake.h"
 #include "qjrtp.h"
+
 
 
 using namespace CryptoPP;
@@ -49,6 +55,10 @@ private :
     MessengerWindow *m_MessengerWindow;
     QByteArray mAesKey;
     QByteArray mAesIv;
+    quint8 m_PacketCounter;
+    quint16 m_TimeStamp;
+    QTime *m_Time;
+    QDateTime *m_dateTime;
     CFB_Mode<AES>::Encryption mCfbAesEnc;
     CFB_Mode<AES>::Decryption mCfbAesDec;
 };

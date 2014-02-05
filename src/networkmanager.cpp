@@ -3,6 +3,8 @@
 NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(parent){
     m_Socket = socket;
     m_contact = new Contact();
+    m_TimeStamp = 0;
+    m_PacketCounter = 0;
     m_handshake = new Handshake(m_Socket);
     connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
 
@@ -11,7 +13,8 @@ NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(par
 
 NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(parent){
     m_Socket = new QTcpSocket;
-
+    m_TimeStamp = 0;
+    m_PacketCounter = 0;
     m_contact = contact;
 
     QString ip  = m_contact->getHost();
@@ -31,6 +34,10 @@ NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(paren
 }
 
 void NetworkManager::onConnect(){
+    m_Time = new QTime();
+    m_Time->start();
+    m_dateTime = new QDateTime();
+
     m_handshake = new Handshake(m_Socket,m_contact);
     connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
     connect(m_handshake,SIGNAL(connectionClosed()),
@@ -40,6 +47,7 @@ void NetworkManager::onConnect(){
 }
 
 void NetworkManager::onIdentified(){
+
 
     m_contact = m_handshake->getContact();
 
@@ -85,16 +93,12 @@ void NetworkManager::voipCall(){
 
         if(m_voip->openMode() != VoIP::ReadWrite){
             m_MessengerWindow->changeButtonState(false);
-            qDebug()<<m_voip->openMode()<<"1";
             m_voip->start();
-            qDebug()<<m_voip->openMode()<<"2";
             sendData("VOIP",SYSTEM);
         }
         else{
             m_MessengerWindow->changeButtonState(true);
-            qDebug()<<m_voip->openMode()<<"3";
             m_voip->stop();
-            qDebug()<<m_voip->openMode()<<"4";
             sendData("VOIPoff",SYSTEM);
         }
 
@@ -103,7 +107,6 @@ void NetworkManager::voipCall(){
 void NetworkManager::onVoIPReadyRead()
 {
     qDebug()<<"new data from m_voip";
-    qDebug()<<m_voip->openMode();
     sendData(m_voip->readAll(),VOIP);
 
 }
@@ -114,32 +117,49 @@ void NetworkManager::readIncomingData(){
     //decrypt AES
     mCfbAesDec.ProcessString((byte*)data.data(), data.length());
 
-    quint8 appIDparse = data.at(0);
-    data.remove(0,1);
+    quint16 TimeStampParse;
+    TimeStampParse = qFromBigEndian<quint16>((uchar*)data.mid(0,2).data());
 
+    qDebug()<<"TimeStamp recieved"<<TimeStampParse<<" --> "<<data.mid(0,2).toUInt();
+    quint8 PacketCounterParse = data.at(2);
+    qDebug()<<"PacketCount recieved"<<PacketCounterParse;
+    quint8 appIDparse = data.at(3);
+    qDebug()<<"appID recieved"<<appIDparse;
 
+    data = data.remove(0,4);
+    qDebug()<<data.data();
 
-    if (appIDparse == MESSENGER) m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
-    else if (appIDparse == VOIP){
-        m_voip->write(data);
-    }
-    else if (appIDparse == SYSTEM){
-        m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
-        if(data == "VOIP"){
-            qDebug()<<m_voip->openMode()<<"5";
-            if(m_voip->openMode() != VoIP::ReadWrite){
-                m_MessengerWindow->changeButtonState(false);
-                m_voip->start();
-                qDebug()<<m_voip->openMode()<<"6";
+    if(TimeStampParse <= m_dateTime->currentMSecsSinceEpoch()%64536+2000 )
+    {
+        qDebug()<<"TimeStamp : "<<TimeStampParse<<" CurrentTime : "<<m_dateTime->currentMSecsSinceEpoch()%64536<<"  Difference : "<<(m_dateTime->currentMSecsSinceEpoch()%64536)-TimeStampParse;
+            if (appIDparse == MESSENGER)
+            {
+                qDebug()<<":"<<QString(data.data());
+                m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
             }
-            else sendData("VOIPoff",SYSTEM);
-        }
-        else if (data == "VOIPoff"){
-            m_MessengerWindow->changeButtonState(true);
-            m_voip->stop();
-        }
+            else if (appIDparse == VOIP){
+                m_voip->write(data);
+            }
+            else if (appIDparse == SYSTEM){
+                m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
+                if(data == "VOIP"){
+                    if(m_voip->openMode() != VoIP::ReadWrite){
+                        m_MessengerWindow->changeButtonState(false);
+                        m_voip->start();
+                    }
+                    else sendData("VOIPoff",SYSTEM);
+                }
+                else if (data == "VOIPoff"){
+                    m_MessengerWindow->changeButtonState(true);
+                    m_voip->stop();
+                }
+            }
+            else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
     }
-    else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
+    else qDebug()<<"TimeStamp : "<<TimeStampParse<<" CurrentTime : "<<m_dateTime->currentMSecsSinceEpoch()%64536<<"  Difference : "<<(m_dateTime->currentMSecsSinceEpoch()%64536)-TimeStampParse;
+
+
+
 }
 void NetworkManager::sendData(QByteArray data, quint8 appID){
 
@@ -147,11 +167,30 @@ void NetworkManager::sendData(QByteArray data, quint8 appID){
 
         if (appID == MESSENGER) m_MessengerWindow->displayMessage(Message(QString(data), Message::SENT));
         else if (appID == SYSTEM) m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
+        else if (appID == VOIP);
         else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
-        data = data.prepend(appID);
+        m_TimeStamp = m_dateTime->currentMSecsSinceEpoch()%64536;
+
+        qDebug()<<(int)m_dateTime->currentMSecsSinceEpoch()%64536;
+        qDebug()<<"TimeStamp added"<<m_TimeStamp;
+        if(m_PacketCounter < 255)m_PacketCounter++;
+        else m_PacketCounter = 0;
+        qDebug()<<"PacketCounter added"<<m_PacketCounter;
+        data.prepend(appID);
+        qDebug()<<"appID added"<<appID;
+        data.prepend(m_PacketCounter);
+        data.prepend(m_TimeStamp%256);
+        data.prepend(m_TimeStamp/256);
+
+
         //encrypt AES
+
+
         mCfbAesEnc.ProcessString((byte*)data.data(), data.length());
         m_Socket->write(data);
+
+
+
     }else{
         m_MessengerWindow->displayMessage(Message("Couldn't send message : Not connected.", Message::ERR));
     }
