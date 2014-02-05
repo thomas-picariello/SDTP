@@ -120,21 +120,16 @@ void NetworkManager::readIncomingData(){
     quint16 TimeStampParse;
     TimeStampParse = qFromBigEndian<quint16>((uchar*)data.mid(0,2).data());
 
-    qDebug()<<"TimeStamp recieved"<<TimeStampParse<<" --> "<<data.mid(0,2).toUInt();
-    quint8 PacketCounterParse = data.at(2);
-    qDebug()<<"PacketCount recieved"<<PacketCounterParse;
+   quint8 PacketCounterParse = data.at(2);
     quint8 appIDparse = data.at(3);
-    qDebug()<<"appID recieved"<<appIDparse;
 
     data = data.remove(0,4);
-    qDebug()<<data.data();
 
     if(TimeStampParse <= m_dateTime->currentMSecsSinceEpoch()%64536+2000 )
     {
         qDebug()<<"TimeStamp : "<<TimeStampParse<<" CurrentTime : "<<m_dateTime->currentMSecsSinceEpoch()%64536<<"  Difference : "<<(m_dateTime->currentMSecsSinceEpoch()%64536)-TimeStampParse;
             if (appIDparse == MESSENGER)
             {
-                qDebug()<<":"<<QString(data.data());
                 m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
             }
             else if (appIDparse == VOIP){
@@ -171,13 +166,9 @@ void NetworkManager::sendData(QByteArray data, quint8 appID){
         else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
         m_TimeStamp = m_dateTime->currentMSecsSinceEpoch()%64536;
 
-        qDebug()<<(int)m_dateTime->currentMSecsSinceEpoch()%64536;
-        qDebug()<<"TimeStamp added"<<m_TimeStamp;
         if(m_PacketCounter < 255)m_PacketCounter++;
         else m_PacketCounter = 0;
-        qDebug()<<"PacketCounter added"<<m_PacketCounter;
         data.prepend(appID);
-        qDebug()<<"appID added"<<appID;
         data.prepend(m_PacketCounter);
         data.prepend(m_TimeStamp%256);
         data.prepend(m_TimeStamp/256);
