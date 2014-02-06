@@ -13,18 +13,25 @@ class QOpusDecoder : public QIODevice
 {
     Q_OBJECT
 public:
-    explicit QOpusDecoder(QIODevice* parent = 0);
+    explicit QOpusDecoder(QAudioFormat outputFormat,
+                          float frameSizeInMs = 20.0,
+                          QIODevice* parent = 0);
 
     bool isSequential() const;
+
+    QAudioFormat getOutputAudioFormat() const;
+    void setOutputAudioFormat(QAudioFormat outputFormat);
     quint64 getBufferMaxSize() const;
     void setBufferMaxSize(quint64 bytesCount);
+    float getOpusFrameSize() const;
+    void setOpusFrameSize(float frameSizeInMs);
 
     static QString getOpusErrorDesc(int errorCode);
 
     ~QOpusDecoder();
 
 signals:
-    void error(const int err);
+    void error(int err);
 
 public slots:
     void decode();
@@ -37,10 +44,11 @@ protected:
 private:
     quint64 mBufferMaxSize;
     OpusDecoder *mDecoder;
-    QByteArray mRawBuffer;
+    QByteArray mPcmBuffer;
     QByteArray mEncodedBuffer;
-    QAudioFormat mAudioFormat;
-    int mError;
+    QAudioFormat mOpusAudioFormat;
+    QAudioFormat mOutputAudioFormat;
+    float mOpusFrameLength;
 
     Q_DISABLE_COPY(QOpusDecoder)
 };

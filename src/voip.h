@@ -25,8 +25,8 @@ signals:
     
 public slots:
     //Debug
-    void inputStateChanged(QAudio::State state);
-    void outputStateChanged(QAudio::State state);
+    void encoderErr(int err);
+    void decoderErr(int err);
 
 protected:
     qint64 readData(char * data, qint64 maxSize);

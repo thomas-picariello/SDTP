@@ -13,13 +13,15 @@ class QOpusEncoder : public QIODevice
 {
     Q_OBJECT
 public:
-    explicit QOpusEncoder(float frameSizeInMs = 20.0,
+    explicit QOpusEncoder(QAudioFormat inputFormat, float frameSizeInMs = 20.0,
                          QIODevice* parent = 0);
 
     bool isSequential() const;
 
-    float getBufferLength() const;
-    void setBufferLength(float lengthInMs);
+    QAudioFormat getInputAudioFormat() const;
+    void setInputAudioFormat(QAudioFormat inputFormat);
+    float getBufferMaxLength() const;
+    void setBufferMaxLength(float lengthInMs);
     float getOpusFrameSize() const;
     void setOpusFrameSize(float frameSizeInMs);
     int getEncoderApplication() const;
@@ -43,11 +45,11 @@ protected:
 
 private:
     OpusEncoder *mEncoder;
-    QByteArray mRawBuffer;
+    QByteArray mPcmBuffer;
     QByteArray mEncodedBuffer;
-    QAudioFormat mAudioFormat;
-    int mError;
-    float mOpusFrameSize;
+    QAudioFormat mInputAudioFormat;
+    QAudioFormat mOpusAudioFormat;
+    float mOpusFrameLength;
     float mBufferLength;
     int mApplication;
 

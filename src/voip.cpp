@@ -1,8 +1,6 @@
 #include "voip.h"
 
 VoIP::VoIP(QIODevice *parent): QIODevice(parent){
-    mOpusDecoder = new QOpusDecoder();
-    mOpusEncoder = new QOpusEncoder();
 
     QAudioFormat format;
     format.setChannelCount(2);
@@ -10,7 +8,7 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
     format.setSampleSize(16);
     format.setCodec("audio/pcm");
     format.setByteOrder(QAudioFormat::LittleEndian); //Requiered by Opus
-    format.setSampleType(QAudioFormat::SignedInt); //Requiered by Opus (or float if using encode_float)
+    format.setSampleType(QAudioFormat::SignedInt);   //Requiered by Opus
 
     QAudioDeviceInfo info;
     info = QAudioDeviceInfo::defaultInputDevice();
@@ -19,32 +17,35 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
         format = info.nearestFormat(format);
     }
     mAudioInput = new QAudioInput(format, this);
-    mAudioInput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
-    connect(mAudioInput, SIGNAL(notify()),
-            mOpusEncoder, SLOT(encode()));
-
 
     info = QAudioDeviceInfo::defaultOutputDevice();
     if (!info.isFormatSupported(format)) {
         qWarning() << "Raw audio format not supported by backend, cannot play audio.";
     }
     mAudioOutput = new QAudioOutput(format, this);
+
+    mOpusDecoder = new QOpusDecoder(format);
+    mOpusEncoder = new QOpusEncoder(format);
+
+    mAudioInput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
     mAudioOutput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
+
+    connect(mAudioOutput, SIGNAL(notify()),
+            mOpusDecoder, SLOT(decode()));
+    connect(mAudioInput, SIGNAL(notify()),
+            mOpusEncoder, SLOT(encode()));
 
     connect(mOpusEncoder, SIGNAL(readyRead()),
             this, SIGNAL(readyRead()));
-
-    /*debug*/
-    connect(mAudioInput, SIGNAL(stateChanged(QAudio::State)),
-            this, SLOT(inputStateChanged(QAudio::State)));
-    connect(mAudioOutput, SIGNAL(stateChanged(QAudio::State)),
-            this, SLOT(outputStateChanged(QAudio::State)));
-    /**/
+    //Debug
+    connect(mOpusDecoder, SIGNAL(error(int)),
+            this, SLOT(decoderErr(int)));
+    connect(mOpusEncoder, SIGNAL(error(int)),
+            this, SLOT(encoderErr(int)));
 }
 
 void VoIP::start(){
     mAudioInput->start(mOpusEncoder);
-    //mAudioOutput->start(mOpusDecoder);
     setOpenMode(ReadWrite);
 }
 
@@ -52,6 +53,14 @@ void VoIP::stop(){
     mAudioInput->stop();
     mAudioOutput->stop();
     setOpenMode(NotOpen);
+}
+
+void VoIP::encoderErr(int err){
+    qDebug() << "encoder error:" << mOpusEncoder->getOpusErrorDesc(err);
+}
+
+void VoIP::decoderErr(int err){
+    qDebug() << "decoder error:" << mOpusDecoder->getOpusErrorDesc(err);
 }
 
 qint64 VoIP::readData(char * data, qint64 maxSize){
@@ -66,15 +75,6 @@ qint64 VoIP::writeData(const char * data, qint64 maxSize){
     return written;
 }
 
-/*debug*/
-void VoIP::inputStateChanged(QAudio::State state){
-    qDebug() << "New input state:" << state;
-}
-
-void VoIP::outputStateChanged(QAudio::State state){
-    qDebug() << "New output state:" << state;
-}
-/**/
 VoIP::~VoIP(){
     delete mOpusEncoder, mOpusDecoder, mAudioInput, mAudioOutput;
 }

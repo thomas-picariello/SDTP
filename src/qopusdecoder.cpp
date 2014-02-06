@@ -1,23 +1,37 @@
 #include "qopusdecoder.h"
 
-QOpusDecoder::QOpusDecoder(QIODevice* parent): QIODevice(parent){
-    mError = OPUS_OK;
+QOpusDecoder::QOpusDecoder(QAudioFormat outputFormat, float frameSizeInMs, QIODevice* parent):
+    QIODevice(parent)
+{
+    mOpusFrameLength = frameSizeInMs;
     mBufferMaxSize = 16384; //in bytes
+    mOutputAudioFormat = outputFormat;
 
-    mAudioFormat.setSampleRate(48000);
-    mAudioFormat.setChannelCount(2);
-    mAudioFormat.setCodec("audio/pcm");
-    mAudioFormat.setSampleSize(16);
-    mAudioFormat.setSampleType(QAudioFormat::SignedInt);
+    mOpusAudioFormat.setSampleRate(48000);
+    mOpusAudioFormat.setChannelCount(2);
+    mOpusAudioFormat.setCodec("audio/pcm");
+    mOpusAudioFormat.setSampleSize(16);
+    mOpusAudioFormat.setSampleType(QAudioFormat::SignedInt);
 
-    mDecoder = opus_decoder_create(mAudioFormat.sampleRate(),
-                                   mAudioFormat.channelCount(),
-                                   &mError);
+    int err = OPUS_OK;
+    mDecoder = opus_decoder_create(mOpusAudioFormat.sampleRate(),
+                                   mOpusAudioFormat.channelCount(),
+                                   &err);
+    if(err != OPUS_OK)
+        emit error(err);
     setOpenMode(ReadWrite);
 }
 
 bool QOpusDecoder::isSequential() const{
     return true;
+}
+
+QAudioFormat QOpusDecoder::getOutputAudioFormat() const{
+    return mOutputAudioFormat;
+}
+
+void QOpusDecoder::setOutputAudioFormat(QAudioFormat outputFormat){
+    mOutputAudioFormat = outputFormat;
 }
 
 quint64 QOpusDecoder::getBufferMaxSize() const{
@@ -29,61 +43,70 @@ void QOpusDecoder::setBufferMaxSize(quint64 bytesCount){
 }
 
 qint64 QOpusDecoder::readData(char * data, qint64 maxSize){
-    qint64 bufferSize = mEncodedBuffer.size();
+    qint64 bufferSize = mPcmBuffer.size();
     qint64 i = 0;
     while(i<maxSize && i<bufferSize){
-        data[i] = mEncodedBuffer.at(i);
+        data[i] = mPcmBuffer.at(i);
         i++;
     }
-    mEncodedBuffer.remove(0,i);
+    mPcmBuffer.remove(0,i);
     return i;
 }
+
 
 qint64 QOpusDecoder::writeData(const char * data, qint64 maxSize){
     mEncodedBuffer.append(data, maxSize);
     if(mEncodedBuffer.size() > mBufferMaxSize){
-        qDebug()<<"decoder buffer trimmed !";
+        qDebug()<<"decoder encoded buffer trimmed !";
+        qDebug()<<mEncodedBuffer.size();
         mEncodedBuffer.remove(0, mEncodedBuffer.size()-mBufferMaxSize);
     }
-    decode();
+    qDebug()<<mEncodedBuffer.size();
     return maxSize;
 }
 
-static QString getOpusErrorDesc(int errorCode){
-    switch(errorCode){
-    case OPUS_OK:
-        return "No error";
-    case OPUS_BAD_ARG:
-        return "One or more invalid/out of range arguments";
-    case OPUS_BUFFER_TOO_SMALL:
-        return "The mode struct passed is invalid";
-    case OPUS_INTERNAL_ERROR:
-        return "An internal error was detected";
-    case OPUS_INVALID_PACKET:
-        return "The compressed data passed is corrupted";
-    case OPUS_UNIMPLEMENTED:
-        return "Invalid/unsupported request number";
-    case OPUS_INVALID_STATE:
-        return "An encoder or decoder structure is invalid or already freed";
-    case OPUS_ALLOC_FAIL:
-        return "Memory allocation has failed";
-    default:
-        return "Unknown error code";
-    }
+QString QOpusDecoder::getOpusErrorDesc(int errorCode){
+    return QString(opus_strerror(errorCode));
 }
 
 void QOpusDecoder::decode(){
-    qDebug()<<"decode...";
-    //assuming that Opus reassemble the packets in an internal buffer
-//    mError = 0;
-//    mError = opus_decode(mDecoder,
-//                (const unsigned char*)payload.constData(),
-//                maxSize,
-//                reinterpret_cast<qint16 *>(data),
-//                mAudioFormat.framesForDuration(mOpusFrameSize)/mAudioFormat.channelCount(), //number of samples per channel per frame
-//                0);
+    if(mEncodedBuffer.size()==0){
+        qDebug()<<"nothing to decode !";
+    }else{
+        qint32 pcmFrameLength = mOutputAudioFormat.framesForDuration(mOpusFrameLength*1000);
+        int pcmFrameSize = pcmFrameLength * mOutputAudioFormat.bytesPerFrame()*mOutputAudioFormat.channelCount();
 
-//    if(mError < 0) emit(error(mError));
+        QVector<uchar> opusFrames(mEncodedBuffer.size());
+        QVector<qint16> pcmData(pcmFrameSize);
+
+        int i = 0;
+        for(int i=0; i<mEncodedBuffer.size(); i++){
+            opusFrames[i] = mEncodedBuffer.at(i);
+        }
+        mEncodedBuffer.resize(0);
+        qDebug()<<opusFrames.size()<<"->"<<pcmData.size();
+
+        int decodedFrames = opus_decode(mDecoder,
+                             opusFrames.constData(),
+                             opusFrames.size(),
+                             pcmData.data(),
+                             pcmFrameLength, //number of samples per channel per frame
+                             0);
+        if(decodedFrames < 0){
+            emit error(0);
+        }else{
+            //TODO: trimm mPcmBuffer if needed
+            mPcmBuffer.clear();
+            for(int i=0; i<pcmData.size(); i++){
+                char msb = (pcmData[i] >> 8) & 0xFF;
+                char lsb = pcmData[i] & 0xFF;
+                //TODO: try to inverse...
+                mPcmBuffer.append(lsb);
+                mPcmBuffer.append(msb);
+
+            }
+        }
+    }
 }
 
 QOpusDecoder::~QOpusDecoder(){
