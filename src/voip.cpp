@@ -27,13 +27,13 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
     mOpusDecoder = new QOpusDecoder(format);
     mOpusEncoder = new QOpusEncoder(format);
 
-    mAudioInput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
-    mAudioOutput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
+//    mAudioInput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
+//    mAudioOutput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
 
-    connect(mAudioOutput, SIGNAL(notify()),
-            mOpusDecoder, SLOT(decode()));
-    connect(mAudioInput, SIGNAL(notify()),
-            mOpusEncoder, SLOT(encode()));
+//    connect(mAudioOutput, SIGNAL(notify()),
+//            mOpusDecoder, SLOT(decode()));
+//    connect(mAudioInput, SIGNAL(notify()),
+//            mOpusEncoder, SLOT(encode()));
 
     connect(mOpusEncoder, SIGNAL(readyRead()),
             this, SIGNAL(readyRead()));

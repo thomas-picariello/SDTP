@@ -6,6 +6,8 @@ QOpusEncoder::QOpusEncoder(QAudioFormat inputFormat, float frameSizeInMs, QIODev
     mApplication = OPUS_APPLICATION_VOIP;
     mInputAudioFormat = inputFormat;
     mOpusFrameLength = frameSizeInMs;
+    //allocate the pcm Buffer (in frames)
+    //mPcmBuffer.resize(mInputAudioFormat.framesForDuration((qint64)mOpusFrameLength*1000));
     mBufferLength = 40.0; //for both buffers
 
 
@@ -56,17 +58,40 @@ qint64 QOpusEncoder::readData(char * data, qint64 maxSize){
     return i;
 }
 
-qint64 QOpusEncoder::writeData(const char * data, qint64 maxSize){
-    qint32 opusFrameSizeInBytes = mInputAudioFormat.bytesForDuration((int)mOpusFrameLength*1000);
-    qint32 maxBufferLengthInBytes = mInputAudioFormat.bytesForDuration((int)mBufferLength*1000);
+qint64 QOpusEncoder::writeData(const char * data, qint64 size){
+    static qint32 opusFrameLength = mInputAudioFormat.framesForDuration((qint64)mOpusFrameLength * 1000);
+    static qint32 samplesPerOpusFrame = opusFrameLength * mInputAudioFormat.channelCount();
+    //empty the buffer
+    mPcmBuffer.clear();
+    quint64 bytesProcessed = 0;
+    const uchar *sample_ptr = reinterpret_cast<const uchar*>(data);
+    //if an entire opus frame is available,
+    if(size >= samplesPerOpusFrame*2){
+        //perform the copy
+        for(int i=0; i< samplesPerOpusFrame; i++){
+            qint16 sample = qFromLittleEndian<qint16>(sample_ptr);
+            mPcmBuffer.append(sample);
+            sample_ptr += 2;
+            bytesProcessed += 2;
+        }
+        //and encode the frame
+        mEncodedBuffer.clear();
+        mEncodedBuffer.resize(4000);
 
-    mPcmBuffer.append(data, opusFrameSizeInBytes);
+        int encodedBytes = opus_encode(mEncoder,
+                                 mPcmBuffer.constData(),
+                                 mPcmBuffer.size(),
+                                 mEncodedBuffer.data(),
+                                 4000); //arbitrary packet max size
 
-    if(mPcmBuffer.size() > maxBufferLengthInBytes){
-        qDebug()<<"encoder pcm buffer trimmed !";
-        mPcmBuffer.remove(0, mPcmBuffer.size()-maxBufferLengthInBytes);
+        if(encodedBytes < 0)
+            emit(error(encodedBytes));
+        else
+            mEncodedBuffer.resize(encodedBytes);
+        qDebug()<<encodedBytes;
     }
-    return opusFrameSizeInBytes;
+    emit readyRead();
+    return bytesProcessed;
 }
 
 float QOpusEncoder::getOpusFrameSize() const{
@@ -110,33 +135,6 @@ void QOpusEncoder::setBitrate(quint64 bitrate){
 
 QString QOpusEncoder::getOpusErrorDesc(int errorCode){
     return QString(opus_strerror(errorCode));
-}
-
-void QOpusEncoder::encode(){
-    qint32 pcmFrameLength = mInputAudioFormat.framesForDuration(mOpusFrameLength*1000);
-    int pcmFrameSize = pcmFrameLength * mInputAudioFormat.bytesPerFrame()*mInputAudioFormat.channelCount();
-
-    while(mPcmBuffer.size() >= pcmFrameSize){
-        QVector<uchar> opusPacket(4000); //arbitrary packet max size
-
-        int encodedBytes = opus_encode(mEncoder,
-                                 reinterpret_cast<qint16*>(mPcmBuffer.left(pcmFrameSize).data()),
-                                 pcmFrameLength,
-                                 opusPacket.data(),
-                                 4000);
-        //remove the frame from the buffer
-        mPcmBuffer.remove(0, pcmFrameSize);
-
-        if(encodedBytes < 0){
-            emit(error(encodedBytes));
-        }else{
-            for(int i=0; i<encodedBytes; i++){
-                mEncodedBuffer.append(opusPacket[i]);
-            }
-
-        }
-    }
-    emit readyRead();
 }
 
 QOpusEncoder::~QOpusEncoder(){

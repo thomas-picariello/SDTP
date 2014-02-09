@@ -44,8 +44,8 @@ protected:
 private:
     quint64 mBufferMaxSize;
     OpusDecoder *mDecoder;
-    QByteArray mPcmBuffer;
-    QByteArray mEncodedBuffer;
+    QVector<qint16> mPcmBuffer;
+    QVector<uchar> mEncodedBuffer;
     QAudioFormat mOpusAudioFormat;
     QAudioFormat mOutputAudioFormat;
     float mOpusFrameLength;

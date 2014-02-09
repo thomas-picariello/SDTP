@@ -7,6 +7,7 @@
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QByteArray>
+#include <QtEndian>
 #include <opus/opus.h>
 
 class QOpusEncoder : public QIODevice
@@ -36,17 +37,14 @@ public:
 signals:
     void error(const int err);
 
-public slots:
-    void encode();
-
 protected:
     qint64 readData(char * data, qint64 maxSize);
-    qint64 writeData(const char * data, qint64 maxSize);
+    qint64 writeData(const char * data, qint64 size);
 
 private:
     OpusEncoder *mEncoder;
-    QByteArray mPcmBuffer;
-    QByteArray mEncodedBuffer;
+    QVector<qint16> mPcmBuffer;
+    QVector<uchar> mEncodedBuffer;
     QAudioFormat mInputAudioFormat;
     QAudioFormat mOpusAudioFormat;
     float mOpusFrameLength;
