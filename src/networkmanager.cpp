@@ -7,12 +7,11 @@ NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(par
     m_PacketCounter = 0;
     m_handshake = new Handshake(m_Socket);
     connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
-
-
 }
 
 NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(parent){
     m_Socket = new QTcpSocket;
+
     m_TimeStamp = 0;
     m_PacketCounter = 0;
     m_contact = contact;
@@ -34,8 +33,7 @@ NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(paren
 }
 
 void NetworkManager::onConnect(){
-    m_Time = new QTime();
-    m_Time->start();
+
     m_dateTime = new QDateTime();
 
     m_handshake = new Handshake(m_Socket,m_contact);
@@ -62,10 +60,8 @@ void NetworkManager::onIdentified(){
     m_settings = new QSettings;
 
     m_voip = new VoIP();
-    //m_QJrtp = new QJrtp();
 
-    mAesKey = key; //16 byte = 128 bits, filled with 0x0.
-
+    mAesKey = key;
 
 
     mAesIv = QByteArray(AES::BLOCKSIZE, 0x0); //filled with 0x0.
@@ -106,12 +102,10 @@ void NetworkManager::voipCall(){
 
 void NetworkManager::onVoIPReadyRead()
 {
-    qDebug()<<"new data from m_voip";
+    //qDebug()<<"new data from m_voip";
     sendData(m_voip->readAll(),VOIP);
 
 }
-
-
 void NetworkManager::readIncomingData(){
     QByteArray data = m_Socket->readAll();
     //decrypt AES
@@ -120,7 +114,11 @@ void NetworkManager::readIncomingData(){
     quint16 TimeStampParse;
     TimeStampParse = qFromBigEndian<quint16>((uchar*)data.mid(0,2).data());
 
-   quint8 PacketCounterParse = data.at(2);
+
+    quint8 PacketCounterParse = data.at(2);
+
+
+
     quint8 appIDparse = data.at(3);
 
     data = data.remove(0,4);
@@ -166,12 +164,12 @@ void NetworkManager::sendData(QByteArray data, quint8 appID){
         else m_MessengerWindow->displayMessage(Message(QString("An unknown app has sent the following message : \n"+data), Message::ERR));
         m_TimeStamp = m_dateTime->currentMSecsSinceEpoch()%64536;
 
-        if(m_PacketCounter < 255)m_PacketCounter++;
-        else m_PacketCounter = 0;
+        m_PacketCounter++;
+
         data.prepend(appID);
         data.prepend(m_PacketCounter);
-        data.prepend(m_TimeStamp%256);
-        data.prepend(m_TimeStamp/256);
+        data.prepend(m_TimeStamp&0xff);
+        data.prepend((m_TimeStamp>>8)&0xff);
 
 
         //encrypt AES

@@ -29,6 +29,7 @@ set(SVOIP_HEADERS
     networkmanager.h
     handshake.h
     qjrtp.h
+    packetassembler.h
 )
 
 set(SVOIP_SOURCES
@@ -46,6 +47,7 @@ set(SVOIP_SOURCES
     networkmanager.cpp
     handshake.cpp
     qjrtp.cpp
+packetassembler.cpp
 )
 
 set(SVOIP_FORMS

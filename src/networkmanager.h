@@ -8,7 +8,6 @@
 #include <QSettings>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
-#include <QTime>
 #include <QDateTime>
 #include <QDataStream>
 #include <QtEndian>
@@ -29,7 +28,7 @@ class NetworkManager : public QObject
     Q_OBJECT
 
 public:
-    enum AppID{MESSENGER,VOIP ,SYSTEM,UNKNOWN}; // 0-10 are reserved IDs.
+    enum AppID{MESSENGER,VOIP ,SYSTEM,SYNC,UNKNOWN}; // 0-10 are reserved IDs.
 
     NetworkManager(QTcpSocket *socket,  QObject *parent=0);
     NetworkManager(Contact *contact,  QObject *parent=0);
