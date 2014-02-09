@@ -1,9 +1,9 @@
 #include "qopusdecoder.h"
 
-QOpusDecoder::QOpusDecoder(QAudioFormat outputFormat, float frameSizeInMs, QIODevice* parent):
+QOpusDecoder::QOpusDecoder(QAudioFormat outputFormat, QIODevice* parent):
     QIODevice(parent)
 {
-    mOpusFrameLength = frameSizeInMs;
+    mOpusFrameLength = 20.0;
     mBufferMaxSize = 4000; //in bytes (is the largest opus packet size set)
     mOutputAudioFormat = outputFormat;
 

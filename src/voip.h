@@ -19,7 +19,6 @@ public:
 
     void start();
     void stop();
-    ~VoIP();
 
 signals:
     

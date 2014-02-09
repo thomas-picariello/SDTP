@@ -24,8 +24,8 @@ VoIP::VoIP(QIODevice *parent): QIODevice(parent){
     }
     mAudioOutput = new QAudioOutput(format, this);
 
-    mOpusDecoder = new QOpusDecoder(format);
-    mOpusEncoder = new QOpusEncoder(format);
+    mOpusDecoder = new QOpusDecoder(format, this);
+    mOpusEncoder = new QOpusEncoder(format, this);
 
 //    mAudioInput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
 //    mAudioOutput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
@@ -73,8 +73,4 @@ qint64 VoIP::writeData(const char * data, qint64 maxSize){
         mAudioOutput->start(mOpusDecoder);
     qint64 written = mOpusDecoder->write(data, maxSize);
     return written;
-}
-
-VoIP::~VoIP(){
-    delete mOpusEncoder, mOpusDecoder, mAudioInput, mAudioOutput;
 }

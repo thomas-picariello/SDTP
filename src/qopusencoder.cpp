@@ -1,15 +1,12 @@
 #include "qopusencoder.h"
 
-QOpusEncoder::QOpusEncoder(QAudioFormat inputFormat, float frameSizeInMs, QIODevice* parent):
+QOpusEncoder::QOpusEncoder(QAudioFormat inputFormat, QIODevice* parent):
     QIODevice(parent)
 {
     mApplication = OPUS_APPLICATION_VOIP;
     mInputAudioFormat = inputFormat;
-    mOpusFrameLength = frameSizeInMs;
-    //allocate the pcm Buffer (in frames)
-    //mPcmBuffer.resize(mInputAudioFormat.framesForDuration((qint64)mOpusFrameLength*1000));
+    mOpusFrameLength = 20.0;
     mBufferLength = 40.0; //for both buffers
-
 
     mOpusAudioFormat.setSampleRate(48000);
     mOpusAudioFormat.setChannelCount(2);
@@ -61,29 +58,30 @@ qint64 QOpusEncoder::readData(char * data, qint64 maxSize){
 qint64 QOpusEncoder::writeData(const char * data, qint64 size){
     static qint32 opusFrameLength = mInputAudioFormat.framesForDuration((qint64)mOpusFrameLength * 1000);
     static qint32 samplesPerOpusFrame = opusFrameLength * mInputAudioFormat.channelCount();
-    //empty the buffer
-    mPcmBuffer.clear();
+    static quint8 sampleSize = mInputAudioFormat.sampleSize()/8;
+
     quint64 bytesProcessed = 0;
-    const uchar *sample_ptr = reinterpret_cast<const uchar*>(data);
+
     //if an entire opus frame is available,
-    if(size >= samplesPerOpusFrame*2){
+    if(size >= samplesPerOpusFrame*sampleSize){
+        const uchar *sample_ptr = reinterpret_cast<const uchar*>(data);
+        //empty the buffer
+        mPcmBuffer.clear();
         //perform the copy
         for(int i=0; i< samplesPerOpusFrame; i++){
             qint16 sample = qFromLittleEndian<qint16>(sample_ptr);
             mPcmBuffer.append(sample);
-            sample_ptr += 2;
-            bytesProcessed += 2;
+            sample_ptr += sampleSize;
+            bytesProcessed += sampleSize;
         }
         //and encode the frame
         mEncodedBuffer.clear();
         mEncodedBuffer.resize(4000);
-
         int encodedBytes = opus_encode(mEncoder,
                                  mPcmBuffer.constData(),
                                  mPcmBuffer.size(),
                                  mEncodedBuffer.data(),
                                  4000); //arbitrary packet max size
-
         if(encodedBytes < 0)
             emit(error(encodedBytes));
         else

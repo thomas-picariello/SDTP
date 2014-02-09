@@ -14,7 +14,6 @@ class QOpusDecoder : public QIODevice
     Q_OBJECT
 public:
     explicit QOpusDecoder(QAudioFormat outputFormat,
-                          float frameSizeInMs = 20.0,
                           QIODevice* parent = 0);
 
     bool isSequential() const;

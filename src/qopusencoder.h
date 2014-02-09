@@ -14,8 +14,7 @@ class QOpusEncoder : public QIODevice
 {
     Q_OBJECT
 public:
-    explicit QOpusEncoder(QAudioFormat inputFormat, float frameSizeInMs = 20.0,
-                         QIODevice* parent = 0);
+    explicit QOpusEncoder(QAudioFormat inputFormat, QIODevice* parent = 0);
 
     bool isSequential() const;
 
