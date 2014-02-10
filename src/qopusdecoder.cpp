@@ -1,21 +1,14 @@
 #include "qopusdecoder.h"
 
 QOpusDecoder::QOpusDecoder(QAudioFormat outputFormat, QIODevice* parent):
-    QIODevice(parent)
+    QIODevice(parent),
+    mOpusFrameLength(20.0),
+    mBufferMaxSize(4000), //in bytes (is the largest opus packet size set)
+    mOutputAudioFormat(outputFormat)
 {
-    mOpusFrameLength = 20.0;
-    mBufferMaxSize = 4000; //in bytes (is the largest opus packet size set)
-    mOutputAudioFormat = outputFormat;
-
-    mOpusAudioFormat.setSampleRate(48000);
-    mOpusAudioFormat.setChannelCount(2);
-    mOpusAudioFormat.setCodec("audio/pcm");
-    mOpusAudioFormat.setSampleSize(16);
-    mOpusAudioFormat.setSampleType(QAudioFormat::SignedInt);
-
     int err = OPUS_OK;
-    mDecoder = opus_decoder_create(mOpusAudioFormat.sampleRate(),
-                                   mOpusAudioFormat.channelCount(),
+    mDecoder = opus_decoder_create(48000,
+                                   2,
                                    &err);
     if(err != OPUS_OK)
         emit error(err);
@@ -53,14 +46,13 @@ qint64 QOpusDecoder::readData(char * data, qint64 maxSize){
     return i*2;
 }
 
-
-qint64 QOpusDecoder::writeData(const char * data, qint64 maxSize){
+qint64 QOpusDecoder::writeData(const char * data, qint64 size){
     const uchar *data_ptr = reinterpret_cast<const uchar*>(data);
 
     mEncodedBuffer.clear();
     mEncodedBuffer.reserve(mBufferMaxSize);
     int i = 0;
-    while(i<maxSize && i<mBufferMaxSize){
+    while(i<size && i<mBufferMaxSize){
         mEncodedBuffer.append(data_ptr[i]);
         i++;
     }
