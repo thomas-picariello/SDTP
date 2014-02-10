@@ -45,9 +45,10 @@ qint64 QOpusEncoder::writeData(const char * data, qint64 size){
     static quint8 sampleSize = mInputAudioFormat.sampleSize()/8;
 
     quint64 bytesProcessed = 0;
+    quint64 offset = 0;
 
     //if an entire opus frame is available,
-    if(size >= samplesPerOpusFrame*sampleSize){
+    while(size-offset >= samplesPerOpusFrame*sampleSize){
         const uchar *sample_ptr = reinterpret_cast<const uchar*>(data);
         //empty the buffer
         mPcmBuffer.clear();
@@ -58,7 +59,6 @@ qint64 QOpusEncoder::writeData(const char * data, qint64 size){
             sample_ptr += sampleSize;
             bytesProcessed += sampleSize;
         }
-        qDebug()<<mPcmBuffer.size();
         //and encode the frame
         mEncodedBuffer.clear();
         mEncodedBuffer.resize(4000);
@@ -71,7 +71,7 @@ qint64 QOpusEncoder::writeData(const char * data, qint64 size){
             emit(error(encodedBytes));
         else
             mEncodedBuffer.resize(encodedBytes);
-        qDebug()<<encodedBytes;
+        offset += samplesPerOpusFrame*sampleSize;
     }
     emit readyRead();
     return bytesProcessed;

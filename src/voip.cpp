@@ -68,9 +68,9 @@ qint64 VoIP::readData(char * data, qint64 maxSize){
     return read;
 }
 
-qint64 VoIP::writeData(const char * data, qint64 maxSize){
+qint64 VoIP::writeData(const char * data, qint64 size){
     if(mAudioOutput->state() != QAudio::ActiveState && openMode() == ReadWrite)
         mAudioOutput->start(mOpusDecoder);
-    qint64 written = mOpusDecoder->write(data, maxSize);
-    return written;
+    qint64 bytesWritten = mOpusDecoder->write(data, size);
+    return bytesWritten;
 }
