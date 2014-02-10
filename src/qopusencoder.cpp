@@ -1,22 +1,14 @@
-    #include "qopusencoder.h"
+#include "qopusencoder.h"
 
 QOpusEncoder::QOpusEncoder(QAudioFormat inputFormat, QIODevice* parent):
-    QIODevice(parent)
+    QIODevice(parent),
+    mApplication(OPUS_APPLICATION_VOIP),
+    mInputAudioFormat(inputFormat),
+    mOpusFrameLength(20.0)
 {
-    mApplication = OPUS_APPLICATION_VOIP;
-    mInputAudioFormat = inputFormat;
-    mOpusFrameLength = 20.0;
-    mBufferLength = 40.0; //for both buffers
-
-    mOpusAudioFormat.setSampleRate(48000);
-    mOpusAudioFormat.setChannelCount(2);
-    mOpusAudioFormat.setCodec("audio/pcm");
-    mOpusAudioFormat.setSampleSize(16);
-    mOpusAudioFormat.setSampleType(QAudioFormat::SignedInt);
-
     int err = OPUS_OK;
-    mEncoder = opus_encoder_create(mOpusAudioFormat.sampleRate(),
-                                   mOpusAudioFormat.channelCount(),
+    mEncoder = opus_encoder_create(48000,
+                                   2,
                                    mApplication,
                                    &err);
     if(err != OPUS_OK)
@@ -34,14 +26,6 @@ QAudioFormat QOpusEncoder::getInputAudioFormat() const{
 
 void QOpusEncoder::setInputAudioFormat(QAudioFormat inputFormat){
     mInputAudioFormat = inputFormat;
-}
-
-float QOpusEncoder::getBufferMaxLength() const{
-    return mBufferLength;
-}
-
-void QOpusEncoder::setBufferMaxLength(float lengthInMs){
-    mBufferLength = lengthInMs;
 }
 
 qint64 QOpusEncoder::readData(char * data, qint64 maxSize){
@@ -74,6 +58,7 @@ qint64 QOpusEncoder::writeData(const char * data, qint64 size){
             sample_ptr += sampleSize;
             bytesProcessed += sampleSize;
         }
+        qDebug()<<mPcmBuffer.size();
         //and encode the frame
         mEncodedBuffer.clear();
         mEncodedBuffer.resize(4000);

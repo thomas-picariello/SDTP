@@ -20,8 +20,6 @@ public:
 
     QAudioFormat getInputAudioFormat() const;
     void setInputAudioFormat(QAudioFormat inputFormat);
-    float getBufferMaxLength() const;
-    void setBufferMaxLength(float lengthInMs);
     float getOpusFrameSize() const;
     void setOpusFrameSize(float frameSizeInMs);
     int getEncoderApplication() const;
@@ -45,9 +43,7 @@ private:
     QVector<qint16> mPcmBuffer;
     QVector<uchar> mEncodedBuffer;
     QAudioFormat mInputAudioFormat;
-    QAudioFormat mOpusAudioFormat;
     float mOpusFrameLength;
-    float mBufferLength;
     int mApplication;
 
     Q_DISABLE_COPY(QOpusEncoder)
