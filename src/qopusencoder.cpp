@@ -1,4 +1,4 @@
-#include "qopusencoder.h"
+    #include "qopusencoder.h"
 
 QOpusEncoder::QOpusEncoder(QAudioFormat inputFormat, QIODevice* parent):
     QIODevice(parent)
