@@ -21,6 +21,15 @@ public:
     void start();
     void stop();
 
+    QAudioFormat getAudioFormat() const;
+    void setAudioFormat(QAudioFormat format);
+    float getOpusFrameSize() const;
+    void setOpusFrameSize(float frameSizeInMs);
+    int getEncoderApplication() const;
+    void setEncoderApplication(int application);
+    quint64 getBitrate() const;
+    void setBitrate(quint64 bitrate);
+
     ~VoIP();
 
 signals:
@@ -43,7 +52,7 @@ private:
     QPcmBuffer mOutputPcmBuffer;
     QByteArray mInputEncodedBuffer;
     QByteArray mOutputEncodedBuffer;
-
+    int mApplication;
     float mOpusFrameLength;
 
     //Debug

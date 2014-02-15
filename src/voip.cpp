@@ -1,6 +1,7 @@
 #include "voip.h"
 
 VoIP::VoIP(QIODevice *parent):QIODevice(parent){
+    mApplication = OPUS_APPLICATION_VOIP;
     mOpusFrameLength = 40.0;
 
     mAudioFormat.setChannelCount(2);
@@ -25,12 +26,9 @@ VoIP::VoIP(QIODevice *parent):QIODevice(parent){
     mAudioOutput = new QAudioOutput(mAudioFormat, this);
 
     mAudioInput->setNotifyInterval((int)mOpusFrameLength);
-//    mAudioOutput->setNotifyInterval((int)mOpusFrameLength);
 
     connect(mAudioInput, SIGNAL(notify()),
             this, SLOT(opusEncode()));
-//    connect(mAudioOutput, SIGNAL(notify()),
-//            this, SLOT(opusDecode()));
 
     //the input pcm buffer size is set to the duration of the opus frame
     mInputPcmBuffer.setMaxSize(mAudioFormat.framesForDuration((qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount());
@@ -40,7 +38,7 @@ VoIP::VoIP(QIODevice *parent):QIODevice(parent){
     mOutputPcmBuffer.open(ReadWrite);
 
     int err = OPUS_OK;
-    mEncoder = opus_encoder_create(48000, 2, OPUS_APPLICATION_VOIP, &err);
+    mEncoder = opus_encoder_create(48000, 2, mApplication, &err);
     if(err != OPUS_OK)
         displayOpusErr(err);
     mDecoder = opus_decoder_create(48000, 2, &err);
@@ -57,6 +55,53 @@ void VoIP::stop(){
     mAudioInput->stop();
     mAudioOutput->stop();
     setOpenMode(NotOpen);
+}
+
+QAudioFormat VoIP::getAudioFormat() const{
+    return mAudioFormat;
+}
+
+void VoIP::setAudioFormat(QAudioFormat format){
+    mAudioFormat = format;
+}
+
+float VoIP::getOpusFrameSize() const{
+    return mOpusFrameLength;
+}
+
+void VoIP::setOpusFrameSize(float frameSizeInMs){
+    QList<int> authorisedValues;
+    authorisedValues << 2.5 << 5.0 << 10.0 << 20.0 << 40.0 << 60.0;
+    if(authorisedValues.contains(frameSizeInMs)){
+        mOpusFrameLength = frameSizeInMs;
+    }
+}
+
+int VoIP::getEncoderApplication() const{
+    return mApplication;
+}
+
+void VoIP::setEncoderApplication(int application){
+    QList<int> authorisedValues;
+    authorisedValues << OPUS_APPLICATION_AUDIO
+                     << OPUS_APPLICATION_RESTRICTED_LOWDELAY
+                     << OPUS_APPLICATION_VOIP;
+    if(authorisedValues.contains(application)){
+        mApplication = application;
+        opus_encoder_ctl(mEncoder, OPUS_SET_APPLICATION(application));
+    }
+}
+
+quint64 VoIP::getBitrate() const{
+    qint32 returnValue;
+    opus_encoder_ctl(mEncoder, OPUS_GET_BITRATE(&returnValue));
+    return returnValue;
+}
+
+void VoIP::setBitrate(quint64 bitrate){
+    if(bitrate >= 500 && bitrate <= 512000){
+        opus_encoder_ctl(mEncoder, OPUS_SET_BITRATE(bitrate));
+    }
 }
 
 void VoIP::displayOpusErr(int err){

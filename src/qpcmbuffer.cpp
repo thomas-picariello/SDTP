@@ -91,7 +91,6 @@ void QPcmBuffer::free(qint64 size){
             mBuffer->clear();
         else
             mBuffer->remove(0, mBuffer->size()+size - mBufferMaxSize);
-        qDebug()<<"removed from buffer:"<<mBuffer->size()+size-mBufferMaxSize;
     }
 }
 
