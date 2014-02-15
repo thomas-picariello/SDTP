@@ -55,9 +55,9 @@ void QPcmBuffer::setBuffer(QVector<qint16> *buffer){
 
 qint16* QPcmBuffer::preAllocate(qint64 size){
     free(size);
-    qint16 *data_ptr = mBuffer->data()+mBuffer->size();
-    mBuffer->resize(size);
-    return data_ptr;
+    qint64 offset = mBuffer->size();
+    mBuffer->resize(mBuffer->size()+size);
+    return mBuffer->data()+offset;
 }
 
 qint16* QPcmBuffer::data(){

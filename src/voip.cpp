@@ -99,11 +99,10 @@ void VoIP::opusEncode(){
 
 void VoIP::opusDecode(){
     static int pcmFrameLength = mAudioFormat.framesForDuration((qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount();
-    qint16 *pcmOut_ptr = mOutputPcmBuffer.preAllocate(pcmFrameLength);
     int decodedFrames = opus_decode(mDecoder,
                                  reinterpret_cast<const uchar*>(mOutputEncodedBuffer.constData()),
                                  mOutputEncodedBuffer.size(),
-                                 pcmOut_ptr,
+                                 mOutputPcmBuffer.preAllocate(pcmFrameLength),
                                  pcmFrameLength/2, //number of samples per channel per frame
                                  0);
     if(decodedFrames < 0)
