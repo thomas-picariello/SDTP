@@ -3,12 +3,13 @@
 
 #include <QDebug>
 #include <QIODevice>
+#include <QBuffer>
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QAudioFormat>
 #include <QAudioDeviceInfo>
-#include "qopusencoder.h"
-#include "qopusdecoder.h"
+#include <opus/opus.h>
+#include "qpcmbuffer.h"
 
 class VoIP : public QIODevice
 {
@@ -20,12 +21,13 @@ public:
     void start();
     void stop();
 
+    ~VoIP();
+
 signals:
     
 public slots:
-    //Debug
-    void encoderErr(int err);
-    void decoderErr(int err);
+    void opusEncode();
+    void opusDecode();
 
 protected:
     qint64 readData(char * data, qint64 maxSize);
@@ -34,8 +36,20 @@ protected:
 private:
     QAudioInput *mAudioInput;
     QAudioOutput *mAudioOutput;
-    QOpusEncoder *mOpusEncoder;
-    QOpusDecoder *mOpusDecoder;
+    QAudioFormat mAudioFormat;
+    OpusEncoder *mEncoder;
+    OpusDecoder *mDecoder;
+    QPcmBuffer mInputPcmBuffer;
+    QPcmBuffer mOutputPcmBuffer;
+    QByteArray mInputEncodedBuffer;
+    QByteArray mOutputEncodedBuffer;
+
+    float mOpusFrameLength;
+
+    //Debug
+    void displayOpusErr(int err);
+
+    Q_DISABLE_COPY(VoIP)
 };
 
 #endif // VOIP_H

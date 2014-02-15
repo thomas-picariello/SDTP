@@ -1,51 +1,55 @@
 #include "voip.h"
 
-VoIP::VoIP(QIODevice *parent): QIODevice(parent){
+VoIP::VoIP(QIODevice *parent):QIODevice(parent){
+    mOpusFrameLength = 40.0;
 
-    QAudioFormat format;
-    format.setChannelCount(2);
-    format.setSampleRate(48000);
-    format.setSampleSize(16);
-    format.setCodec("audio/pcm");
-    format.setByteOrder(QAudioFormat::LittleEndian); //Requiered by Opus
-    format.setSampleType(QAudioFormat::SignedInt);   //Requiered by Opus
+    mAudioFormat.setChannelCount(2);
+    mAudioFormat.setSampleRate(48000);
+    mAudioFormat.setSampleSize(16);                        //Requiered by Opus
+    mAudioFormat.setCodec("audio/pcm");                    //Requiered by Opus
+    mAudioFormat.setByteOrder(QAudioFormat::LittleEndian); //Requiered by Opus
+    mAudioFormat.setSampleType(QAudioFormat::SignedInt);   //Requiered by Opus
 
     QAudioDeviceInfo info;
     info = QAudioDeviceInfo::defaultInputDevice();
-    if (!info.isFormatSupported(format)) {
+    if (!info.isFormatSupported(mAudioFormat)) {
         qWarning() << "Default input format not supported, trying to use the nearest.";
-        format = info.nearestFormat(format);
+        mAudioFormat = info.nearestFormat(mAudioFormat);
     }
-    mAudioInput = new QAudioInput(format, this);
+    mAudioInput = new QAudioInput(mAudioFormat, this);
 
     info = QAudioDeviceInfo::defaultOutputDevice();
-    if (!info.isFormatSupported(format)) {
+    if (!info.isFormatSupported(mAudioFormat)) {
         qWarning() << "Raw audio format not supported by backend, cannot play audio.";
     }
-    mAudioOutput = new QAudioOutput(format, this);
+    mAudioOutput = new QAudioOutput(mAudioFormat, this);
 
-    mOpusDecoder = new QOpusDecoder(format, this);
-    mOpusEncoder = new QOpusEncoder(format, this);
+    mAudioInput->setNotifyInterval((int)mOpusFrameLength);
+//    mAudioOutput->setNotifyInterval((int)mOpusFrameLength);
 
-//    mAudioInput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
-//    mAudioOutput->setNotifyInterval((int)mOpusEncoder->getOpusFrameSize());
-
+    connect(mAudioInput, SIGNAL(notify()),
+            this, SLOT(opusEncode()));
 //    connect(mAudioOutput, SIGNAL(notify()),
-//            mOpusDecoder, SLOT(decode()));
-//    connect(mAudioInput, SIGNAL(notify()),
-//            mOpusEncoder, SLOT(encode()));
+//            this, SLOT(opusDecode()));
 
-    connect(mOpusEncoder, SIGNAL(readyRead()),
-            this, SIGNAL(readyRead()));
-    //Debug
-    connect(mOpusDecoder, SIGNAL(error(int)),
-            this, SLOT(decoderErr(int)));
-    connect(mOpusEncoder, SIGNAL(error(int)),
-            this, SLOT(encoderErr(int)));
+    //the input pcm buffer size is set to the duration of the opus frame
+    mInputPcmBuffer.setMaxSize(mAudioFormat.framesForDuration((qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount());
+    //the input pcm buffer size is set to 4 time the duration of the opus frame (arbitrary)
+    mOutputPcmBuffer.setMaxSize(mAudioFormat.framesForDuration(4*(qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount());
+    mInputPcmBuffer.open(ReadWrite);
+    mOutputPcmBuffer.open(ReadWrite);
+
+    int err = OPUS_OK;
+    mEncoder = opus_encoder_create(48000, 2, OPUS_APPLICATION_VOIP, &err);
+    if(err != OPUS_OK)
+        displayOpusErr(err);
+    mDecoder = opus_decoder_create(48000, 2, &err);
+    if(err != OPUS_OK)
+        displayOpusErr(err);
 }
 
 void VoIP::start(){
-    mAudioInput->start(mOpusEncoder);
+    mAudioInput->start(&mInputPcmBuffer);
     setOpenMode(ReadWrite);
 }
 
@@ -55,22 +59,59 @@ void VoIP::stop(){
     setOpenMode(NotOpen);
 }
 
-void VoIP::encoderErr(int err){
-    qDebug() << "encoder error:" << mOpusEncoder->getOpusErrorDesc(err);
+void VoIP::displayOpusErr(int err){
+    qDebug() << "Opus error:" << opus_strerror(err);
 }
-
-void VoIP::decoderErr(int err){
-    qDebug() << "decoder error:" << mOpusDecoder->getOpusErrorDesc(err);
-}
-
 qint64 VoIP::readData(char * data, qint64 maxSize){
-    qint64 read = mOpusEncoder->read(data, maxSize);
-    return read;
+    qint64 pos = 0;
+    while((pos < maxSize) && (pos <mInputEncodedBuffer.size())){
+        data[pos] = mInputEncodedBuffer.at(pos);
+        pos++;
+    }
+    mInputEncodedBuffer.remove(0, pos);
+    return pos;
 }
 
 qint64 VoIP::writeData(const char * data, qint64 size){
     if(mAudioOutput->state() != QAudio::ActiveState && openMode() == ReadWrite)
-        mAudioOutput->start(mOpusDecoder);
-    qint64 bytesWritten = mOpusDecoder->write(data, size);
-    return bytesWritten;
+        mAudioOutput->start(&mOutputPcmBuffer);
+    mOutputEncodedBuffer.append(data, size);
+    opusDecode();
+    return size;
+}
+
+void VoIP::opusEncode(){
+    QVector<uchar> encodedFrame(4000);
+    int encodedBytes = opus_encode(mEncoder,
+                                 mInputPcmBuffer.data(),
+                                 mInputPcmBuffer.size()/2,
+                                 encodedFrame.data(),
+                                 4000);
+    if(encodedBytes < 0){
+        displayOpusErr(encodedBytes);
+    }else{
+        mInputEncodedBuffer.clear();
+        for(int i=0; i<encodedBytes; i++)
+            mInputEncodedBuffer.append(encodedFrame.at(i));
+        emit readyRead();
+    }
+}
+
+void VoIP::opusDecode(){
+    static int pcmFrameLength = mAudioFormat.framesForDuration((qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount();
+    qint16 *pcmOut_ptr = mOutputPcmBuffer.preAllocate(pcmFrameLength);
+    int decodedFrames = opus_decode(mDecoder,
+                                 reinterpret_cast<const uchar*>(mOutputEncodedBuffer.constData()),
+                                 mOutputEncodedBuffer.size(),
+                                 pcmOut_ptr,
+                                 pcmFrameLength/2, //number of samples per channel per frame
+                                 0);
+    if(decodedFrames < 0)
+        displayOpusErr(decodedFrames);
+    mOutputEncodedBuffer.clear();
+}
+
+VoIP::~VoIP(){
+    opus_decoder_destroy(mDecoder);
+    opus_encoder_destroy(mEncoder);
 }

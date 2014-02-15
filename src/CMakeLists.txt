@@ -24,8 +24,7 @@ set(SVOIP_HEADERS
     contactfactory.h
     message.h
     voip.h
-    qopusencoder.h
-    qopusdecoder.h
+    qpcmbuffer.h
     networkmanager.h
     handshake.h
     qjrtp.h
@@ -42,8 +41,7 @@ set(SVOIP_SOURCES
     contactfactory.cpp
     message.cpp
     voip.cpp
-    qopusencoder.cpp
-    qopusdecoder.cpp
+    qpcmbuffer.cpp
     networkmanager.cpp
     handshake.cpp
     qjrtp.cpp
