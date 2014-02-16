@@ -4,7 +4,7 @@ VoIP::VoIP(QIODevice *parent):QIODevice(parent){
     mApplication = OPUS_APPLICATION_VOIP;
     mOpusFrameLength = 40.0;
 
-    mAudioFormat.setChannelCount(2);
+    mAudioFormat.setChannelCount(1);
     mAudioFormat.setSampleRate(48000);
     mAudioFormat.setSampleSize(16);                        //Requiered by Opus
     mAudioFormat.setCodec("audio/pcm");                    //Requiered by Opus
@@ -45,7 +45,7 @@ VoIP::VoIP(QIODevice *parent):QIODevice(parent){
     if(err != OPUS_OK)
         displayOpusErr(err);
 
-    //setBitrate(50000);
+    setBitrate(25000);
 }
 
 void VoIP::start(){
