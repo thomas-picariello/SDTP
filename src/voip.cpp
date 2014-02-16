@@ -32,18 +32,20 @@ VoIP::VoIP(QIODevice *parent):QIODevice(parent){
 
     //the input pcm buffer size is set to the duration of the opus frame
     mInputPcmBuffer.setMaxSize(mAudioFormat.framesForDuration((qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount());
-    //the input pcm buffer size is set to 4 time the duration of the opus frame (arbitrary)
-    mOutputPcmBuffer.setMaxSize(mAudioFormat.framesForDuration(4*(qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount());
+    //the input pcm buffer size is set to 2 time the duration of the opus frame (arbitrary)
+    mOutputPcmBuffer.setMaxSize(mAudioFormat.framesForDuration(2*(qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount());
     mInputPcmBuffer.open(ReadWrite);
     mOutputPcmBuffer.open(ReadWrite);
 
     int err = OPUS_OK;
-    mEncoder = opus_encoder_create(48000, 2, mApplication, &err);
+    mEncoder = opus_encoder_create(mAudioFormat.sampleRate(), 2, mApplication, &err);
     if(err != OPUS_OK)
         displayOpusErr(err);
-    mDecoder = opus_decoder_create(48000, 2, &err);
+    mDecoder = opus_decoder_create(mAudioFormat.sampleRate(), 2, &err);
     if(err != OPUS_OK)
         displayOpusErr(err);
+
+    //setBitrate(50000);
 }
 
 void VoIP::start(){
@@ -114,6 +116,7 @@ qint64 VoIP::readData(char * data, qint64 maxSize){
         pos++;
     }
     mInputEncodedBuffer.remove(0, pos);
+    qDebug()<<pos;
     return pos;
 }
 
