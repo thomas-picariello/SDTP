@@ -90,12 +90,12 @@ void NetworkManager::voipCall(){
         if(m_voip->openMode() != VoIP::ReadWrite){
             m_MessengerWindow->changeButtonState(false);
             m_voip->start();
-            sendData("VOIP",SYSTEM);
+            sendData("1",SYSTEM);
         }
         else{
             m_MessengerWindow->changeButtonState(true);
             m_voip->stop();
-            sendData("VOIPoff",SYSTEM);
+            sendData("0",SYSTEM);
         }
 
 }
@@ -125,7 +125,7 @@ void NetworkManager::readIncomingData(){
 
     if(TimeStampParse <= m_dateTime->currentMSecsSinceEpoch()%64536+2000 )
     {
-        qDebug()<<"TimeStamp : "<<TimeStampParse<<" CurrentTime : "<<m_dateTime->currentMSecsSinceEpoch()%64536<<"  Difference : "<<(m_dateTime->currentMSecsSinceEpoch()%64536)-TimeStampParse;
+        //qDebug()<<"TimeStamp : "<<TimeStampParse<<" CurrentTime : "<<m_dateTime->currentMSecsSinceEpoch()%64536<<"  Difference : "<<(m_dateTime->currentMSecsSinceEpoch()%64536)-TimeStampParse;
             if (appIDparse == MESSENGER)
             {
                 m_MessengerWindow->displayMessage(Message(QString(data), Message::RECIEVED));
@@ -133,16 +133,16 @@ void NetworkManager::readIncomingData(){
             else if (appIDparse == VOIP){
                 m_voip->write(data);
             }
-            else if (appIDparse == SYSTEM){
+            else if (appIDparse == SYSTEM){// 0 = VOIPOFF 1 = VOIPON
                 m_MessengerWindow->displayMessage(Message(QString("SYSTEM message : "+data), Message::SERVICE));
-                if(data == "VOIP"){
+                if(data == "1"){
                     if(m_voip->openMode() != VoIP::ReadWrite){
                         m_MessengerWindow->changeButtonState(false);
                         m_voip->start();
                     }
-                    else sendData("VOIPoff",SYSTEM);
+                    else sendData("1",SYSTEM);
                 }
-                else if (data == "VOIPoff"){
+                else if (data == "0"){
                     m_MessengerWindow->changeButtonState(true);
                     m_voip->stop();
                 }
