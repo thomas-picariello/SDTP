@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QSettings>
 #include <QMessageBox>
+#include <QIntValidator>
 
 namespace Ui {
 class SettingsWindow;
@@ -17,6 +18,9 @@ public:
     explicit SettingsWindow(QWidget *parent = 0);
     ~SettingsWindow();
 
+signals:
+    void settingsUpdated();
+
 public slots:
     void save();
     void cancel();
@@ -24,6 +28,7 @@ public slots:
 private:
     Ui::SettingsWindow *ui;
     QSettings mSettings;
+    QIntValidator mPortValidator;
 };
 
 #endif // SETTINGSWINDOW_H

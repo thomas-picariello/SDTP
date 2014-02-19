@@ -9,6 +9,9 @@
 #include "cryptopp/aes.h"
 #include "cryptopp/modes.h"
 #include "contact.h"
+#include "contactfactory.h"
+#include <QSettings>
+#include <QCoreApplication>
 
 
 using namespace CryptoPP;
@@ -21,7 +24,9 @@ class Handshake : public QObject
 public:
 
     Handshake(QTcpSocket *socket, QObject *parent=0);
-    Handshake(QTcpSocket *socket, Contact contact,  QObject *parent=0);
+    Handshake(QTcpSocket *socket, Contact *contact,  QObject *parent=0);
+    Contact* getContact();
+    QByteArray getkey();
     ~Handshake();
 
 signals :
@@ -33,10 +38,16 @@ public slots :
     void startCheckCompatibility();
     void respondCheckKey();
     void respondCheckCompatbility();
+    void finishHandshake();
+
 
 private :
     QTcpSocket *m_Socket;
-    Contact contact;
+    Contact *m_contact;
+    QSettings *m_Settings;
+    QByteArray *m_key;
+    QStringList *m_CompatibleVersions;
+
 };
 
 #endif // HANDSHAKE_H

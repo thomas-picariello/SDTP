@@ -4,34 +4,33 @@
 #include <QDebug>
 #include <QSettings>
 #include <QStringList>
+#include <QHostAddress>
+#include <QHostInfo>
 
-
-class Contact
+class Contact: public QObject
 {
-public:
-    Contact(QString name = QString(),
-            QString ip = QString(),
-            quint16 port = 0,
-            QByteArray key = QByteArray(),
-            int id = getNextAvailableID());
+    Q_OBJECT
+public: 
+    explicit Contact(QObject *parent = 0);
+    explicit Contact(int id,
+            QString name,
+            QString host,
+            quint16 port,
+            QByteArray key,
+            QObject *parent = 0);
 
-    static Contact findById(int id);
-    static Contact findByName(QString name);
-    static Contact findByIp(QString ip);
-    static Contact findByKey(QByteArray key);
-    static QList<Contact> getContactList();
-
-    static int getNextAvailableID();
+    int getNextAvailableID();
 
     int getId() const;
     QString getName() const;
-    QString getIp() const;
+    QString getHost() const;
     quint16 getPort() const;
     QByteArray getKey() const;
+    bool isResolving() const;
 
     void setId(int id);
     void setName(QString name);
-    void setIp(QString ip);
+    void setHost(QString host);
     void setPort(quint16 port);
     void setKey(QByteArray key);
     void save();
@@ -40,8 +39,10 @@ public:
 private :
     int mId;
     quint16 mPort;
-    QString mName, mIp;
+    QString mName, mHost;
     QByteArray mKey;
+
+    Q_DISABLE_COPY(Contact)
 };
 
 #endif // CONTACT_H

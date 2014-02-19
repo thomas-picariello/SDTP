@@ -3,19 +3,21 @@
 
 SettingsWindow::SettingsWindow(QWidget *parent) :QWidget(parent), ui(new Ui::SettingsWindow){
     ui->setupUi(this);
-    this->setAttribute(Qt::WA_DeleteOnClose);
 
     mSettings.beginGroup("Settings");
 
     ui->port->setText(mSettings.value("port").toString());
     ui->key->setText(mSettings.value("key").toString());
 
+    mPortValidator.setRange(0, 65535);
+    ui->port->setValidator(&mPortValidator);
+
     connect(ui->save, SIGNAL(clicked()),
             this, SLOT(save()));
     connect(ui->cancel, SIGNAL(clicked()),
             this, SLOT(cancel()));
 
-    this->show();
+    show();
 }
 
 void SettingsWindow::save(){
@@ -25,16 +27,18 @@ void SettingsWindow::save(){
     }else{
         mSettings.setValue("port", ui->port->text());
         mSettings.setValue("key", ui->key->toPlainText().toUtf8());
-        this->hide();
+        emit settingsUpdated();
+        close();
+        deleteLater();
     }
 }
 
 void SettingsWindow::cancel(){
-    this->hide();
+    close();
+    deleteLater();
 }
 
-SettingsWindow::~SettingsWindow()
-{
+SettingsWindow::~SettingsWindow(){
     mSettings.endGroup();
     delete ui;
 }

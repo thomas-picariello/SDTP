@@ -2,46 +2,63 @@
 #define VOIP_H
 
 #include <QDebug>
-#include <QObject>
+#include <QIODevice>
+#include <QBuffer>
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QAudioFormat>
 #include <QAudioDeviceInfo>
-#include <QBuffer>
-#include "contact.h"
-#include "qopusdevice.h"
+#include <opus/opus.h>
+#include "qpcmbuffer.h"
 
-class VoIP : public QObject
+class VoIP : public QIODevice
 {
     Q_OBJECT
-public:
-    enum CallState{ONLINE, OFFLINE};
 
-    explicit VoIP(QIODevice *sourceInterface = new QBuffer(),
-                  QObject *parent = 0);
-    void call(Contact const &contact);
-    void endCall();
-    QOpusDevice* getOpusDevice();
-    CallState getCallState();
+public:
+    explicit VoIP(QIODevice *parent = 0);
+
+    void start();
+    void stop();
+
+    QAudioFormat getAudioFormat() const;
+    void setAudioFormat(QAudioFormat format);
+    float getOpusFrameSize() const;
+    void setOpusFrameSize(float frameSizeInMs);
+    int getEncoderApplication() const;
+    void setEncoderApplication(int application);
+    quint64 getBitrate() const;
+    void setBitrate(quint64 bitrate);
+
     ~VoIP();
 
 signals:
-    void callStateChanged(CallState state);
     
 public slots:
-    void takeIncommingCall();
-    void startAudioOutput();
-    //Debug
-    void inputStateChanged(QAudio::State state);
-    void outputStateChanged(QAudio::State state);
-    void bufferWritten(qint64 bc);
+    void opusEncode();
+    void opusDecode();
+
+protected:
+    qint64 readData(char * data, qint64 maxSize);
+    qint64 writeData(const char * data, qint64 size);
 
 private:
     QAudioInput *mAudioInput;
     QAudioOutput *mAudioOutput;
-    QOpusDevice *mOpus;
-    QIODevice *mDataInterface;
-    CallState mCallState;
+    QAudioFormat mAudioFormat;
+    OpusEncoder *mEncoder;
+    OpusDecoder *mDecoder;
+    QPcmBuffer mInputPcmBuffer;
+    QPcmBuffer mOutputPcmBuffer;
+    QByteArray mInputEncodedBuffer;
+    QByteArray mOutputEncodedBuffer;
+    int mApplication;
+    float mOpusFrameLength;
+
+    //Debug
+    void displayOpusErr(int err);
+
+    Q_DISABLE_COPY(VoIP)
 };
 
 #endif // VOIP_H

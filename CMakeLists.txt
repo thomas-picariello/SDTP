@@ -16,6 +16,6 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 set(CMAKE_BUILD_TYPE Debug)
 
 #Set MSVC runtime linking
-setMsvcLinkType(static)
+#setMsvcLinkType(static)
 
 add_subdirectory(src)

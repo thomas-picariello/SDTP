@@ -1,42 +1,44 @@
 #include "editcontactwindow.h"
 #include "ui_editcontactwindow.h"
 
-EditContactWindow::EditContactWindow(Contact contact, QWidget *parent):
+EditContactWindow::EditContactWindow(Contact *contact, QWidget *parent):
     QWidget(parent), ui(new Ui::EditContactWindow)
 {
     mContact = contact;
+    mContact->setParent(this);
     ui->setupUi(this);
-    setAttribute(Qt::WA_DeleteOnClose);
 
     connect(ui->save, SIGNAL(clicked()),
             this, SLOT(save()));
     connect(ui->cancel, SIGNAL(clicked()),
             this, SLOT(cancel()));
 
-    ui->name->setText(mContact.getName());
-    ui->ip->setText(mContact.getIp());
-    ui->port->setText(QString::number(mContact.getPort()));
-    ui->key->setText(QString(mContact.getKey()));
+    ui->name->setText(mContact->getName());
+    ui->host->setText(mContact->getHost());
+    ui->port->setText(QString::number(mContact->getPort()));
+    ui->key->setText(QString(mContact->getKey()));
+
+    mPortValidator.setRange(0, 65535);
+    ui->port->setValidator(&mPortValidator);
 
     this->show();
 }
 
 void EditContactWindow::save(){
     QString name = ui->name->text();
-    QString ip = ui->ip->text();
+    QString host = ui->host->text();
     QString port = ui->port->text();
     QString key = ui->key->toPlainText();
 
-    if(name.isEmpty() || ip.isEmpty() || port.isEmpty() || key.isEmpty()){
+    if(name.isEmpty() || host.isEmpty() || port.isEmpty() || key.isEmpty()){
         QMessageBox::warning(this, "Incomplete", "Please fill all the fields");
     }else{
-        mContact.setName(name);
-        mContact.setPort(port.toUInt());
-        mContact.setIp(ip);
-        mContact.setKey(key.toUtf8());
-        mContact.save();
+        mContact->setName(name);
+        mContact->setPort(port.toUInt());
+        mContact->setHost(host);
+        mContact->setKey(key.toUtf8());
+        mContact->save();
         emit contactChanged();
-
         close();
         deleteLater();
     }
@@ -48,5 +50,5 @@ void EditContactWindow::cancel(){
 }
 
 EditContactWindow::~EditContactWindow(){
-    delete ui, mContact;
+    delete ui;
 }

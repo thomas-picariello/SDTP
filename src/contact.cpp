@@ -1,98 +1,19 @@
 #include "contact.h"
 
-Contact::Contact(QString name, QString ip, quint16 port, QByteArray key, int id){
-    mId = id;
-    mName = name;
-    mIp = ip;
-    mPort = port;
-    mKey = key;
+Contact::Contact(QObject *parent):
+    QObject(parent),
+    mId(getNextAvailableID())
+{
 }
 
-Contact Contact::findById(int id){
-    quint16 cPort;
-    QString cId, cName, cIp;
-    QByteArray cKey;
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    foreach(cId, settings.childGroups()){
-        if(cId.toInt() == id){
-            cName = settings.value(cId + "/name").toString();
-            cIp = settings.value(cId + "/ip").toString();
-            cPort = settings.value(cId + "/port").toUInt();
-            cKey = settings.value(cId + "/key").toByteArray();
-            break;
-        }
-    }
-    settings.endGroup();
-    return Contact(cName, cIp, cPort, cKey, cId.toInt());
-}
-
-Contact Contact::findByName(QString name){
-    quint16 cPort;
-    QString cId, cName, cIp;
-    QByteArray cKey;
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    foreach(cId, settings.childGroups()){
-        cName = settings.value(cId + "/name").toString();
-        if(cName.compare(name) == 0){
-            cIp = settings.value(cId + "/ip").toString();
-            cPort = settings.value(cId + "/port").toUInt();
-            cKey = settings.value(cId + "/key").toByteArray();
-            break;
-        }
-    }
-    settings.endGroup();
-    return Contact(cName, cIp, cPort, cKey, cId.toInt());
-}
-
-Contact Contact::findByIp(QString ip){
-    quint16 cPort;
-    QString cId, cName, cIp;
-    QByteArray cKey;
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    foreach(cId, settings.childGroups()){
-        cIp = settings.value(cId + "/ip").toString();
-        if(cIp.compare(ip) == 0){
-            cName = settings.value(cId + "/name").toString();
-            cPort = settings.value(cId + "/port").toUInt();
-            cKey = settings.value(cId + "/key").toByteArray();
-            break;
-        }
-    }
-    settings.endGroup();
-    return Contact(cName, cIp, cPort, cKey, cId.toInt());
-}
-
-Contact Contact::findByKey(QByteArray key){
-    quint16 cPort;
-    QString cId, cName, cIp;
-    QByteArray cKey;
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    foreach(cId, settings.childGroups()){
-        cKey = settings.value(cId + "/key").toByteArray();
-        if(cKey == key){ //TODO: test use cases
-            cName = settings.value(cId + "/name").toString();
-            cIp = settings.value(cId + "/ip").toString();
-            cPort = settings.value(cId + "/port").toUInt();
-            break;
-        }
-    }
-    settings.endGroup();
-    return Contact(cName, cIp, cPort, cKey, cId.toInt());
-}
-
-QList<Contact> Contact::getContactList(){
-    QSettings settings;
-    QList<Contact> contactList;
-    settings.beginGroup("Contacts");
-    QStringList idList = settings.childGroups();
-    foreach(QString id, idList)
-        contactList.append(Contact::findById(id.toInt()));
-    settings.endGroup();
-    return contactList;
+Contact::Contact(int id, QString name, QString host, quint16 port, QByteArray key, QObject *parent):
+    QObject(parent),
+    mId(id),
+    mName(name),
+    mHost(host),
+    mPort(port),
+    mKey(key)
+{
 }
 
 int Contact::getId() const{
@@ -103,8 +24,8 @@ QString Contact::getName() const{
     return mName;
 }
 
-QString Contact::getIp() const{
-    return mIp;
+QString Contact::getHost() const{
+    return mHost;
 }
 
 quint16 Contact::getPort() const{
@@ -123,8 +44,8 @@ void Contact::setName(QString name){
     mName = name;
 }
 
-void Contact::setIp(QString ip){
-    mIp = ip;
+void Contact::setHost(QString host){
+    mHost = host;
 }
 
 void Contact::setPort(quint16 port){
@@ -140,7 +61,7 @@ void Contact::save(){
     QSettings settings;
     settings.beginGroup("Contacts");
     settings.setValue(id + "/name", mName);
-    settings.setValue(id + "/ip", mIp);
+    settings.setValue(id + "/host", mHost);
     settings.setValue(id + "/port", QString::number(mPort));
     settings.setValue(id + "/key", mKey);
     settings.endGroup();

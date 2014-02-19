@@ -5,6 +5,8 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QString>
+#include <QIntValidator>
+#include <QRegExpValidator>
 #include "contact.h"
 
 namespace Ui {
@@ -16,7 +18,7 @@ class EditContactWindow : public QWidget
     Q_OBJECT
     
 public:
-    explicit EditContactWindow(Contact contact, QWidget *parent = 0);
+    explicit EditContactWindow(Contact *contact, QWidget *parent = 0);
     ~EditContactWindow();
     void fill(QString contactName);
     void clear();
@@ -30,7 +32,8 @@ public slots:
     
 private:
     Ui::EditContactWindow *ui;
-    Contact mContact;
+    Contact *mContact;
+    QIntValidator mPortValidator;
 };
 
 #endif // EDITCONTACTWINDOW_H
