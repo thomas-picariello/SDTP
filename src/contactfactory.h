@@ -1,7 +1,7 @@
 /**
  * @brief ContactFactory retrieves contact informations from the storage and returns filled Contact objects.
  *
- * Each contact should be stored according to the following path pattern:
+ * Each contact should be stored to be retrieved by the **QSettings** class according to the following path pattern:
  *
  * ~~~~~~~~~~
  * /"Contacts"/id/("name", "host", "port" or "key")
@@ -59,7 +59,7 @@ public:
     static QList<Contact*> findByName(QString name, QObject *parent = 0);
 
     /**
-     * @brief Returns all the existing contacts.
+     * @brief Returns a list of all existing contacts.
      *
      * @param parent The parent **QObject**.
      *

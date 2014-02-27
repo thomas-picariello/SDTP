@@ -107,7 +107,7 @@ void VoIP::setBitrate(quint64 bitrate){
 }
 
 void VoIP::displayOpusErr(int err){
-    qDebug() << "Opus error:" << opus_strerror(err);
+    qWarning() << "Opus error:" << opus_strerror(err);
 }
 qint64 VoIP::readData(char * data, qint64 maxSize){
     qint64 pos = 0;
@@ -116,7 +116,6 @@ qint64 VoIP::readData(char * data, qint64 maxSize){
         pos++;
     }
     mInputEncodedBuffer.remove(0, pos);
-    qDebug()<<pos;
     return pos;
 }
 
