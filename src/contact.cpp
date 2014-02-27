@@ -16,44 +16,44 @@ Contact::Contact(int id, QString name, QString host, quint16 port, QByteArray ke
 {
 }
 
-int Contact::getId() const{
-    return mId;
+void Contact::erase(){
+    QSettings settings;
+    settings.beginGroup("Contacts");
+    if(settings.childGroups().contains(QString::number(mId)))
+        settings.remove(QString::number(mId));
+    settings.endGroup();
 }
 
-QString Contact::getName() const{
-    return mName;
+int Contact::getId() const{
+    return mId;
 }
 
 QString Contact::getHost() const{
     return mHost;
 }
 
-quint16 Contact::getPort() const{
-    return mPort;
-}
-
 QByteArray Contact::getKey() const{
     return mKey;
 }
 
-void Contact::setId(int id){
-    mId = id;
+QString Contact::getName() const{
+    return mName;
 }
 
-void Contact::setName(QString name){
-    mName = name;
+int Contact::getNextAvailableID(){
+    QSettings settings;
+    settings.beginGroup("Contacts");
+    QStringList idList = settings.childGroups();
+    int freeId = 0;
+    while(idList.contains(QString::number(freeId))){
+        freeId++;
+    }
+    return freeId;
+    settings.endGroup();
 }
 
-void Contact::setHost(QString host){
-    mHost = host;
-}
-
-void Contact::setPort(quint16 port){
-    mPort = port;
-}
-
-void Contact::setKey(QByteArray key){
-    mKey = key;
+quint16 Contact::getPort() const{
+    return mPort;
 }
 
 void Contact::save(){
@@ -67,22 +67,22 @@ void Contact::save(){
     settings.endGroup();
 }
 
-void Contact::erase(){
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    if(settings.childGroups().contains(QString::number(mId)))
-        settings.remove(QString::number(mId));
-    settings.endGroup();
+void Contact::setHost(QString host){
+    mHost = host;
 }
 
-int Contact::getNextAvailableID(){
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    QStringList idList = settings.childGroups();
-    int freeId = 0;
-    while(idList.contains(QString::number(freeId))){
-        freeId++;
-    }
-    return freeId;
-    settings.endGroup();
+void Contact::setKey(QByteArray key){
+    mKey = key;
+}
+
+void Contact::setId(int id){
+    mId = id;
+}
+
+void Contact::setName(QString name){
+    mName = name;
+}
+
+void Contact::setPort(quint16 port){
+    mPort = port;
 }
