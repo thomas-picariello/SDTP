@@ -1,19 +1,58 @@
 #include "qpcmbuffer.h"
 
-QPcmBuffer::QPcmBuffer(QIODevice* parent):QIODevice(parent){
+QPcmBuffer::QPcmBuffer(QObject *parent): QIODevice(parent){
     hasExternalBuffer = false;
     mBuffer = new QVector<qint16>;
+    mBufferMaxSize = 0;
 }
 
-QPcmBuffer::QPcmBuffer(qint64 bufferMaxSize, QIODevice* parent): QIODevice(parent){
+QPcmBuffer::QPcmBuffer(qint64 maxSize, QObject* parent): QIODevice(parent){
     hasExternalBuffer = false;
     mBuffer = new QVector<qint16>;
-    mBufferMaxSize = bufferMaxSize;
+    mBufferMaxSize = maxSize;
 }
 
-QPcmBuffer::QPcmBuffer(QVector<qint16> *buffer, QIODevice *parent): QIODevice(parent){
+QPcmBuffer::QPcmBuffer(QVector<qint16> *buffer, QObject *parent): QIODevice(parent){
     hasExternalBuffer = true;
     mBuffer = buffer;
+    mBufferMaxSize = 0;
+}
+
+QPcmBuffer::~QPcmBuffer(){
+    if(!hasExternalBuffer)
+        delete mBuffer;
+}
+
+QVector<qint16>& QPcmBuffer::buffer(){
+    return *mBuffer;
+}
+
+qint16* QPcmBuffer::data(){
+    return mBuffer->data();
+}
+
+const qint16* QPcmBuffer::data() const{
+    return mBuffer->data();
+}
+
+void QPcmBuffer::free(qint64 size){
+    if(mBuffer->size()+size > mBufferMaxSize && (mBufferMaxSize != 0)){
+        if(size > mBufferMaxSize)
+            mBuffer->clear();
+        else
+            mBuffer->remove(0, mBuffer->size()+size - mBufferMaxSize);
+    }
+}
+
+qint64 QPcmBuffer::getMaxSize() const{
+    return mBufferMaxSize;
+}
+
+qint16* QPcmBuffer::preAllocate(qint64 sampleCount){
+    free(sampleCount);
+    qint64 offset = mBuffer->size();
+    mBuffer->resize(mBuffer->size()+sampleCount);
+    return mBuffer->data()+offset;
 }
 
 qint64 QPcmBuffer::readData(char * data, qint64 maxSize){
@@ -28,44 +67,13 @@ qint64 QPcmBuffer::readData(char * data, qint64 maxSize){
     return i*2;
 }
 
-qint64 QPcmBuffer::writeData(const char * data, qint64 size){
-    qint64 bytesProcessed = 0;
-    const uchar *sample_ptr = reinterpret_cast<const uchar*>(data);
-    qint16 sample;
-    free(size);
-    while((bytesProcessed < size) && (bytesProcessed/2 < mBufferMaxSize)){
-        sample = qFromLittleEndian<qint16>(sample_ptr);
-        mBuffer->append(sample);
-        sample_ptr += 2;
-        bytesProcessed += 2;
-    }
-    return bytesProcessed;
-}
-
-QVector<qint16>& QPcmBuffer::buffer(){
-    return *mBuffer;
-}
-
 void QPcmBuffer::setBuffer(QVector<qint16> *buffer){
     if(openMode() == NotOpen){
+        if(!hasExternalBuffer)
+            delete mBuffer;
         hasExternalBuffer = true;
         mBuffer = buffer;
     }
-}
-
-qint16* QPcmBuffer::preAllocate(qint64 size){
-    free(size);
-    qint64 offset = mBuffer->size();
-    mBuffer->resize(mBuffer->size()+size);
-    return mBuffer->data()+offset;
-}
-
-qint16* QPcmBuffer::data(){
-    return mBuffer->data();
-}
-
-const qint16* QPcmBuffer::data() const{
-    return mBuffer->data();
 }
 
 void QPcmBuffer::setData(const QVector<qint16> &data){
@@ -73,28 +81,26 @@ void QPcmBuffer::setData(const QVector<qint16> &data){
         mBuffer->data()[i] = data[i];
 }
 
-qint64 QPcmBuffer::size() const{
-    return mBuffer->size();
-}
-
-qint64 QPcmBuffer::getMaxSize() const{
-    return mBufferMaxSize;
-}
-
 void QPcmBuffer::setMaxSize(qint64 maxSize){
     mBufferMaxSize = maxSize;
 }
 
-void QPcmBuffer::free(qint64 size){
-    if(mBuffer->size()+size > mBufferMaxSize){
-        if(size > mBufferMaxSize)
-            mBuffer->clear();
-        else
-            mBuffer->remove(0, mBuffer->size()+size - mBufferMaxSize);
-    }
+qint64 QPcmBuffer::size() const{
+    return mBuffer->size();
 }
 
-QPcmBuffer::~QPcmBuffer(){
-    if(!hasExternalBuffer)
-        delete mBuffer;
+qint64 QPcmBuffer::writeData(const char * data, qint64 size){
+    qint64 bytesProcessed = 0;
+    const uchar *sample_ptr = reinterpret_cast<const uchar*>(data);
+    qint16 sample;
+    free(size);
+    while((bytesProcessed < size)){
+        if((mBufferMaxSize > 0) && (bytesProcessed/2 > mBufferMaxSize))
+            break;
+        sample = qFromLittleEndian<qint16>(sample_ptr);
+        mBuffer->append(sample);
+        sample_ptr += 2;
+        bytesProcessed += 2;
+    }
+    return bytesProcessed;
 }
