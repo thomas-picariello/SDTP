@@ -38,7 +38,7 @@ public:
      *
      * It is initialized with an internal **QVector<qint16>**.
      *
-     * @param maxSize the maximum size of the buffer.
+     * @param maxSize the maximum size of the buffer
      * @param parent the parent **QObject**
      */
     explicit QPcmBuffer(qint64 maxSize, QObject* parent = 0);
@@ -50,7 +50,7 @@ public:
      * or until setBuffer() is called to change the buffer.
      * QPcmBuffer doesn't take ownership of the **QVector**.
      *
-     * @param buffer a pointer to a **QVector<qint16>** to be used as buffer.
+     * @param buffer a pointer to a **QVector<qint16>** to be used as buffer
      * @param parent the parent **QObject**
      */
     explicit QPcmBuffer(QVector<qint16> *buffer, QObject* parent = 0);
@@ -61,15 +61,15 @@ public:
     ~QPcmBuffer();
 
     /**
-     * @brief Returns a reference to the internal buffer.
-     * @return A reference to the internal buffer as a **QVector<qint16>**.
+     * @brief Returns a reference to the internal buffer
+     * @return A reference to the internal buffer as a **QVector<qint16>**
      */
     QVector<qint16>& buffer();
 
     /**
      * @brief Returns a pointer to the internal buffer array.
      *
-     * @return A pointer to the internal **QVector<qint16>** data.
+     * @return A pointer to the internal **QVector<qint16>** data
      */
     qint16* data();
 
@@ -85,7 +85,7 @@ public:
      *
      * Returns *0* when the buffer has an unlimited size.
      *
-     * @return The maximum size of the internal buffer.
+     * @return The maximum size of the internal buffer
      */
     qint64 getMaxSize() const;
 
@@ -100,8 +100,8 @@ public:
      * **Warning:** A pointer previously returned by buffer() or data()
      * might **not be valid** after this operation !
      *
-     * @param sampleCount the number to pre allocate.
-     * @return A pointer to the begining of the allocated space.
+     * @param sampleCount the number to pre allocate
+     * @return A pointer to the begining of the allocated space
      */
     qint16* preAllocate(qint64 sampleCount);
 
@@ -121,7 +121,7 @@ public:
      *
      * This is the same as assigning data to buffer().
      *
-     * @param data A reference to the data to copy.
+     * @param data a reference to the data to copy
      */
     void setData(const QVector<qint16> &data);
 
@@ -130,7 +130,7 @@ public:
      *
      * If set to *0* the buffer has an unlimited size.
      *
-     * @param maxSize The maximum sample count to be contained in the buffer.
+     * @param maxSize the maximum sample count to be contained in the buffer
      */
     void setMaxSize(qint64 maxSize);
 
@@ -139,7 +139,7 @@ public:
      *
      * The size is the number of samples present in the buffer.
      *
-     * @return The actual size of the internal buffer.
+     * @return The actual size of the internal buffer
      */
     qint64 size() const;
 
