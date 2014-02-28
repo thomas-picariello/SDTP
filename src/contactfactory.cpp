@@ -19,24 +19,6 @@ Contact* ContactFactory::findById(int id, QObject *parent){
     return NULL;
 }
 
-QList<Contact*> ContactFactory::findByName(QString name, QObject *parent){
-    QList<Contact*> matchList;
-    QString cId, cName;
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    foreach(cId, settings.childGroups()){
-        cName = settings.value(cId + "/name").toString();
-        if(cName.compare(name) == 0){
-            QString cHost = settings.value(cId + "/host").toString();
-            quint16 cPort = settings.value(cId + "/port").toUInt();
-            QByteArray cKey = settings.value(cId + "/key").toByteArray();
-            matchList.append(new Contact(cId.toInt(),cName, cHost, cPort, cKey, parent));
-        }
-    }
-    settings.endGroup();
-    return matchList;
-}
-
 QList<Contact*> ContactFactory::findByHost(QString host, QObject *parent){
     QList<Contact*> matchList;
     QString cId;
@@ -73,6 +55,24 @@ Contact* ContactFactory::findByKey(QByteArray key, QObject *parent){
     }
     settings.endGroup();
     return NULL;
+}
+
+QList<Contact*> ContactFactory::findByName(QString name, QObject *parent){
+    QList<Contact*> matchList;
+    QString cId, cName;
+    QSettings settings;
+    settings.beginGroup("Contacts");
+    foreach(cId, settings.childGroups()){
+        cName = settings.value(cId + "/name").toString();
+        if(cName.compare(name) == 0){
+            QString cHost = settings.value(cId + "/host").toString();
+            quint16 cPort = settings.value(cId + "/port").toUInt();
+            QByteArray cKey = settings.value(cId + "/key").toByteArray();
+            matchList.append(new Contact(cId.toInt(),cName, cHost, cPort, cKey, parent));
+        }
+    }
+    settings.endGroup();
+    return matchList;
 }
 
 QList<Contact*> ContactFactory::getContactList(QObject *parent){
