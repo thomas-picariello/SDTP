@@ -16,6 +16,7 @@
 #define CONTACT_H
 
 #include <QSettings>
+#include <QtSql/QtSql>
 
 class Contact: public QObject
 {
@@ -76,11 +77,11 @@ public:
      */
     QString getName() const;
 
-    /**
-     * @brief Returns the next smallest available ID.
-     * @return the next available ID
-     */
-    static int getNextAvailableID();
+//    /**
+//     * @brief Returns the next smallest available ID.
+//     * @return the next available ID
+//     */
+//    static int getNextAvailableID();
 
     /**
      * @brief Returns the port to be used for the contact.

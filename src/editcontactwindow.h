@@ -8,6 +8,7 @@
 #include <QIntValidator>
 #include <QRegExpValidator>
 #include "contact.h"
+#include "contactdb.h"
 
 namespace Ui {
 class EditContactWindow;
@@ -18,7 +19,7 @@ class EditContactWindow : public QWidget
     Q_OBJECT
     
 public:
-    explicit EditContactWindow(Contact *contact, QWidget *parent = 0);
+    explicit EditContactWindow(Contact *contact, ContactDB *contactDB, QWidget *parent = 0);
     ~EditContactWindow();
     void fill(QString contactName);
     void clear();
@@ -31,6 +32,7 @@ public slots:
     void cancel();
     
 private:
+    ContactDB *mContactDB;
     Ui::EditContactWindow *ui;
     Contact *mContact;
     QIntValidator mPortValidator;

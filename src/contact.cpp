@@ -2,9 +2,9 @@
 
 Contact::Contact(QObject *parent):
     QObject(parent),
-    mId(getNextAvailableID())
-{
-}
+    mId(0),
+    mPort(0)
+{}
 
 Contact::Contact(int id, QString name, QString host, quint16 port, QByteArray key, QObject *parent):
     QObject(parent),
@@ -13,8 +13,7 @@ Contact::Contact(int id, QString name, QString host, quint16 port, QByteArray ke
     mHost(host),
     mPort(port),
     mKey(key)
-{
-}
+{}
 
 void Contact::erase(){
     QSettings settings;
@@ -40,17 +39,18 @@ QString Contact::getName() const{
     return mName;
 }
 
-int Contact::getNextAvailableID(){
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    QStringList idList = settings.childGroups();
-    int freeId = 0;
-    while(idList.contains(QString::number(freeId))){
-        freeId++;
-    }
-    return freeId;
-    settings.endGroup();
-}
+//int Contact::getNextAvailableID(){
+//    QSettings settings;
+//    settings.beginGroup("Contacts");
+//    QStringList idList = settings.childGroups();
+//    int freeId = 0;
+//    while(idList.contains(QString::number(freeId))){
+//        freeId++;
+//    }
+//    return freeId;
+//    settings.endGroup();
+//    return 0;
+//}
 
 quint16 Contact::getPort() const{
     return mPort;

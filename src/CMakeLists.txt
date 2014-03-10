@@ -8,6 +8,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Multimedia REQUIRED)
+find_package(Qt5Sql REQUIRED)
 
 find_package(Cryptlib REQUIRED)
 find_package(Opus REQUIRED)
@@ -20,6 +21,7 @@ set(SVOIP_HEADERS
     editcontactwindow.h
     messengerwindow.h
     settingswindow.h
+    contactdb.h
     contact.h
     contactfactory.h
     message.h
@@ -37,6 +39,7 @@ set(SVOIP_SOURCES
     editcontactwindow.cpp
     messengerwindow.cpp
     settingswindow.cpp
+    contactdb.cpp
     contact.cpp
     contactfactory.cpp
     message.cpp
@@ -45,7 +48,7 @@ set(SVOIP_SOURCES
     networkmanager.cpp
     handshake.cpp
     qjrtp.cpp
-packetassembler.cpp
+    packetassembler.cpp
 )
 
 set(SVOIP_FORMS
@@ -71,4 +74,4 @@ target_link_libraries(${PROJECT}
     ${JTHREAD_LIBRARIES}
 )
 
-qt5_use_modules(${PROJECT} Widgets Multimedia)
+qt5_use_modules(${PROJECT} Widgets Multimedia Sql)

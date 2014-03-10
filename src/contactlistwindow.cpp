@@ -36,22 +36,24 @@ void ContactListWindow::acceptConnection(){
 }
 
 void ContactListWindow::addContact(){
-    EditContactWindow *ecw = new EditContactWindow(new Contact(this));
+    EditContactWindow *ecw = new EditContactWindow(new Contact(), &mContactDB);
     connect(ecw, SIGNAL(contactChanged()),
             this, SLOT(refreshList()));
 }
 
 void ContactListWindow::editContact(){
     if(getSelectedContact()){
-        EditContactWindow *ecw = new EditContactWindow(getSelectedContact());
+        EditContactWindow *ecw = new EditContactWindow(getSelectedContact(), &mContactDB);
         connect(ecw, SIGNAL(contactChanged()),
                 this, SLOT(refreshList()));
     }
 }
 
 void ContactListWindow::removeContact(){
-    if(getSelectedContact()){
-        getSelectedContact()->erase();
+    QListWidgetItem *currentItem = ui->list->currentItem();
+    if(currentItem){
+        int currentId = currentItem->data(IdRole).toInt();
+        mContactDB.erase(currentId);
         refreshList();
     }
 }
@@ -73,7 +75,7 @@ void ContactListWindow::exitApp(){
 }
 
 void ContactListWindow::refreshList(){
-    mContactList = ContactFactory::getContactList();
+    mContactList = mContactDB.getAllContacts();
     qDeleteAll(mItemList);
     mItemList.clear();
     foreach(Contact *contact, mContactList){
@@ -97,7 +99,7 @@ Contact* ContactListWindow::getSelectedContact(){
     QListWidgetItem *currentItem = ui->list->currentItem();
     if(currentItem){
         int currentId = currentItem->data(IdRole).toInt();
-        return ContactFactory::findById(currentId, this);
+        return mContactDB.findById(currentId);
     }
     return NULL;
 }

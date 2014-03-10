@@ -1,10 +1,11 @@
 #include "editcontactwindow.h"
 #include "ui_editcontactwindow.h"
 
-EditContactWindow::EditContactWindow(Contact *contact, QWidget *parent):
+EditContactWindow::EditContactWindow(Contact *contact, ContactDB *contactDB, QWidget *parent):
     QWidget(parent), ui(new Ui::EditContactWindow)
 {
     mContact = contact;
+    mContactDB = contactDB;
     mContact->setParent(this);
     ui->setupUi(this);
 
@@ -37,7 +38,7 @@ void EditContactWindow::save(){
         mContact->setPort(port.toUInt());
         mContact->setHost(host);
         mContact->setKey(key.toUtf8());
-        mContact->save();
+        mContactDB->write(mContact);
         emit contactChanged();
         close();
         deleteLater();

@@ -8,6 +8,7 @@
 #include <QTcpServer>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
+#include "contactdb.h"
 #include "contactfactory.h"
 #include "contact.h"
 #include "networkmanager.h"
@@ -40,6 +41,7 @@ public slots:
     void restartListener();
     
 private:
+    ContactDB mContactDB;
     Ui::ContactListWindow *ui;
     QTcpServer *mListener;
     QList<QListWidgetItem*> mItemList;
