@@ -1,13 +1,15 @@
 #include "settingswindow.h"
 #include "ui_settingswindow.h"
 
-SettingsWindow::SettingsWindow(QWidget *parent) :QWidget(parent), ui(new Ui::SettingsWindow){
+SettingsWindow::SettingsWindow(QWidget *parent):
+    QWidget(parent),
+    ui(new Ui::SettingsWindow),
+    mSettings(new QSettings("settings.ini", QSettings::IniFormat))
+{
     ui->setupUi(this);
 
-    mSettings.beginGroup("Settings");
-
-    ui->port->setText(mSettings.value("port").toString());
-    ui->key->setText(mSettings.value("key").toString());
+    ui->port->setText(mSettings->value("network/listen_port").toString());
+    ui->key->setText(mSettings->value("keyring/public_key").toString());
 
     mPortValidator.setRange(0, 65535);
     ui->port->setValidator(&mPortValidator);
@@ -16,7 +18,6 @@ SettingsWindow::SettingsWindow(QWidget *parent) :QWidget(parent), ui(new Ui::Set
             this, SLOT(save()));
     connect(ui->cancel, SIGNAL(clicked()),
             this, SLOT(cancel()));
-
     show();
 }
 
@@ -25,8 +26,8 @@ void SettingsWindow::save(){
        ui->key->toPlainText().isEmpty()){
         QMessageBox::warning(this, "Incomplete", "Please fill all the fields");
     }else{
-        mSettings.setValue("port", ui->port->text());
-        mSettings.setValue("key", ui->key->toPlainText().toUtf8());
+        mSettings->setValue("network/listen_port", ui->port->text());
+        mSettings->setValue("keyring/public_key", ui->key->toPlainText().toUtf8());
         emit settingsUpdated();
         close();
         deleteLater();
@@ -39,6 +40,5 @@ void SettingsWindow::cancel(){
 }
 
 SettingsWindow::~SettingsWindow(){
-    mSettings.endGroup();
-    delete ui;
+    delete ui, mSettings;
 }

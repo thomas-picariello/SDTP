@@ -27,7 +27,7 @@ public slots:
     
 private:
     Ui::SettingsWindow *ui;
-    QSettings mSettings;
+    QSettings *mSettings;
     QIntValidator mPortValidator;
 };
 
