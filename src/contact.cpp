@@ -15,14 +15,6 @@ Contact::Contact(int id, QString name, QString host, quint16 port, QByteArray ke
     mKey(key)
 {}
 
-void Contact::erase(){
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    if(settings.childGroups().contains(QString::number(mId)))
-        settings.remove(QString::number(mId));
-    settings.endGroup();
-}
-
 int Contact::getId() const{
     return mId;
 }
@@ -39,32 +31,8 @@ QString Contact::getName() const{
     return mName;
 }
 
-//int Contact::getNextAvailableID(){
-//    QSettings settings;
-//    settings.beginGroup("Contacts");
-//    QStringList idList = settings.childGroups();
-//    int freeId = 0;
-//    while(idList.contains(QString::number(freeId))){
-//        freeId++;
-//    }
-//    return freeId;
-//    settings.endGroup();
-//    return 0;
-//}
-
 quint16 Contact::getPort() const{
     return mPort;
-}
-
-void Contact::save(){
-    QString id = QString::number(mId);
-    QSettings settings;
-    settings.beginGroup("Contacts");
-    settings.setValue(id + "/name", mName);
-    settings.setValue(id + "/host", mHost);
-    settings.setValue(id + "/port", QString::number(mPort));
-    settings.setValue(id + "/key", mKey);
-    settings.endGroup();
 }
 
 void Contact::setHost(QString host){

@@ -15,7 +15,6 @@
 #ifndef CONTACT_H
 #define CONTACT_H
 
-#include <QSettings>
 #include <QtSql/QtSql>
 
 class Contact: public QObject
@@ -49,11 +48,6 @@ public:
             QObject *parent = 0);
 
     /**
-     * @brief Erases the contact from the storage.
-     */
-    void erase();
-
-    /**
      * @brief Returns the hostname or the IP address of the contact.
      * @return the hostname or the IP address of the contact
      */
@@ -77,24 +71,11 @@ public:
      */
     QString getName() const;
 
-//    /**
-//     * @brief Returns the next smallest available ID.
-//     * @return the next available ID
-//     */
-//    static int getNextAvailableID();
-
     /**
      * @brief Returns the port to be used for the contact.
      * @return the port to use for the contact
      */
     quint16 getPort() const;
-
-    /**
-     * @brief Save the contact to the storage in its actual state.
-     *
-     * Some field might be left empty.
-     */
-    void save();
 
     /**
      * @brief Defines the unique ID of the contact.
