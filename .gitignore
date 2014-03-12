@@ -230,11 +230,13 @@ pip-log.txt
 *.dll
 *.dylib
 
-# Qt-es
+# Qt projects and temporary files
 
 *.pro
+*.pri
 *.pro.user
 *.pro.user.*
+
 
 moc_*.cpp
 qrc_*.cpp

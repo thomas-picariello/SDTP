@@ -15,7 +15,7 @@
 #ifndef CONTACT_H
 #define CONTACT_H
 
-#include <QtSql/QtSql>
+#include <QObject>
 
 class Contact: public QObject
 {

@@ -59,13 +59,16 @@ set(SVOIP_FORMS
 )
 
 set(SVOIP_RES
-   ../res/svoip.rc
+   ../res/res.qrc
 )
 
 #process the ui files.
-qt5_wrap_ui(SVOIP_UI_HEADERS ${SVOIP_FORMS})
+qt5_wrap_ui(SVOIP_UI_MOC ${SVOIP_FORMS})
 
-add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_HEADERS} ${SVOIP_RES})
+#process the ressource files.
+qt5_add_resources(SVOIP_RES_MOC ${SVOIP_RES})
+
+add_executable(${PROJECT} ${SVOIP_SOURCES} ${SVOIP_HEADERS} ${SVOIP_UI_MOC} ${SVOIP_RES_MOC})
 
 target_link_libraries(${PROJECT}
     ${CRYPTLIB_LIBRARIES}
