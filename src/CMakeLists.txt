@@ -21,10 +21,12 @@ set(SVOIP_HEADERS
     editcontactwindow.h
     messengerwindow.h
     settingswindow.h
+    passwordwindow.h
     contactdb.h
     contact.h
     contactfactory.h
     message.h
+    svoip.h
     voip.h
     qpcmbuffer.h
     networkmanager.h
@@ -39,10 +41,12 @@ set(SVOIP_SOURCES
     editcontactwindow.cpp
     messengerwindow.cpp
     settingswindow.cpp
+    passwordwindow.cpp
     contactdb.cpp
     contact.cpp
     contactfactory.cpp
     message.cpp
+    svoip.cpp
     voip.cpp
     qpcmbuffer.cpp
     networkmanager.cpp
@@ -56,6 +60,7 @@ set(SVOIP_FORMS
     editcontactwindow.ui
     settingswindow.ui
     messengerwindow.ui
+    passwordwindow.ui
 )
 
 set(SVOIP_RES
