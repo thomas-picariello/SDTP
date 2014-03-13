@@ -1,5 +1,5 @@
-#include "contactlistwindow.h"
 #include <QApplication>
+#include "svoip.h"
 
 int main(int argc, char *argv[])
 {
@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion("0.1");
 
 
-    ContactListWindow contactListWindow;
+    SVoIP svoip;
 
     return a.exec();
 }

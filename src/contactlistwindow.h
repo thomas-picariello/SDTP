@@ -8,7 +8,6 @@
 #include <QTcpServer>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
-#include "contactdb.h"
 #include "contactfactory.h"
 #include "contact.h"
 #include "networkmanager.h"
@@ -26,7 +25,7 @@ public:
         IdRole = 0x0101
     };
 
-    explicit ContactListWindow(QWidget *parent = 0);
+    explicit ContactListWindow(ContactDB *contactDB, QByteArray *fileKey, QWidget *parent = 0);
     ~ContactListWindow();
 
 public slots:
@@ -41,7 +40,8 @@ public slots:
     void restartListener();
     
 private:
-    ContactDB mContactDB;
+    ContactDB *mContactDB;
+    QByteArray *mFileKey;
     Ui::ContactListWindow *ui;
     QTcpServer *mListener;
     QList<QListWidgetItem*> mItemList;

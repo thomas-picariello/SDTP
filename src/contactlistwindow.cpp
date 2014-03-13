@@ -1,7 +1,12 @@
 #include "contactlistwindow.h"
 #include "ui_contactlistwindow.h"
 
-ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new Ui::ContactListWindow){
+ContactListWindow::ContactListWindow(ContactDB *contactDB, QByteArray *fileKey, QWidget *parent):
+    QWidget(parent),
+    mContactDB(contactDB),
+    mFileKey(fileKey),
+    ui(new Ui::ContactListWindow)
+{
     ui->setupUi(this);
 
     qint16 listenPort = QSettings().value("Settings/port").toInt();
@@ -27,8 +32,6 @@ ContactListWindow::ContactListWindow(QWidget *parent) : QWidget(parent), ui(new 
             this, SLOT(openSettingsWindow()));
     connect(ui->exit, SIGNAL(clicked()),
             this, SLOT(exitApp()));
-
-    show();
 }
 
 void ContactListWindow::acceptConnection(){
@@ -36,14 +39,14 @@ void ContactListWindow::acceptConnection(){
 }
 
 void ContactListWindow::addContact(){
-    EditContactWindow *ecw = new EditContactWindow(new Contact(), &mContactDB);
+    EditContactWindow *ecw = new EditContactWindow(new Contact(), mContactDB);
     connect(ecw, SIGNAL(contactChanged()),
             this, SLOT(refreshList()));
 }
 
 void ContactListWindow::editContact(){
     if(getSelectedContact()){
-        EditContactWindow *ecw = new EditContactWindow(getSelectedContact(), &mContactDB);
+        EditContactWindow *ecw = new EditContactWindow(getSelectedContact(), mContactDB);
         connect(ecw, SIGNAL(contactChanged()),
                 this, SLOT(refreshList()));
     }
@@ -53,7 +56,7 @@ void ContactListWindow::removeContact(){
     QListWidgetItem *currentItem = ui->list->currentItem();
     if(currentItem){
         int currentId = currentItem->data(IdRole).toInt();
-        mContactDB.erase(currentId);
+        mContactDB->erase(currentId);
         refreshList();
     }
 }
@@ -75,7 +78,7 @@ void ContactListWindow::exitApp(){
 }
 
 void ContactListWindow::refreshList(){
-    mContactList = mContactDB.getAllContacts();
+    mContactList = mContactDB->getAllContacts();
     qDeleteAll(mItemList);
     mItemList.clear();
     foreach(Contact *contact, mContactList){
@@ -99,7 +102,7 @@ Contact* ContactListWindow::getSelectedContact(){
     QListWidgetItem *currentItem = ui->list->currentItem();
     if(currentItem){
         int currentId = currentItem->data(IdRole).toInt();
-        return mContactDB.findById(currentId);
+        return mContactDB->findById(currentId);
     }
     return NULL;
 }
