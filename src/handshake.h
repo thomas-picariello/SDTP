@@ -9,7 +9,6 @@
 #include "cryptopp/aes.h"
 #include "cryptopp/modes.h"
 #include "contact.h"
-#include "contactfactory.h"
 #include <QSettings>
 #include <QCoreApplication>
 #include "contactdb.h"
