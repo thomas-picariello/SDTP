@@ -18,6 +18,7 @@
 #include "contact.h"
 #include "handshake.h"
 #include "qjrtp.h"
+#include "contactdb.h"
 
 
 
@@ -30,8 +31,8 @@ class NetworkManager : public QObject
 public:
     enum AppID{MESSENGER,VOIP ,SYSTEM,SYNC,UNKNOWN}; // 0-10 are reserved IDs.
 
-    NetworkManager(QTcpSocket *socket,  QObject *parent=0);
-    NetworkManager(Contact *contact,  QObject *parent=0);
+    NetworkManager(QTcpSocket *socket, ContactDB *responder_contactdb,  QObject *parent=0);
+    NetworkManager(Contact *contact, ContactDB *starter_contactdb,  QObject *parent=0);
     ~NetworkManager();
 
 public slots :
@@ -45,6 +46,7 @@ public slots :
     void onIdentified();
 
 private :
+    ContactDB *responder_contactdb,*starter_contactdb;
     QTcpSocket *m_Socket;
     QSettings *m_settings;
     QJrtp *m_QJrtp;

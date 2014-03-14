@@ -1,15 +1,15 @@
 #include "networkmanager.h"
 
-NetworkManager::NetworkManager(QTcpSocket *socket, QObject *parent): QObject(parent){
+NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *responder_contactdb, QObject *parent): QObject(parent){
     m_Socket = socket;
     m_contact = new Contact();
     m_TimeStamp = 0;
     m_PacketCounter = 0;
-    m_handshake = new Handshake(m_Socket);
+    m_handshake = new Handshake(m_Socket,responder_contactdb);
     connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
 }
 
-NetworkManager::NetworkManager(Contact *contact, QObject *parent): QObject(parent){
+NetworkManager::NetworkManager(Contact *contact, ContactDB *starter_contactdb, QObject *parent): QObject(parent){
     m_Socket = new QTcpSocket;
 
     m_TimeStamp = 0;

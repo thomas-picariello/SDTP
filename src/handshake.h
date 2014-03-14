@@ -12,6 +12,7 @@
 #include "contactfactory.h"
 #include <QSettings>
 #include <QCoreApplication>
+#include "contactdb.h"
 
 
 using namespace CryptoPP;
@@ -23,7 +24,7 @@ class Handshake : public QObject
 
 public:
 
-    Handshake(QTcpSocket *socket, QObject *parent=0);
+    Handshake(QTcpSocket *socket, ContactDB *contactdb, QObject *parent=0);
     Handshake(QTcpSocket *socket, Contact *contact,  QObject *parent=0);
     Contact* getContact();
     QByteArray getkey();
@@ -42,6 +43,7 @@ public slots :
 
 
 private :
+    ContactDB *contactdb;
     QTcpSocket *m_Socket;
     Contact *m_contact;
     QSettings *m_Settings;

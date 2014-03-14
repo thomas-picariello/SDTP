@@ -29,7 +29,7 @@ QByteArray PacketAssembler::assemble(QByteArray data, quint8 appID){
 
     encrypt();
 
-    return 0;
+    return data;
 
 }
 QByteArray PacketAssembler::disassemble(QByteArray data){
@@ -37,7 +37,7 @@ QByteArray PacketAssembler::disassemble(QByteArray data){
     m_data = data;
 
 
-    return 0;
+    return 0;//tuple...
 }
 quint8 PacketAssembler::getID(){
 

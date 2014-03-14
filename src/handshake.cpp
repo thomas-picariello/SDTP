@@ -1,14 +1,14 @@
 #include "handshake.h"
 
-Handshake::Handshake(QTcpSocket *socket,  QObject *parent): QObject(parent)
+Handshake::Handshake(QTcpSocket *socket,ContactDB *contactdb,  QObject *parent): QObject(parent)
 {
     //responder
     m_key = new QByteArray;
 
     m_Socket = socket;
 
-    m_Settings = new QSettings;
-    m_Settings->beginGroup("Settings");
+    m_Settings = new QSettings("settings.ini", QSettings::IniFormat);
+
 
 
 
@@ -30,8 +30,8 @@ Handshake::Handshake(QTcpSocket *socket,Contact *contact,  QObject *parent): QOb
     m_key = new QByteArray;
     m_Socket = socket;
 
-    m_Settings = new QSettings;
-    m_Settings->beginGroup("Settings");
+    m_Settings = new QSettings("settings.ini", QSettings::IniFormat);
+
 
 
     m_CompatibleVersions = new QStringList();
@@ -47,8 +47,8 @@ Handshake::Handshake(QTcpSocket *socket,Contact *contact,  QObject *parent): QOb
 void Handshake::startCheckKey(){
 
 
-    m_Socket->write(m_Settings->value("key").toByteArray());
-    qDebug()<<"send : "<<m_Settings->value("key").toByteArray();
+    m_Socket->write(m_Settings->value("keyring/public_key").toByteArray());
+    qDebug()<<"send : "<<m_Settings->value("keyring/public_key").toByteArray();
 
     connect(m_Socket,SIGNAL(readyRead()),
             this,SLOT(startCheckCompatibility()));
@@ -90,7 +90,8 @@ void Handshake::respondCheckKey(){
     qDebug()<<"message recieved"<<msg.data();
 
 
-    m_contact = ContactFactory::findByKey(msg.data());
+    //m_contact = ContactFactory::findByKey(msg.data());
+    m_contact = contactdb->findByKey(msg.data());
 
     if(m_contact == NULL)
     {
