@@ -35,7 +35,7 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QByteArray *fileKey, 
 }
 
 void ContactListWindow::acceptConnection(){
-    mManagerList.append(new NetworkManager(mListener->nextPendingConnection(), this));
+    mManagerList.append(new NetworkManager(mListener->nextPendingConnection(),mContactDB, this));
 }
 
 void ContactListWindow::addContact(){
@@ -63,7 +63,7 @@ void ContactListWindow::removeContact(){
 
 void ContactListWindow::connectToContact(){
     if(getSelectedContact()){
-        mManagerList.append(new NetworkManager(getSelectedContact()));
+        mManagerList.append(new NetworkManager(getSelectedContact(), mContactDB, this));
     }
 }
 
