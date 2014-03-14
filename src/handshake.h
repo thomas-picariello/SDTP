@@ -24,8 +24,8 @@ class Handshake : public QObject
 
 public:
 
-    Handshake(QTcpSocket *socket, ContactDB *m_conntactdb, QObject *parent=0);
-    Handshake(QTcpSocket *socket, Contact *contact,ContactDB *m_contactdb,  QObject *parent=0);
+    Handshake(QTcpSocket *socket, ContactDB *contactdb, QObject *parent=0);
+    Handshake(QTcpSocket *socket, ContactDB *contactdb,Contact *contact,  QObject *parent=0);
     Contact* getContact();
     QByteArray getkey();
     ~Handshake();

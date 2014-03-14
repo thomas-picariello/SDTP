@@ -1,9 +1,10 @@
 #include "handshake.h"
 
-Handshake::Handshake(QTcpSocket *socket,ContactDB *m_contactdb,  QObject *parent): QObject(parent)
+Handshake::Handshake(QTcpSocket *socket,ContactDB *contactdb,  QObject *parent): QObject(parent)
 {
     //responder
 
+    m_contactdb = contactdb;
     m_key = new QByteArray;
 
     m_Socket = socket;
@@ -25,9 +26,11 @@ Handshake::Handshake(QTcpSocket *socket,ContactDB *m_contactdb,  QObject *parent
 
 }
 
-Handshake::Handshake(QTcpSocket *socket,Contact *contact,ContactDB *m_contactdb,  QObject *parent): QObject(parent)
+Handshake::Handshake(QTcpSocket *socket,ContactDB *contactdb,Contact *contact,  QObject *parent): QObject(parent)
 {
     //starter
+
+    m_contactdb = contactdb;
     m_key = new QByteArray;
     m_Socket = socket;
 
