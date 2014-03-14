@@ -9,7 +9,7 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QByteArray *fileKey, 
 {
     ui->setupUi(this);
 
-    qint16 listenPort = QSettings().value("Settings/port").toInt();
+    qint16 listenPort = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toInt();
 
     mListener = new QTcpServer(this);
     mListener->listen(QHostAddress::Any, listenPort);
@@ -93,7 +93,7 @@ void ContactListWindow::refreshList(){
 }
 
 void ContactListWindow::restartListener(){
-    qint16 listenPort = QSettings().value("Settings/port").toInt();
+    qint16 listenPort = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toInt();
     mListener->close();
     mListener->listen(QHostAddress::Any, listenPort);
 }
