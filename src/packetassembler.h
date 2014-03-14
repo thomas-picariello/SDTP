@@ -10,10 +10,6 @@
 #include <QtEndian>
 #include "handshake.h"
 
-
-using namespace CryptoPP;
-
-
 class PacketAssembler : public QObject
 {
     Q_OBJECT
@@ -41,8 +37,8 @@ private :
     Contact *m_contact;
     QByteArray m_data;
     quint8 m_appID;
-    CFB_Mode<AES>::Encryption mCfbAesEnc;
-    CFB_Mode<AES>::Decryption mCfbAesDec;
+    CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption mCfbAesEnc;
+    CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption mCfbAesDec;
     quint8 m_PacketCounter;
     quint16 m_TimeStamp;
     QTime *m_Time;

@@ -68,7 +68,7 @@ void ContactListWindow::connectToContact(){
 }
 
 void ContactListWindow::openSettingsWindow(){
-    SettingsWindow *setWin = new SettingsWindow();
+    SettingsWindow *setWin = new SettingsWindow(mFileKey);
     connect(setWin, SIGNAL(settingsUpdated()),
             this, SLOT(restartListener()));
 }

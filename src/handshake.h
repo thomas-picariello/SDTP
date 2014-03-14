@@ -13,9 +13,6 @@
 #include <QCoreApplication>
 #include "contactdb.h"
 
-
-using namespace CryptoPP;
-
 class Handshake : public QObject
 {
 

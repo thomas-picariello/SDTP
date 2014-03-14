@@ -24,7 +24,6 @@ set(SVOIP_HEADERS
     passwordwindow.h
     contactdb.h
     contact.h
-    #contactfactory.h
     message.h
     svoip.h
     voip.h
@@ -33,6 +32,7 @@ set(SVOIP_HEADERS
     handshake.h
     qjrtp.h
     packetassembler.h
+    rsakeyring.h
 )
 
 set(SVOIP_SOURCES
@@ -44,7 +44,6 @@ set(SVOIP_SOURCES
     passwordwindow.cpp
     contactdb.cpp
     contact.cpp
-    #contactfactory.cpp
     message.cpp
     svoip.cpp
     voip.cpp
@@ -53,6 +52,7 @@ set(SVOIP_SOURCES
     handshake.cpp
     qjrtp.cpp
     packetassembler.cpp
+    rsakeyring.cpp
 )
 
 set(SVOIP_FORMS

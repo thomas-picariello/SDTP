@@ -33,57 +33,33 @@
        <string>Password</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="2" column="0">
-        <widget class="QLabel" name="pwd_newpwd_label">
-         <property name="text">
-          <string>New Password</string>
-         </property>
-         <property name="buddy">
-          <cstring>pwd_newpwd_input</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="pwd_newpwd_input"/>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="pwd_confpwd_label">
-         <property name="text">
-          <string>Confirm new Password</string>
-         </property>
-         <property name="buddy">
-          <cstring>pwd_confpwd_input</cstring>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QLineEdit" name="pwd_oldpwd_input"/>
        </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="pwd_confpwd_input"/>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="pwd_oldpwd_label">
-         <property name="text">
-          <string>Old Password</string>
-         </property>
-         <property name="buddy">
-          <cstring>pwd_oldpwd_input</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <spacer name="pwd_spacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
+       <item row="4" column="2">
+        <widget class="QLabel" name="pwd_confpwd_state">
+         <property name="minimumSize">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>16</width>
+           <height>16</height>
           </size>
          </property>
-        </spacer>
+         <property name="maximumSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="../res/res.qrc">:/img/icon_no.png</pixmap>
+         </property>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item row="0" column="2">
         <widget class="QLabel" name="pwd_oldpwd_state">
@@ -110,30 +86,54 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="2">
-        <widget class="QLabel" name="pwd_confpwd_state">
-         <property name="minimumSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
+       <item row="2" column="0">
+        <widget class="QLabel" name="pwd_newpwd_label">
          <property name="text">
-          <string/>
+          <string>New Password</string>
          </property>
-         <property name="pixmap">
-          <pixmap resource="../res/res.qrc">:/img/icon_no.png</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
+         <property name="buddy">
+          <cstring>pwd_newpwd_input</cstring>
          </property>
         </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="pwd_newpwd_input"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="pwd_confpwd_label">
+         <property name="text">
+          <string>Confirm new Password</string>
+         </property>
+         <property name="buddy">
+          <cstring>pwd_confpwd_input</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="pwd_oldpwd_label">
+         <property name="text">
+          <string>Old Password</string>
+         </property>
+         <property name="buddy">
+          <cstring>pwd_oldpwd_input</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="pwd_confpwd_input"/>
+       </item>
+       <item row="5" column="0">
+        <spacer name="pwd_spacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -173,7 +173,29 @@
         </widget>
        </item>
        <item>
-        <widget class="QTextEdit" name="rsa_pubkey_input"/>
+        <widget class="QTextEdit" name="rsa_pubkey_input">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <property name="lineWidth">
+          <number>1</number>
+         </property>
+         <property name="tabChangesFocus">
+          <bool>true</bool>
+         </property>
+         <property name="acceptRichText">
+          <bool>false</bool>
+         </property>
+         <property name="placeholderText">
+          <string>No public key detected, import or generate a new one.</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QLabel" name="rsa_privkey_label">
@@ -186,7 +208,20 @@
         </widget>
        </item>
        <item>
-        <widget class="QTextEdit" name="rsa_privkey_input"/>
+        <widget class="QTextEdit" name="rsa_privkey_input">
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="tabChangesFocus">
+          <bool>true</bool>
+         </property>
+         <property name="acceptRichText">
+          <bool>false</bool>
+         </property>
+         <property name="placeholderText">
+          <string>No private key detected, import or generate a new one.</string>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="rsa_bt_hlayout">
@@ -231,9 +266,9 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="rsa_export_bt_2">
+          <widget class="QPushButton" name="rsa_generate_bt">
            <property name="text">
-            <string>Generate</string>
+            <string>&amp;Generate</string>
            </property>
           </widget>
          </item>
@@ -277,7 +312,18 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>tabs</tabstop>
+  <tabstop>pwd_oldpwd_input</tabstop>
+  <tabstop>pwd_newpwd_input</tabstop>
+  <tabstop>pwd_confpwd_input</tabstop>
+  <tabstop>net_port_input</tabstop>
+  <tabstop>rsa_pubkey_input</tabstop>
+  <tabstop>rsa_privkey_input</tabstop>
+  <tabstop>rsa_import_bt</tabstop>
+  <tabstop>rsa_export_bt</tabstop>
+  <tabstop>rsa_generate_bt</tabstop>
   <tabstop>save_bt</tabstop>
+  <tabstop>cancel_bt</tabstop>
  </tabstops>
  <resources>
   <include location="../res/res.qrc"/>
