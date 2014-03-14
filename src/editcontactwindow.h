@@ -19,7 +19,9 @@ class EditContactWindow : public QWidget
     Q_OBJECT
     
 public:
-    explicit EditContactWindow(Contact *contact, ContactDB *contactDB, QWidget *parent = 0);
+    explicit EditContactWindow(Contact *contact,
+                               ContactDB *contactDB,
+                               QWidget *parent = 0);
     ~EditContactWindow();
     void fill(QString contactName);
     void clear();

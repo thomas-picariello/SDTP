@@ -25,7 +25,9 @@ public:
         IdRole = 0x0101
     };
 
-    explicit ContactListWindow(ContactDB *contactDB, QByteArray *fileKey, QWidget *parent = 0);
+    explicit ContactListWindow(ContactDB *contactDB,
+                               QByteArray *fileKey,
+                               QWidget *parent = 0);
     ~ContactListWindow();
 
 public slots:

@@ -12,7 +12,7 @@ ContactDB::ContactDB(QObject *parent):
                            "name TEXT, "
                            "host TEXT, "
                            "port INTEGER, "
-                           "key  BLOB "
+                           "key  TEXT "
                        ");";
     query.exec(strQuery);
 }
@@ -51,6 +51,7 @@ Contact* ContactDB::findByKey(QByteArray key){
                   "FROM contacts WHERE key=:key");
     query.bindValue(":key", key);
     if(query.exec()){
+        query.next();
         int id = query.value(0).toInt();
         QString name = query.value(1).toString();
         QString host = query.value(2).toString();

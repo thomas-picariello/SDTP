@@ -24,7 +24,7 @@ set(SVOIP_HEADERS
     passwordwindow.h
     contactdb.h
     contact.h
-    contactfactory.h
+    #contactfactory.h
     message.h
     svoip.h
     voip.h
@@ -44,7 +44,7 @@ set(SVOIP_SOURCES
     passwordwindow.cpp
     contactdb.cpp
     contact.cpp
-    contactfactory.cpp
+    #contactfactory.cpp
     message.cpp
     svoip.cpp
     voip.cpp
