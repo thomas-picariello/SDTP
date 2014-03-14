@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
-    <height>200</height>
+    <width>393</width>
+    <height>288</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -22,45 +22,238 @@
   <property name="windowTitle">
    <string>Settings</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <property name="spacing">
-      <number>50</number>
+    <widget class="QTabWidget" name="tabs">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Listen Port:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="port"/>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>My Public Key:</string>
-     </property>
+     <widget class="QWidget" name="pwd_tab">
+      <attribute name="title">
+       <string>Password</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="2" column="0">
+        <widget class="QLabel" name="pwd_newpwd_label">
+         <property name="text">
+          <string>New Password</string>
+         </property>
+         <property name="buddy">
+          <cstring>pwd_newpwd_input</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="pwd_newpwd_input"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="pwd_confpwd_label">
+         <property name="text">
+          <string>Confirm new Password</string>
+         </property>
+         <property name="buddy">
+          <cstring>pwd_confpwd_input</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="pwd_oldpwd_input"/>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="pwd_confpwd_input"/>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="pwd_oldpwd_label">
+         <property name="text">
+          <string>Old Password</string>
+         </property>
+         <property name="buddy">
+          <cstring>pwd_oldpwd_input</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <spacer name="pwd_spacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="pwd_oldpwd_state">
+         <property name="minimumSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="../res/res.qrc">:/img/icon_yes.png</pixmap>
+         </property>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLabel" name="pwd_confpwd_state">
+         <property name="minimumSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="../res/res.qrc">:/img/icon_no.png</pixmap>
+         </property>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="net_tab">
+      <attribute name="title">
+       <string>Network</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="net_listenport_label">
+         <property name="text">
+          <string>Listen Port:</string>
+         </property>
+         <property name="buddy">
+          <cstring>net_port_input</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="net_port_input"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="rsa_tab">
+      <attribute name="title">
+       <string>RSA keys</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="rsa_pubkey_label">
+         <property name="text">
+          <string>Public Key:</string>
+         </property>
+         <property name="buddy">
+          <cstring>rsa_pubkey_input</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="rsa_pubkey_input"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="rsa_privkey_label">
+         <property name="text">
+          <string>Private Key:</string>
+         </property>
+         <property name="buddy">
+          <cstring>rsa_pubkey_input</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="rsa_privkey_input"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="rsa_bt_hlayout">
+         <item>
+          <widget class="QPushButton" name="rsa_import_bt">
+           <property name="text">
+            <string>&amp;Import</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="rsa_spacer1">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="rsa_export_bt">
+           <property name="text">
+            <string>&amp;Export</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="rsa_spacer2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="rsa_export_bt_2">
+           <property name="text">
+            <string>Generate</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
-    <widget class="QTextEdit" name="key"/>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="global_bt_hlayout">
      <item>
-      <widget class="QPushButton" name="cancel">
+      <widget class="QPushButton" name="cancel_bt">
        <property name="text">
         <string>Cancel</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer">
+      <spacer name="spacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -73,7 +266,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="save">
+      <widget class="QPushButton" name="save_bt">
        <property name="text">
         <string>Save</string>
        </property>
@@ -83,6 +276,11 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <tabstops>
+  <tabstop>save_bt</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../res/res.qrc"/>
+ </resources>
  <connections/>
 </ui>

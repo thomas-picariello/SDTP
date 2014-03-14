@@ -8,26 +8,26 @@ SettingsWindow::SettingsWindow(QWidget *parent):
 {
     ui->setupUi(this);
 
-    ui->port->setText(mSettings->value("network/listen_port").toString());
-    ui->key->setText(mSettings->value("keyring/public_key").toString());
+    ui->net_port_input->setText(mSettings->value("network/listen_port").toString());
+    ui->rsa_pubkey_input->setText(mSettings->value("keyring/public_key").toString());
 
     mPortValidator.setRange(0, 65535);
-    ui->port->setValidator(&mPortValidator);
+    ui->net_port_input->setValidator(&mPortValidator);
 
-    connect(ui->save, SIGNAL(clicked()),
+    connect(ui->save_bt, SIGNAL(clicked()),
             this, SLOT(save()));
-    connect(ui->cancel, SIGNAL(clicked()),
+    connect(ui->cancel_bt, SIGNAL(clicked()),
             this, SLOT(cancel()));
     show();
 }
 
 void SettingsWindow::save(){
-    if(ui->port->text().isEmpty() ||
-       ui->key->toPlainText().isEmpty()){
+    if(ui->net_port_input->text().isEmpty() ||
+       ui->rsa_pubkey_input->toPlainText().isEmpty()){
         QMessageBox::warning(this, "Incomplete", "Please fill all the fields");
     }else{
-        mSettings->setValue("network/listen_port", ui->port->text());
-        mSettings->setValue("keyring/public_key", ui->key->toPlainText().toUtf8());
+        mSettings->setValue("network/listen_port", ui->net_port_input->text());
+        mSettings->setValue("keyring/public_key", ui->rsa_pubkey_input->toPlainText().toUtf8());
         emit settingsUpdated();
         close();
         deleteLater();

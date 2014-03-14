@@ -2,4 +2,8 @@
     <qresource prefix="/icon">
         <file alias="app_icon">mobile-security.png</file>
     </qresource>
+    <qresource prefix="/img">
+        <file>icon_yes.png</file>
+        <file>icon_no.png</file>
+    </qresource>
 </RCC>

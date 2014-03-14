@@ -43,7 +43,6 @@ void SVoIP::onPasswordInput(QString password){
 
 QByteArray SVoIP::deriveKey(QString password){
     CryptoPP::PKCS5_PBKDF1<CryptoPP::SHA256> derivator;
-    derivator.MaxDerivedKeyLength();
     uchar key[32];
     derivator.DeriveKey(key,
                         derivator.MaxDerivedKeyLength(),
@@ -54,6 +53,8 @@ QByteArray SVoIP::deriveKey(QString password){
                         mSalt.length(),
                         1000,
                         0);
+    qDebug()<<"Gen AES key"
+            <<QByteArray(reinterpret_cast<char*>(key), static_cast<uint>(derivator.MaxDerivedKeyLength())).toBase64();
     return QByteArray(reinterpret_cast<char*>(key), static_cast<uint>(derivator.MaxDerivedKeyLength()));
 }
 
