@@ -24,8 +24,8 @@ class Handshake : public QObject
 
 public:
 
-    Handshake(QTcpSocket *socket, ContactDB *contactdb, QObject *parent=0);
-    Handshake(QTcpSocket *socket, Contact *contact,  QObject *parent=0);
+    Handshake(QTcpSocket *socket, ContactDB *m_conntactdb, QObject *parent=0);
+    Handshake(QTcpSocket *socket, Contact *contact,ContactDB *m_contactdb,  QObject *parent=0);
     Contact* getContact();
     QByteArray getkey();
     ~Handshake();
@@ -43,7 +43,7 @@ public slots :
 
 
 private :
-    ContactDB *contactdb;
+    ContactDB *m_contactdb;
     QTcpSocket *m_Socket;
     Contact *m_contact;
     QSettings *m_Settings;

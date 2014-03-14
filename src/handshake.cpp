@@ -1,8 +1,9 @@
 #include "handshake.h"
 
-Handshake::Handshake(QTcpSocket *socket,ContactDB *contactdb,  QObject *parent): QObject(parent)
+Handshake::Handshake(QTcpSocket *socket,ContactDB *m_contactdb,  QObject *parent): QObject(parent)
 {
     //responder
+
     m_key = new QByteArray;
 
     m_Socket = socket;
@@ -24,7 +25,7 @@ Handshake::Handshake(QTcpSocket *socket,ContactDB *contactdb,  QObject *parent):
 
 }
 
-Handshake::Handshake(QTcpSocket *socket,Contact *contact,  QObject *parent): QObject(parent)
+Handshake::Handshake(QTcpSocket *socket,Contact *contact,ContactDB *m_contactdb,  QObject *parent): QObject(parent)
 {
     //starter
     m_key = new QByteArray;
@@ -91,7 +92,7 @@ void Handshake::respondCheckKey(){
 
 
     //m_contact = ContactFactory::findByKey(msg.data());
-    m_contact = contactdb->findByKey(msg.data());
+    m_contact = m_contactdb->findByKey(msg.data());
 
     if(m_contact == NULL)
     {

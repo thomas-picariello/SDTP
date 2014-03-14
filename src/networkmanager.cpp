@@ -36,7 +36,7 @@ void NetworkManager::onConnect(){
 
     m_dateTime = new QDateTime();
 
-    m_handshake = new Handshake(m_Socket,m_contact);
+    m_handshake = new Handshake(m_Socket,m_contact,starter_contactdb);
     connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
     connect(m_handshake,SIGNAL(connectionClosed()),
             this,SLOT(deleteLater()));
