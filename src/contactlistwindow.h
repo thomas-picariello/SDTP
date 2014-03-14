@@ -8,7 +8,6 @@
 #include <QTcpServer>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
-#include "contactfactory.h"
 #include "contact.h"
 #include "networkmanager.h"
 
