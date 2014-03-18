@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
     QCoreApplication::setOrganizationName("FHNW-ICS");
     QCoreApplication::setApplicationName("SVoIP");
     QCoreApplication::setApplicationVersion("0.1");
@@ -11,5 +11,5 @@ int main(int argc, char *argv[])
 
     SVoIP svoip;
 
-    return a.exec();
+    return app.exec();
 }

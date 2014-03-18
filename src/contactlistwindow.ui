@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../res/res.qrc">
-    <normaloff>:/icon/app_icon</normaloff>:/icon/app_icon</iconset>
+    <normaloff>:/icon/app_icon.png</normaloff>:/icon/app_icon.png</iconset>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>

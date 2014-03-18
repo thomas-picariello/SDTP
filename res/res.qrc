@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/icon">
-        <file alias="app_icon">mobile-security.png</file>
+        <file>app_icon.png</file>
     </qresource>
     <qresource prefix="/img">
         <file>icon_yes.png</file>
