@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QSettings>
 #include <QMessageBox>
+#include <QProgressDialog>
 #include <QIntValidator>
 #include "rsakeyring.h"
 
@@ -26,6 +27,7 @@ public slots:
     void cancel();
     void rsaExport();
     void rsaGenerate();
+    void rsaKeyGenFinished();
     void rsaImport();
     void save();
 
@@ -35,6 +37,7 @@ private:
     QByteArray *mFileKey;
     QIntValidator mPortValidator;
     RsaKeyring mKeyring;
+    QProgressDialog *mProgress;
 };
 
 #endif // SETTINGSWINDOW_H

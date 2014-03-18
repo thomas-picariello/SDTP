@@ -1,9 +1,13 @@
 #ifndef RSAKEYRING_H
 #define RSAKEYRING_H
 
+#include <QDebug>
 #include <QObject>
 #include <QByteArray>
 #include <QFile>
+#include <QFuture>
+#include <QFutureWatcher>
+#include <QtConcurrent/QtConcurrent>
 #include <cryptopp/osrng.h>
 #include <cryptopp/rsa.h>
 #include <cryptopp/aes.h>
@@ -18,20 +22,27 @@ public:
 
     void exportKeys(QString filePath);
     void exportPublicKey(QString filePath);
-    void generate();
-    QByteArray getPrivateKey();
-    QByteArray getPublicKey();
+    void generateKeypair();
+    QByteArray *getPrivateKey();
+    QByteArray *getPublicKey();
     void importKeys(QString filePath);
     void importPublicKey(QString filePath);
     void setPrivateKey(QByteArray privateKey);
     void setPublicKey(QByteArray publicKey);
 
+signals:
+    void keyGenerationFinished();
+
+public slots:
+    void onKeyGenJobFinished();
+
 private:
     QByteArray *mFileKey;
     QByteArray mPrivateKey;
     QByteArray mPublicKey;
+    QFutureWatcher<QPair<QByteArray,QByteArray>> mWatcher;
 
-    void encodeBase64(QByteArray key);
+    QPair<QByteArray, QByteArray> generate();
 
     Q_DISABLE_COPY(RsaKeyring)
 };
