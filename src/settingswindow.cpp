@@ -6,18 +6,16 @@ SettingsWindow::SettingsWindow(QByteArray *fileKey, QWidget *parent):
     ui(new Ui::SettingsWindow),
     mFileKey(fileKey),
     mKeyring(mFileKey),
-    mSettings(new QSettings("settings.ini", QSettings::IniFormat)),
-    mProgress(new QProgressDialog("Generating Keypair", "Cancel", 0, 0, this, Qt::CustomizeWindowHint|Qt::WindowCloseButtonHint))
+    mSettings(new QSettings("settings.ini", QSettings::IniFormat))
 {
     ui->setupUi(this);
 
     ui->net_port_input->setText(mSettings->value("network/listen_port").toString());
     ui->rsa_pubkey_input->setText(mSettings->value("keyring/public_key").toString());
+    ui->rsa_generate_pb->setVisible(false);
 
     mPortValidator.setRange(0, 65535);
     ui->net_port_input->setValidator(&mPortValidator);
-
-    mProgress->setModal(true);
 
     connect(ui->save_bt, SIGNAL(clicked()),
             this, SLOT(save()));
@@ -45,14 +43,16 @@ void SettingsWindow::rsaExport(){
 }
 
 void SettingsWindow::rsaGenerate(){
+    ui->rsa_generate_pb->setVisible(true);
+    ui->rsa_generate_bt->setDisabled(true);
     mKeyring.generateKeypair();
-    mProgress->setVisible(true);
 }
 
 void SettingsWindow::rsaKeyGenFinished(){
+    ui->rsa_generate_pb->setVisible(false);
+    ui->rsa_generate_bt->setDisabled(false);
     ui->rsa_privkey_input->setText(mKeyring.getPrivateKey()->toBase64());
     ui->rsa_pubkey_input->setText(mKeyring.getPublicKey()->toBase64());
-    mProgress->setVisible(false);
 }
 
 void SettingsWindow::rsaImport(){
@@ -73,5 +73,5 @@ void SettingsWindow::save(){
 }
 
 SettingsWindow::~SettingsWindow(){
-    delete ui, mSettings, mProgress;
+    delete ui, mSettings;
 }

@@ -22,11 +22,15 @@
   <property name="windowTitle">
    <string>Settings</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../res/res.qrc">
+    <normaloff>:/icon/app_icon</normaloff>:/icon/app_icon</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QTabWidget" name="tabs">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="pwd_tab">
       <attribute name="title">
@@ -266,10 +270,70 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="rsa_generate_bt">
-           <property name="text">
-            <string>&amp;Generate</string>
+          <widget class="QWidget" name="rsa_generate" native="true">
+           <property name="enabled">
+            <bool>true</bool>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>75</width>
+             <height>0</height>
+            </size>
+           </property>
+           <widget class="QProgressBar" name="rsa_generate_pb">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>18</y>
+              <width>75</width>
+              <height>4</height>
+             </rect>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>75</width>
+              <height>5</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QProgressBar:horizontal{
+background: rgba(0, 0, 0, 0);
+border:none;
+margin:1;
+}
+
+QProgressBar::chunk:horizontal {
+background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 170, 255, 0), stop:0.5 rgba(0, 170, 255, 255), stop:1 rgba(0, 170, 255, 0));
+}</string>
+            </property>
+            <property name="maximum">
+             <number>0</number>
+            </property>
+            <property name="value">
+             <number>-1</number>
+            </property>
+            <property name="textVisible">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="rsa_generate_bt">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>75</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>&amp;Generate</string>
+            </property>
+           </widget>
+           <zorder>rsa_generate_bt</zorder>
+           <zorder>rsa_generate_pb</zorder>
           </widget>
          </item>
         </layout>
@@ -321,7 +385,6 @@
   <tabstop>rsa_privkey_input</tabstop>
   <tabstop>rsa_import_bt</tabstop>
   <tabstop>rsa_export_bt</tabstop>
-  <tabstop>rsa_generate_bt</tabstop>
   <tabstop>save_bt</tabstop>
   <tabstop>cancel_bt</tabstop>
  </tabstops>
