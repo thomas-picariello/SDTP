@@ -5,6 +5,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QIntValidator>
+#include <QFileDialog>
 #include "rsakeyring.h"
 
 namespace Ui {

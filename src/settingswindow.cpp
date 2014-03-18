@@ -39,7 +39,8 @@ void SettingsWindow::cancel(){
 }
 
 void SettingsWindow::rsaExport(){
-
+    QString filename = QFileDialog::getSaveFileName(this, "Save Key", "",
+                                                          "Key files (*.key *.pem);;Other files (*.*)");
 }
 
 void SettingsWindow::rsaGenerate(){
@@ -56,7 +57,8 @@ void SettingsWindow::rsaKeyGenFinished(){
 }
 
 void SettingsWindow::rsaImport(){
-
+    QString filename = QFileDialog::getOpenFileName(this, "Select Keys", "",
+                                                          "Key files (*.key *.pem);;Other files (*.*)");
 }
 
 void SettingsWindow::save(){
