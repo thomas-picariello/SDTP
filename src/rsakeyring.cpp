@@ -60,7 +60,7 @@ QPair<QByteArray, QByteArray> RsaKeyring::generate(){
 
     try{
         CryptoPP::RSAES_OAEP_SHA_Decryptor rsaPrivate;
-        rsaPrivate.AccessKey().GenerateRandomWithKeySize(CryptoPP::AutoSeededRandomPool(), 4096);
+        rsaPrivate.AccessKey().GenerateRandomWithKeySize(CryptoPP::AutoSeededRandomPool(), 2048);
         CryptoPP::RSAES_OAEP_SHA_Encryptor rsaPublic(rsaPrivate);
         rsaPrivate.AccessKey().Save(queue);
         queue.CopyTo(privateSink);

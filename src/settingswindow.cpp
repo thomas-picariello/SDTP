@@ -12,6 +12,7 @@ SettingsWindow::SettingsWindow(QByteArray *fileKey, QWidget *parent):
 
     ui->net_port_input->setText(mSettings->value("network/listen_port").toString());
     ui->rsa_pubkey_input->setText(mSettings->value("keyring/public_key").toString());
+    ui->rsa_generate_pb->setMaximumWidth(ui->rsa_generate_bt->width());
     ui->rsa_generate_pb->setVisible(false);
 
     mPortValidator.setRange(0, 65535);
@@ -45,13 +46,13 @@ void SettingsWindow::rsaExport(){
 
 void SettingsWindow::rsaGenerate(){
     ui->rsa_generate_pb->setVisible(true);
-    ui->rsa_generate_bt->setDisabled(true);
+    ui->rsa_generate_bt->setVisible(false);
     mKeyring.generateKeypair();
 }
 
 void SettingsWindow::rsaKeyGenFinished(){
     ui->rsa_generate_pb->setVisible(false);
-    ui->rsa_generate_bt->setDisabled(false);
+    ui->rsa_generate_bt->setVisible(true);
     ui->rsa_privkey_input->setText(mKeyring.getPrivateKey()->toBase64());
     ui->rsa_pubkey_input->setText(mKeyring.getPublicKey()->toBase64());
 }
