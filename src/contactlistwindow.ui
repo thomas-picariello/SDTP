@@ -23,6 +23,27 @@
    <iconset resource="../res/res.qrc">
     <normaloff>:/icon/app_icon.png</normaloff>:/icon/app_icon.png</iconset>
   </property>
+  <property name="styleSheet">
+   <string notr="true">/*Global*/
+QWidget{
+background-color:white;
+}
+
+/*QPushButton*/
+QPushButton{
+background-color:#08f;
+color:white;
+border:none;
+padding: 10 10;
+margin:1;
+}
+QPushButton::hover{
+background-color:#09f;
+}
+QPushButton::pressed{
+background-color:#07f;
+}</string>
+  </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <widget class="QListWidget" name="list">

@@ -26,6 +26,47 @@
    <iconset>
     <normaloff>:/icon/app_icon</normaloff>:/icon/app_icon</iconset>
   </property>
+  <property name="styleSheet">
+   <string notr="true">/*Global*/
+QWidget{
+background-color:white;
+}
+
+/*QPushButton*/
+QPushButton{
+background-color:#08f;
+color:white;
+border:none;
+padding: 10 10;
+margin:1;
+}
+QPushButton::hover{
+background-color:#09f;
+}
+QPushButton::pressed{
+background-color:#07f;
+}
+
+/*QLineEdit*/
+QLineEdit{
+padding:5;
+}
+
+/*QTabBar*/
+QTabBar::tab{
+border:none;
+background-color:#888;
+padding:5 5;
+margin: 0 1;
+}
+QTabBar::tab::hover{
+background-color:#999;
+}
+QTabBar::tab::selected{
+background-color:#555;
+color:white;
+}</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QTabWidget" name="tabs">
@@ -146,7 +187,10 @@
        <string>Network</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout_2">
-       <item row="0" column="0">
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="net_port_input"/>
+       </item>
+       <item row="1" column="0">
         <widget class="QLabel" name="net_listenport_label">
          <property name="text">
           <string>Listen Port:</string>
@@ -155,9 +199,6 @@
           <cstring>net_port_input</cstring>
          </property>
         </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="net_port_input"/>
        </item>
       </layout>
      </widget>
