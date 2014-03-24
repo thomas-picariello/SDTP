@@ -5,15 +5,19 @@
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>400</width>
-    <height>393</height>
-   </rect>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>300</height>
+   </size>
+  </property>
+  <property name="baseSize">
    <size>
     <width>400</width>
     <height>300</height>
