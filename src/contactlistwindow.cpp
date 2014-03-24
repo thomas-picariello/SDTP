@@ -1,7 +1,7 @@
 #include "contactlistwindow.h"
 #include "ui_contactlistwindow.h"
 
-ContactListWindow::ContactListWindow(ContactDB *contactDB, QByteArray *fileKey, QWidget *parent):
+ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QByteArray> *fileKey, QWidget *parent):
     QWidget(parent),
     mContactDB(contactDB),
     mFileKey(fileKey),

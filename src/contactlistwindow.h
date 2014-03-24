@@ -25,7 +25,7 @@ public:
     };
 
     explicit ContactListWindow(ContactDB *contactDB,
-                               QByteArray *fileKey,
+                               QPair<QByteArray,QByteArray> *fileKey,
                                QWidget *parent = 0);
     ~ContactListWindow();
 
@@ -42,7 +42,7 @@ public slots:
     
 private:
     ContactDB *mContactDB;
-    QByteArray *mFileKey;
+    QPair<QByteArray,QByteArray> *mFileKey;
     Ui::ContactListWindow *ui;
     QTcpServer *mListener;
     QList<QListWidgetItem*> mItemList;

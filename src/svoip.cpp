@@ -11,6 +11,7 @@ SVoIP::SVoIP(QObject *parent):
     if(mSalt.isEmpty()){
         settings.setValue("encryption/salt", QString::fromUtf8(generateSalt()));
     }
+    mFileKey.first = mSalt.left(32).toUtf8(); //32 bytes = 256 bits
 
     if(mPwHash.isEmpty()){
         mContactListWindow.show();
@@ -36,7 +37,7 @@ void SVoIP::onPasswordInput(QString password){
         QMessageBox::critical(&mPasswordWindow, "Error", "Wrong password !");
     }else{
         mPasswordWindow.close();
-        mFileKey = deriveKey(password);
+        mFileKey.second = deriveKey(password);
         mContactListWindow.show();
     }
 }
@@ -59,7 +60,7 @@ QByteArray SVoIP::deriveKey(QString password){
 }
 
 QByteArray SVoIP::generateSalt(){
-    const unsigned int blockSize = 8 * 8;
+    const unsigned int blockSize = 256;
     byte randomBlock[blockSize];
     std::string encodedBlock;
     CryptoPP::AutoSeededRandomPool rng;

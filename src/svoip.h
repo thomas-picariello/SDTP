@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QPair>
 #include <QMessageBox>
 #include <cryptopp/sha.h>
 #include <cryptopp/base64.h>
@@ -26,7 +27,7 @@ private :
     ContactDB mContactDB;
     PasswordWindow mPasswordWindow;
     ContactListWindow mContactListWindow;
-    QByteArray mFileKey;
+    QPair<QByteArray,QByteArray> mFileKey;
 
     QByteArray deriveKey(QString password);
     QByteArray generateSalt();

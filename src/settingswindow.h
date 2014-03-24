@@ -17,7 +17,7 @@ class SettingsWindow : public QWidget
     Q_OBJECT
     
 public:
-    explicit SettingsWindow(QByteArray *fileKey, QWidget *parent = 0);
+    explicit SettingsWindow(QPair<QByteArray,QByteArray> *fileKey, QWidget *parent = 0);
     ~SettingsWindow();
 
 signals:
@@ -25,6 +25,8 @@ signals:
 
 public slots:
     void cancel();
+    void changeRsaPubKey();
+    void changeRsaPrivKey();
     void rsaExport();
     void rsaGenerate();
     void rsaKeyGenFinished();
@@ -34,7 +36,7 @@ public slots:
 private:
     Ui::SettingsWindow *ui;
     QSettings *mSettings;
-    QByteArray *mFileKey;
+    QPair<QByteArray,QByteArray> *mFileKey;
     QIntValidator mPortValidator;
     RsaKeyring mKeyring;
 };
