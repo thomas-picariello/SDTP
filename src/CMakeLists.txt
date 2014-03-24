@@ -31,8 +31,8 @@ set(SVOIP_HEADERS
     networkmanager.h
     handshake.h
     qjrtp.h
-    packetassembler.h
     rsakeyring.h
+    packet.h
 )
 
 set(SVOIP_SOURCES
@@ -51,8 +51,8 @@ set(SVOIP_SOURCES
     networkmanager.cpp
     handshake.cpp
     qjrtp.cpp
-    packetassembler.cpp
     rsakeyring.cpp
+    packet.cpp
 )
 
 set(SVOIP_FORMS
