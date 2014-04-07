@@ -9,14 +9,15 @@ RsaKeyring::RsaKeyring(QPair<QByteArray, QByteArray> *fileKey, QObject *parent):
             this, SLOT(onKeyGenJobFinished()));
 }
 
+void RsaKeyring::changeFileKey(QPair<QByteArray,QByteArray> newKey){
+    //TODO: reencrypt keystore.
+}
+
 void RsaKeyring::commitToKeystore(){
     if(validateKeypair()){
         QString timestamp = QString::number(QDateTime::currentDateTimeUtc().toTime_t());
-        QFile keystoreFile("keystore.xml");
-        keystoreFile.open(QFile::WriteOnly);
-        keystoreFile.flush();
-        QXmlStreamWriter xml(&keystoreFile);
-        xml.setAutoFormatting(true);
+        QString xmlString;
+        QXmlStreamWriter xml(&xmlString);
 
         xml.writeStartDocument();
         xml.writeStartElement("keyring");
@@ -25,16 +26,22 @@ void RsaKeyring::commitToKeystore(){
         xml.writeTextElement("private_key", mPrivateKey.toBase64());
         xml.writeEndDocument();
 
-        keystoreFile.close();
+        std::string source = xmlString.toStdString();
+        CryptoPP::GCM<CryptoPP::AES>::Encryption enc;
+        enc.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),           //key
+                               (byte*)mFileKey->second.data(), mFileKey->second.length());  //iv
+        CryptoPP::StringSource(source, true,
+                                   new CryptoPP::AuthenticatedEncryptionFilter(enc,
+                                         new CryptoPP::FileSink("keystore.dat")));
     }
 }
 
 void RsaKeyring::exportKeys(QString filePath){
-
+    //TODO: export keypair
 }
 
 void RsaKeyring::exportPublicKey(QString filePath){
-
+    //TODO: export pub key
 }
 
 void RsaKeyring::generateKeypair(){
@@ -51,11 +58,11 @@ QByteArray *RsaKeyring::getPublicKey(){
 }
 
 void RsaKeyring::importKeys(QString filePath){
-
+    //TODO: import keypair
 }
 
 void RsaKeyring::importPublicKey(QString filePath){
-
+    //TODO: import pub key
 }
 
 void RsaKeyring::onKeyGenJobFinished(){
@@ -99,13 +106,29 @@ bool RsaKeyring::validateKeypair(){
         return true;
     else
         return false;
+    //TODO: proper validation
+}
+
+bool RsaKeyring::validateKeypair(QByteArray privateKey, QByteArray publicKey){
+    if(!publicKey.isEmpty() && !privateKey.isEmpty())
+        return true;
+    else
+        return false;
+    //TODO: proper validation
 }
 
 void RsaKeyring::readKeystore(){
-    QFile keystoreFile("keystore.xml");
-    if(keystoreFile.exists()){
-        keystoreFile.open(QFile::ReadOnly);
-        QXmlStreamReader reader(&keystoreFile);
+    QByteArray privateKey, publicKey;
+    std::string xmlString;
+    CryptoPP::GCM<CryptoPP::AES>::Decryption dec;
+    dec.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),           //key
+                     (byte*)mFileKey->second.data(), mFileKey->second.length());  //iv
+    try{
+        CryptoPP::FileSource("keystore.dat",true,
+                                new CryptoPP::AuthenticatedDecryptionFilter(dec,
+                                    new CryptoPP::StringSink(xmlString)));
+
+        QXmlStreamReader reader(QString::fromStdString(xmlString));
         while(!reader.atEnd()){
             if (reader.isStartElement()){
                 if (reader.name() == "keyring"){
@@ -113,18 +136,22 @@ void RsaKeyring::readKeystore(){
                     while(!reader.isStartElement() && !reader.atEnd())
                         reader.readNext();
                     if(reader.name() == "public_key")
-                        mPublicKey = QByteArray::fromBase64(reader.readElementText().toUtf8());
+                        publicKey = QByteArray::fromBase64(reader.readElementText().toUtf8());
                     while(!reader.isStartElement() && !reader.atEnd())
                         reader.readNext();
                     if(reader.name() == "private_key")
-                        mPrivateKey = QByteArray::fromBase64(reader.readElementText().toUtf8());
+                        privateKey = QByteArray::fromBase64(reader.readElementText().toUtf8());
                 }
             }
             reader.readNext();
         }
+    }catch(CryptoPP::Exception& err ){
+        qDebug()<< err.what();
     }
-    keystoreFile.close();
-    //TODO: Verify key consistency
+    if(validateKeypair(privateKey, publicKey)){
+        mPrivateKey = privateKey;
+        mPublicKey = publicKey;
+    }
 }
 
 RsaKeyring::~RsaKeyring(){

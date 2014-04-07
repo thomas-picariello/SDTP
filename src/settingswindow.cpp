@@ -61,6 +61,7 @@ void SettingsWindow::rsaExport(){
 }
 
 void SettingsWindow::rsaGenerate(){
+    //TODO: add confirmation dialog
     ui->rsa_generate_pb->setVisible(true);
     ui->rsa_generate_bt->setVisible(false);
     mKeyring.generateKeypair();

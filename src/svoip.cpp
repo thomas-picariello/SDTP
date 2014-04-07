@@ -11,7 +11,7 @@ SVoIP::SVoIP(QObject *parent):
     if(mSalt.isEmpty()){
         settings.setValue("encryption/salt", QString::fromUtf8(generateSalt()));
     }
-    mFileKey.first = mSalt.left(32).toUtf8(); //32 bytes = 256 bits
+    mFileKey.second = QByteArray::fromBase64(mSalt.toUtf8()).left(16); //AES block size
 
     if(mPwHash.isEmpty()){
         mContactListWindow.show();
@@ -37,7 +37,7 @@ void SVoIP::onPasswordInput(QString password){
         QMessageBox::critical(&mPasswordWindow, "Error", "Wrong password !");
     }else{
         mPasswordWindow.close();
-        mFileKey.second = deriveKey(password);
+        mFileKey.first = deriveKey(password);
         mContactListWindow.show();
     }
 }

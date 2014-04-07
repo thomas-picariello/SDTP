@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QObject>
 #include <QByteArray>
-#include <QFile>
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QtConcurrent/QtConcurrent>
@@ -14,6 +13,9 @@
 #include <cryptopp/osrng.h>
 #include <cryptopp/rsa.h>
 #include <cryptopp/aes.h>
+#include <cryptopp/authenc.h>
+#include <cryptopp/gcm.h>
+#include <cryptopp/files.h>
 
 class RsaKeyring : public QObject
 {
@@ -23,6 +25,7 @@ public:
                         QObject *parent=0);
     ~RsaKeyring();
 
+    void changeFileKey(QPair<QByteArray,QByteArray> newKey);
     void commitToKeystore();
     void exportKeys(QString filePath);
     void exportPublicKey(QString filePath);
@@ -34,6 +37,7 @@ public:
     void setPrivateKey(QByteArray privateKey);
     void setPublicKey(QByteArray publicKey);
     bool validateKeypair();
+    bool validateKeypair(QByteArray privateKey, QByteArray publicKey);
 
 signals:
     void keyGenerationFinished();
