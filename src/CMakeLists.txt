@@ -32,7 +32,9 @@ set(SVOIP_HEADERS
     handshake.h
     qjrtp.h
     rsakeyring.h
-    packet.h
+    packetagent.h
+    abstractlink.h
+    abstractapp.h
 )
 
 set(SVOIP_SOURCES
@@ -52,7 +54,9 @@ set(SVOIP_SOURCES
     handshake.cpp
     qjrtp.cpp
     rsakeyring.cpp
-    packet.cpp
+    packetagent.cpp
+    abstractlink.cpp
+    abstractapp.cpp
 )
 
 set(SVOIP_FORMS

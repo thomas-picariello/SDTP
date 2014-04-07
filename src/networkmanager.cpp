@@ -5,8 +5,15 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *responder_contactd
     m_contact = new Contact();
     m_TimeStamp = 0;
     m_PacketCounter = 0;
+
+    //m_root = new AbstractLink();
+
+
+
     m_handshake = new Handshake(m_Socket,responder_contactdb);
     connect(m_handshake,SIGNAL(handshakeSuccessfull()),this,SLOT(onIdentified()));
+
+
 }
 
 NetworkManager::NetworkManager(Contact *contact, ContactDB *starter_contactdb, QObject *parent): QObject(parent){
@@ -31,7 +38,6 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *starter_contactdb, Q
     connect(m_Socket, SIGNAL(connected()),
             this, SLOT(onConnect()));
 }
-
 void NetworkManager::onConnect(){
 
     m_dateTime = new QDateTime();
