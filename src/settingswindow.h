@@ -27,10 +27,12 @@ public slots:
     void cancel();
     void changeRsaPubKey();
     void changeRsaPrivKey();
-    void rsaExport();
+    void rsaExportPrivate();
+    void rsaExportPublic();
     void rsaGenerate();
     void rsaKeyGenFinished();
-    void rsaImport();
+    void rsaImportPrivate();
+    void rsaImportPublic();
     void save();
 
 private:

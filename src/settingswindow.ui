@@ -216,18 +216,8 @@ color:white;
       <attribute name="title">
        <string>RSA keys</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLabel" name="rsa_pubkey_label">
-         <property name="text">
-          <string>Public Key:</string>
-         </property>
-         <property name="buddy">
-          <cstring>rsa_pubkey_input</cstring>
-         </property>
-        </widget>
-       </item>
-       <item>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="0">
         <widget class="QTextEdit" name="rsa_pubkey_input">
          <property name="enabled">
           <bool>true</bool>
@@ -252,7 +242,7 @@ color:white;
          </property>
         </widget>
        </item>
-       <item>
+       <item row="2" column="0">
         <widget class="QLabel" name="rsa_privkey_label">
          <property name="text">
           <string>Private Key:</string>
@@ -262,7 +252,17 @@ color:white;
          </property>
         </widget>
        </item>
-       <item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="rsa_pubkey_label">
+         <property name="text">
+          <string>Public Key:</string>
+         </property>
+         <property name="buddy">
+          <cstring>rsa_pubkey_input</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
         <widget class="QTextEdit" name="rsa_privkey_input">
          <property name="focusPolicy">
           <enum>Qt::WheelFocus</enum>
@@ -278,48 +278,96 @@ color:white;
          </property>
         </widget>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="rsa_bt_hlayout">
+       <item row="1" column="1">
+        <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
-          <widget class="QPushButton" name="rsa_import_bt">
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="rsa_pub_import_bt">
            <property name="text">
             <string>&amp;Import</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="rsa_spacer1">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="rsa_export_bt">
+          <widget class="QPushButton" name="rsa_pub_export_bt">
            <property name="text">
             <string>&amp;Export</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="rsa_spacer2">
+          <spacer name="verticalSpacer_2">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>40</width>
-             <height>20</height>
+             <width>20</width>
+             <height>40</height>
             </size>
            </property>
           </spacer>
          </item>
+        </layout>
+       </item>
+       <item row="3" column="1">
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="rsa_priv_export_bt">
+           <property name="text">
+            <string>&amp;Export</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="rsa_priv_import_bt">
+           <property name="text">
+            <string>&amp;Import</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="1">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <widget class="QPushButton" name="rsa_generate_bt">
            <property name="text">
@@ -332,10 +380,22 @@ color:white;
            <property name="enabled">
             <bool>true</bool>
            </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
              <height>5</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>21</width>
+             <height>0</height>
             </size>
            </property>
            <property name="styleSheet">
@@ -405,10 +465,6 @@ background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 1
   <tabstop>pwd_newpwd_input</tabstop>
   <tabstop>pwd_confpwd_input</tabstop>
   <tabstop>net_port_input</tabstop>
-  <tabstop>rsa_pubkey_input</tabstop>
-  <tabstop>rsa_privkey_input</tabstop>
-  <tabstop>rsa_import_bt</tabstop>
-  <tabstop>rsa_export_bt</tabstop>
   <tabstop>save_bt</tabstop>
   <tabstop>cancel_bt</tabstop>
  </tabstops>

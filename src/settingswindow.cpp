@@ -30,10 +30,14 @@ SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, QWidget *
             this, SLOT(changeRsaPrivKey()));
     connect(ui->rsa_generate_bt, SIGNAL(clicked()),
             this, SLOT(rsaGenerate()));
-    connect(ui->rsa_export_bt, SIGNAL(clicked()),
-            this, SLOT(rsaExport()));
-    connect(ui->rsa_import_bt, SIGNAL(clicked()),
-            this, SLOT(rsaImport()));
+    connect(ui->rsa_priv_export_bt, SIGNAL(clicked()),
+            this, SLOT(rsaExportPrivate()));
+    connect(ui->rsa_pub_export_bt, SIGNAL(clicked()),
+            this, SLOT(rsaExportPublic()));
+    connect(ui->rsa_priv_import_bt, SIGNAL(clicked()),
+            this, SLOT(rsaImportPrivate()));
+    connect(ui->rsa_pub_import_bt, SIGNAL(clicked()),
+            this, SLOT(rsaImportPublic()));
     connect(&mKeyring, SIGNAL(keyGenerationFinished()),
             this, SLOT(rsaKeyGenFinished()));
     show();
@@ -54,10 +58,14 @@ void SettingsWindow::changeRsaPrivKey(){
     mKeyring.setPrivateKey(QByteArray::fromBase64(inputPrivKey));
 }
 
-void SettingsWindow::rsaExport(){
-    QString filename = QFileDialog::getSaveFileName(this, "Save Key", "",
-                                                          "Key files (*.key *.pem);;Other files (*.*)");
-    mKeyring.exportKeys(filename);
+void SettingsWindow::rsaExportPrivate(){
+    QString filename = QFileDialog::getSaveFileName(this, "Save Private Key", "private_key.key", "Key file (*.key)");
+    mKeyring.exportPrivateKey(filename);
+}
+
+void SettingsWindow::rsaExportPublic(){
+    QString filename = QFileDialog::getSaveFileName(this, "Save Public Key", "public_key.key", "Key file (*.key)");
+    mKeyring.exportPublicKey(filename);
 }
 
 void SettingsWindow::rsaGenerate(){
@@ -74,10 +82,14 @@ void SettingsWindow::rsaKeyGenFinished(){
     ui->rsa_pubkey_input->setText(mKeyring.getPublicKey()->toBase64());
 }
 
-void SettingsWindow::rsaImport(){
-    QString filename = QFileDialog::getOpenFileName(this, "Select Keys", "",
-                                                          "Key files (*.key *.pem);;Other files (*.*)");
-    mKeyring.importKeys(filename);
+void SettingsWindow::rsaImportPrivate(){
+    QString filename = QFileDialog::getOpenFileName(this, "Import private key", "", "Key file (*.key)");
+    mKeyring.importPrivateKey(filename);
+}
+
+void SettingsWindow::rsaImportPublic(){
+    QString filename = QFileDialog::getOpenFileName(this, "Import public key", "", "Key file (*.key)");
+    mKeyring.importPublicKey(filename);
 }
 
 void SettingsWindow::save(){

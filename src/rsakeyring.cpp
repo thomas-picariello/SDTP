@@ -36,12 +36,18 @@ void RsaKeyring::commitToKeystore(){
     }
 }
 
-void RsaKeyring::exportKeys(QString filePath){
-    //TODO: export keypair
+void RsaKeyring::exportPrivateKey(QString filename){
+    QFile file(filename);
+    file.open(QFile::Truncate|QFile::WriteOnly);
+    file.write(mPrivateKey);
+    file.close();
 }
 
-void RsaKeyring::exportPublicKey(QString filePath){
-    //TODO: export pub key
+void RsaKeyring::exportPublicKey(QString filename){
+    QFile file(filename);
+    file.open(QFile::Truncate|QFile::WriteOnly);
+    file.write(mPublicKey);
+    file.close();
 }
 
 void RsaKeyring::generateKeypair(){
@@ -57,12 +63,18 @@ QByteArray *RsaKeyring::getPublicKey(){
     return &mPublicKey;
 }
 
-void RsaKeyring::importKeys(QString filePath){
-    //TODO: import keypair
+void RsaKeyring::importPrivateKey(QString filename){
+    QFile file(filename);
+    file.open(QFile::ReadOnly);
+    mPrivateKey = file.readAll();
+    file.close();
 }
 
-void RsaKeyring::importPublicKey(QString filePath){
-    //TODO: import pub key
+void RsaKeyring::importPublicKey(QString filename){
+    QFile file(filename);
+    file.open(QFile::ReadOnly);
+    mPublicKey = file.readAll();
+    file.close();
 }
 
 void RsaKeyring::onKeyGenJobFinished(){
