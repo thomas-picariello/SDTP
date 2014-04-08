@@ -51,6 +51,21 @@ QPushButton::pressed{
 background-color:#07f;
 }
 
+/*QToolButton*/
+QToolButton{
+background-color:#08f;
+color:white;
+border:none;
+padding: 5;
+margin:1;
+}
+QToolButton::hover{
+background-color:#09f;
+}
+QToolButton::pressed{
+background-color:#07f;
+}
+
 /*QLineEdit*/
 QLineEdit{
 padding:5;
@@ -69,7 +84,25 @@ background-color:#999;
 QTabBar::tab::selected{
 background-color:#555;
 color:white;
-}</string>
+}
+
+/*QMenu*/
+QMenu{
+	padding: 1;
+	margin: 0;
+}
+QMenu::item{
+	padding: 10px 10px;
+}
+QMenu::item::selected{
+	color:white;
+	background-color:#09f;
+}
+QMenu::item::pressed{
+	color:white;
+	background-color:#07f;
+}
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -216,8 +249,42 @@ color:white;
       <attribute name="title">
        <string>RSA keys</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="rsa_pubkey_label">
+           <property name="text">
+            <string>Public Key:</string>
+           </property>
+           <property name="buddy">
+            <cstring>rsa_pubkey_input</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QToolButton" name="rsa_pubkey_opt_bt">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QTextEdit" name="rsa_pubkey_input">
          <property name="enabled">
           <bool>true</bool>
@@ -242,146 +309,18 @@ color:white;
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="rsa_privkey_label">
-         <property name="text">
-          <string>Private Key:</string>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="topMargin">
+          <number>0</number>
          </property>
-         <property name="buddy">
-          <cstring>rsa_pubkey_input</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="rsa_pubkey_label">
-         <property name="text">
-          <string>Public Key:</string>
-         </property>
-         <property name="buddy">
-          <cstring>rsa_pubkey_input</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QTextEdit" name="rsa_privkey_input">
-         <property name="focusPolicy">
-          <enum>Qt::WheelFocus</enum>
-         </property>
-         <property name="tabChangesFocus">
-          <bool>true</bool>
-         </property>
-         <property name="acceptRichText">
-          <bool>false</bool>
-         </property>
-         <property name="placeholderText">
-          <string>No private key detected, import or generate a new one.</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <layout class="QVBoxLayout" name="verticalLayout_5">
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="rsa_pub_import_bt">
-           <property name="text">
-            <string>&amp;Import</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="rsa_pub_export_bt">
-           <property name="text">
-            <string>&amp;Export</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item row="3" column="1">
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <spacer name="verticalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="rsa_priv_export_bt">
-           <property name="text">
-            <string>&amp;Export</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="rsa_priv_import_bt">
-           <property name="text">
-            <string>&amp;Import</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item row="2" column="1">
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QPushButton" name="rsa_generate_bt">
-           <property name="text">
-            <string>&amp;Generate</string>
-           </property>
-          </widget>
-         </item>
          <item>
           <widget class="QProgressBar" name="rsa_generate_pb">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -390,12 +329,6 @@ color:white;
             <size>
              <width>16777215</width>
              <height>5</height>
-            </size>
-           </property>
-           <property name="baseSize">
-            <size>
-             <width>21</width>
-             <height>0</height>
             </size>
            </property>
            <property name="styleSheet">
@@ -412,15 +345,82 @@ background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 1
            <property name="maximum">
             <number>0</number>
            </property>
-           <property name="value">
-            <number>-1</number>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
-           <property name="textVisible">
-            <bool>false</bool>
+           <property name="sizeType">
+            <enum>QSizePolicy::MinimumExpanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="rsa_generate_bt">
+           <property name="text">
+            <string>&amp;Generate</string>
            </property>
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="rsa_privkey_label">
+           <property name="text">
+            <string>Private Key:</string>
+           </property>
+           <property name="buddy">
+            <cstring>rsa_pubkey_input</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QToolButton" name="rsa_privkey_opt_bt">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="rsa_privkey_input">
+         <property name="focusPolicy">
+          <enum>Qt::WheelFocus</enum>
+         </property>
+         <property name="tabChangesFocus">
+          <bool>true</bool>
+         </property>
+         <property name="acceptRichText">
+          <bool>false</bool>
+         </property>
+         <property name="placeholderText">
+          <string>No private key detected, import or generate a new one.</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

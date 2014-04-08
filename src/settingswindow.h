@@ -2,6 +2,7 @@
 #define SETTINGSWINDOW_H
 
 #include <QWidget>
+#include <QMenu>
 #include <QSettings>
 #include <QMessageBox>
 #include <QIntValidator>
@@ -33,6 +34,8 @@ public slots:
     void rsaKeyGenFinished();
     void rsaImportPrivate();
     void rsaImportPublic();
+    void showRsaPubkeyMenu();
+    void showRsaPrivkeyMenu();
     void save();
 
 private:
@@ -41,6 +44,11 @@ private:
     QPair<QByteArray,QByteArray> *mFileKey;
     QIntValidator mPortValidator;
     RsaKeyring mKeyring;
+
+    QMenu *mRsaPubkeyMenu;
+    QMenu *mRsaPrivkeyMenu;
+
+    void setupRsaMenus();
 };
 
 #endif // SETTINGSWINDOW_H
