@@ -5,5 +5,6 @@
     <qresource prefix="/img">
         <file>icon_yes.png</file>
         <file>icon_no.png</file>
+        <file>settings_icon.png</file>
     </qresource>
 </RCC>
