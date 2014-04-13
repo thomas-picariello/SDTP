@@ -1,21 +1,12 @@
 /**
  * @brief Contact represents a contact and its details.
- *
- * The contacts can be saved and erased using save() and erase().
- *
- * The ContactFactory should be used to retrieve existing contacts from the storage.
- *
- * Each contact is stored by the **QSettings** class according to the following path pattern:
- *
- * ~~~~~~~~~~
- * /"Contacts"/id/("name", "host", "port" or "key")
- * ~~~~~~~~~~
  */
 
 #ifndef CONTACT_H
 #define CONTACT_H
 
 #include <QObject>
+#include <QStringList>
 
 class Contact: public QObject
 {
@@ -23,8 +14,6 @@ class Contact: public QObject
 public: 
     /**
      * @brief Constructs an empty contact object.
-     *
-     * The smallest available ID is used as default ID value.
      *
      * @param parent the parent **QObject**
      */
@@ -35,23 +24,23 @@ public:
      *
      * @param id the id of the contact
      * @param name the name of the contact
-     * @param host the host name or the IP address of the contact
+     * @param hostList the host list of the contact
      * @param port the port to use for the contact
      * @param key the public key of the contact
      * @param parent the parent **QObject**
      */
     explicit Contact(int id,
             QString name,
-            QString host,
+            QStringList hostsList,
             quint16 port,
             QByteArray key,
             QObject *parent = 0);
 
     /**
-     * @brief Returns the hostname or the IP address of the contact.
-     * @return the hostname or the IP address of the contact
+     * @brief Returns a copy of the hosts list of the contact.
+     * @return a copy of the hosts list of the contact
      */
-    QString getHost() const;
+    QStringList getHostsList() const;
 
     /**
      * @brief Returns the unique ID of the contact.
@@ -78,6 +67,18 @@ public:
     quint16 getPort() const;
 
     /**
+     * @brief Returns a pointer to the internal hosts list of the contact.
+     * @return a pointer to the internal hosts list of the contact
+     */
+    QStringList* hostsList();
+
+    /**
+     * @brief Defines the host list of the contact.
+     * @param hostsList the host list to copy to the contact
+     */
+    void setHostsList(QStringList hostsList);
+
+    /**
      * @brief Defines the unique ID of the contact.
      * @param id the unique id of the contact.
      */
@@ -88,12 +89,6 @@ public:
      * @param name the name of the contact.
      */
     void setName(QString name);
-
-    /**
-     * @brief Defines the hostname or the IP address of the contact.
-     * @param host the hostname or the IP address of the contact.
-     */
-    void setHost(QString host);
 
     /**
      * @brief Defines the port to be used for the contact.
@@ -108,7 +103,7 @@ public:
     void setKey(QByteArray key);
 
 private :
-    QString mHost;
+    QStringList mHostsList;
     int mId;
     QByteArray mKey;
     quint16 mPort;

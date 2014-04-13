@@ -2,6 +2,7 @@
 
 SVoIP::SVoIP(QObject *parent):
     QObject(parent),
+    mContactDB(&mFileKey),
     mContactListWindow(&mContactDB, &mFileKey)
 {
     QSettings settings("settings.ini", QSettings::IniFormat);
@@ -11,7 +12,7 @@ SVoIP::SVoIP(QObject *parent):
     if(mSalt.isEmpty()){
         settings.setValue("encryption/salt", QString::fromUtf8(generateSalt()));
     }
-    mFileKey.second = QByteArray::fromBase64(mSalt.toUtf8()).left(16); //AES block size
+    mFileKey.second = QByteArray::fromBase64(mSalt.toUtf8()).left(16); //AES block size = 128 bits
 
     if(mPwHash.isEmpty()){
         mContactListWindow.show();

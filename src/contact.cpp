@@ -6,21 +6,21 @@ Contact::Contact(QObject *parent):
     mPort(0)
 {}
 
-Contact::Contact(int id, QString name, QString host, quint16 port, QByteArray key, QObject *parent):
+Contact::Contact(int id, QString name, QStringList hostsList, quint16 port, QByteArray key, QObject *parent):
     QObject(parent),
     mId(id),
     mName(name),
-    mHost(host),
+    mHostsList(hostsList),
     mPort(port),
     mKey(key)
 {}
 
-int Contact::getId() const{
-    return mId;
+QStringList Contact::getHostsList() const{
+    return mHostsList;
 }
 
-QString Contact::getHost() const{
-    return mHost;
+int Contact::getId() const{
+    return mId;
 }
 
 QByteArray Contact::getKey() const{
@@ -35,8 +35,12 @@ quint16 Contact::getPort() const{
     return mPort;
 }
 
-void Contact::setHost(QString host){
-    mHost = host;
+QStringList* Contact::hostsList(){
+    return &mHostsList;
+}
+
+void Contact::setHostsList(QStringList hostsList){
+    mHostsList = hostsList;
 }
 
 void Contact::setKey(QByteArray key){

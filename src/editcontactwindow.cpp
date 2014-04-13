@@ -15,7 +15,8 @@ EditContactWindow::EditContactWindow(Contact *contact, ContactDB *contactDB, QWi
             this, SLOT(cancel()));
 
     ui->name->setText(mContact->getName());
-    ui->host->setText(mContact->getHost());
+    if(!mContact->hostsList()->isEmpty())
+        ui->host->setText(mContact->hostsList()->first());
     ui->port->setText(QString::number(mContact->getPort()));
     ui->key->setText(QString(mContact->getKey()));
 
@@ -36,7 +37,8 @@ void EditContactWindow::save(){
     }else{
         mContact->setName(name);
         mContact->setPort(port.toUInt());
-        mContact->setHost(host);
+        mContact->hostsList()->clear();
+        mContact->hostsList()->append(host);
         mContact->setKey(key.toUtf8());
         mContactDB->write(mContact);
         emit contactChanged();

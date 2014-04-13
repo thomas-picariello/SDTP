@@ -5,13 +5,14 @@
 #include <QtSql/QtSql>
 #include <QList>
 #include <QByteArray>
+#include <cryptopp/authenc.h>
 #include "contact.h"
 
 class ContactDB: public QObject
 {
     Q_OBJECT
 public:
-    explicit ContactDB(QObject *parent = 0);
+    explicit ContactDB(QPair<QByteArray, QByteArray> *fileKey, QObject *parent = 0);
     ~ContactDB();
     bool erase(int id);
     Contact* findById(int id);
@@ -21,6 +22,7 @@ public:
 
 private :
     QSqlDatabase mDb;
+    QPair<QByteArray, QByteArray> *mFileKey;
 
     Q_DISABLE_COPY(ContactDB)
 };
