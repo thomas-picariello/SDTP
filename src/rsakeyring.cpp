@@ -26,13 +26,20 @@ void RsaKeyring::commitToKeystore(){
         xml.writeTextElement("private_key", mPrivateKey.toBase64());
         xml.writeEndDocument();
 
-        std::string source = xmlString.toStdString();
-        CryptoPP::GCM<CryptoPP::AES>::Encryption enc;
-        enc.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),           //key
-                               (byte*)mFileKey->second.data(), mFileKey->second.length());  //iv
-        CryptoPP::StringSource(source, true,
-                                   new CryptoPP::AuthenticatedEncryptionFilter(enc,
-                                         new CryptoPP::FileSink("keystore.dat")));
+        if(!mFileKey->first.isEmpty()){
+            std::string source = xmlString.toStdString();
+            CryptoPP::GCM<CryptoPP::AES>::Encryption enc;
+            enc.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),           //key
+                                   (byte*)mFileKey->second.data(), mFileKey->second.length());  //iv
+            CryptoPP::StringSource(source, true,
+                                       new CryptoPP::AuthenticatedEncryptionFilter(enc,
+                                             new CryptoPP::FileSink("keystore.dat")));
+        }else{
+            QFile keystoreFile("keystore.dat");
+            keystoreFile.open(QFile::WriteOnly|QFile::Truncate);
+            keystoreFile.write(xmlString.toUtf8());
+            keystoreFile.close();
+        }
     }
 }
 
@@ -132,14 +139,20 @@ bool RsaKeyring::validateKeypair(QByteArray privateKey, QByteArray publicKey){
 void RsaKeyring::readKeystore(){
     QByteArray privateKey, publicKey;
     std::string xmlString;
-    CryptoPP::GCM<CryptoPP::AES>::Decryption dec;
-    dec.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),           //key
-                     (byte*)mFileKey->second.data(), mFileKey->second.length());  //iv
     try{
-        CryptoPP::FileSource("keystore.dat",true,
-                                new CryptoPP::AuthenticatedDecryptionFilter(dec,
-                                    new CryptoPP::StringSink(xmlString)));
-
+        if(mFileKey->first.isEmpty()){
+            QFile keystoreFile("keystore.dat");
+            keystoreFile.open(QFile::ReadOnly);
+            xmlString = QString(keystoreFile.readAll()).toStdString();
+            keystoreFile.close();
+        }else{
+            CryptoPP::GCM<CryptoPP::AES>::Decryption dec;
+            dec.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),           //key
+                             (byte*)mFileKey->second.data(), mFileKey->second.length());  //iv
+            CryptoPP::FileSource("keystore.dat",true,
+                                    new CryptoPP::AuthenticatedDecryptionFilter(dec,
+                                        new CryptoPP::StringSink(xmlString)));
+        }
         QXmlStreamReader reader(QString::fromStdString(xmlString));
         while(!reader.atEnd()){
             if (reader.isStartElement()){
