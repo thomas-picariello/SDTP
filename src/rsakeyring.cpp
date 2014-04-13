@@ -26,19 +26,19 @@ void RsaKeyring::commitToKeystore(){
         xml.writeTextElement("private_key", mPrivateKey.toBase64());
         xml.writeEndDocument();
 
-        if(!mFileKey->first.isEmpty()){
-            std::string source = xmlString.toStdString();
-            CryptoPP::GCM<CryptoPP::AES>::Encryption enc;
-            enc.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),           //key
-                                   (byte*)mFileKey->second.data(), mFileKey->second.length());  //iv
-            CryptoPP::StringSource(source, true,
-                                       new CryptoPP::AuthenticatedEncryptionFilter(enc,
-                                             new CryptoPP::FileSink("keystore.dat")));
-        }else{
+        if(mFileKey->first.isEmpty()){
             QFile keystoreFile("keystore.dat");
             keystoreFile.open(QFile::WriteOnly|QFile::Truncate);
             keystoreFile.write(xmlString.toUtf8());
             keystoreFile.close();
+        }else{
+            std::string clearXml = xmlString.toStdString();
+            CryptoPP::GCM<CryptoPP::AES>::Encryption gcmEnc;
+            gcmEnc.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),           //key
+                                   (byte*)mFileKey->second.data(), mFileKey->second.length());  //iv
+            CryptoPP::StringSource(clearXml, true,
+                                       new CryptoPP::AuthenticatedEncryptionFilter(gcmEnc,
+                                             new CryptoPP::FileSink("keystore.dat")));
         }
     }
 }
