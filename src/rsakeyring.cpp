@@ -34,7 +34,7 @@ void RsaKeyring::commitToKeystore(){
         }else{
             std::string clearXml = xmlString.toStdString();
             CryptoPP::GCM<CryptoPP::AES>::Encryption gcmEnc;
-            gcmEnc.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),           //key
+            gcmEnc.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),        //key
                                    (byte*)mFileKey->second.data(), mFileKey->second.length());  //iv
             CryptoPP::StringSource(clearXml, true,
                                        new CryptoPP::AuthenticatedEncryptionFilter(gcmEnc,
@@ -43,14 +43,14 @@ void RsaKeyring::commitToKeystore(){
     }
 }
 
-void RsaKeyring::exportPrivateKey(QString filename){
+void RsaKeyring::exportPrivateKey(QString filename) const{
     QFile file(filename);
     file.open(QFile::Truncate|QFile::WriteOnly);
     file.write(mPrivateKey);
     file.close();
 }
 
-void RsaKeyring::exportPublicKey(QString filename){
+void RsaKeyring::exportPublicKey(QString filename) const{
     QFile file(filename);
     file.open(QFile::Truncate|QFile::WriteOnly);
     file.write(mPublicKey);
@@ -62,11 +62,11 @@ void RsaKeyring::generateKeypair(){
     mWatcher.setFuture(generateFuture);
 }
 
-QByteArray RsaKeyring::getPrivateKey(){
+QByteArray RsaKeyring::getPrivateKey() const{
     return mPrivateKey;
 }
 
-QByteArray RsaKeyring::getPublicKey(){
+QByteArray RsaKeyring::getPublicKey() const{
     return mPublicKey;
 }
 
