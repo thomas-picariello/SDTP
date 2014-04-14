@@ -24,6 +24,9 @@ private :
     QSqlDatabase mDb;
     QPair<QByteArray, QByteArray> *mFileKey;
 
+    QByteArray serializeStringList(QStringList list);
+    QStringList deserializeStringList(QByteArray byteArray);
+
     Q_DISABLE_COPY(ContactDB)
 };
 

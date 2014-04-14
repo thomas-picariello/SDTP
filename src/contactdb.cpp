@@ -11,7 +11,7 @@ ContactDB::ContactDB(QPair<QByteArray, QByteArray> *fileKey, QObject *parent):
     QString strQuery = "CREATE TABLE IF NOT EXISTS contacts("
                            "id      INTEGER PRIMARY KEY, "
                            "name    TEXT, "
-                           "hosts   TEXT, "
+                           "hosts   BLOB, "
                            "port    INTEGER, "
                            "key     TEXT "
                        ");";
@@ -38,7 +38,7 @@ Contact* ContactDB::findById(int id){
     if(query.exec()){
         query.next();
         QString name = query.value(0).toString();
-        QStringList hostList = query.value(1).toStringList();
+        QStringList hostList = deserializeStringList(query.value(1).toByteArray());
         quint16 port = query.value(2).toUInt();
         QByteArray key = query.value(3).toByteArray();
         return new Contact(id, name, hostList, port, key, this);
@@ -55,7 +55,7 @@ Contact* ContactDB::findByKey(QByteArray key){
         query.next();
         int id = query.value(0).toInt();
         QString name = query.value(1).toString();
-        QStringList hostList = query.value(2).toStringList();
+        QStringList hostList = deserializeStringList(query.value(2).toByteArray());
         quint16 port = query.value(3).toUInt();
         return new Contact(id, name, hostList, port, key, this);
     }else
@@ -69,7 +69,7 @@ QList<Contact*> ContactDB::getAllContacts(){
     while(query.next()){
         int id = query.value(0).toInt();
         QString name = query.value(1).toString();
-        QStringList hostList = query.value(2).toStringList();
+        QStringList hostList = deserializeStringList(query.value(2).toByteArray());
         quint16 port = query.value(3).toUInt();
         QByteArray key = query.value(4).toByteArray();
         returnList.append(new Contact(id, name, hostList, port, key, this));
@@ -84,7 +84,7 @@ int ContactDB::write(Contact *contact){
         query.prepare("INSERT INTO contacts (name,hosts,port,key) "
                       "VALUES (:name,:hosts,:port,:key)");
         query.bindValue(":name", contact->getName());
-        query.bindValue(":hosts", contact->getHostsList());
+        query.bindValue(":hosts", serializeStringList(contact->getHostsList()));
         query.bindValue(":port", contact->getPort());
         query.bindValue(":key", contact->getKey());
         if(!query.exec())
@@ -95,7 +95,7 @@ int ContactDB::write(Contact *contact){
                       "WHERE id=:id");
         query.bindValue(":id", contact->getId());
         query.bindValue(":name", contact->getName());
-        query.bindValue(":hosts", contact->getHostsList());
+        query.bindValue(":hosts", serializeStringList(contact->getHostsList()));
         query.bindValue(":port", contact->getPort());
         query.bindValue(":key", contact->getKey());
         if(!query.exec())
@@ -105,3 +105,16 @@ int ContactDB::write(Contact *contact){
     return 0;
 }
 
+QByteArray ContactDB::serializeStringList(QStringList stringList){
+  QByteArray byteArray;
+  QDataStream out(&byteArray, QIODevice::WriteOnly);
+  out << stringList;
+  return byteArray;
+}
+
+QStringList ContactDB::deserializeStringList(QByteArray byteArray){
+  QStringList result;
+  QDataStream in(&byteArray, QIODevice::ReadOnly);
+  in >> result;
+  return result;
+}
