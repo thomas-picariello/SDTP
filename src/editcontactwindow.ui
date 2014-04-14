@@ -39,7 +39,7 @@ QPushButton::pressed{
 background-color:#07f;
 }</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1,1,1,50,1">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
