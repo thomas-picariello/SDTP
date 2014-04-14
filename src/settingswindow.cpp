@@ -11,8 +11,8 @@ SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, QWidget *
     ui->setupUi(this);
     //init UI
     ui->net_port_input->setText(mSettings->value("network/listen_port").toString());
-    ui->rsa_privkey_input->setText(mKeyring.getPrivateKey()->toBase64());
-    ui->rsa_pubkey_input->setText(mKeyring.getPublicKey()->toBase64());
+    ui->rsa_privkey_input->setText(mKeyring.getPrivateKey().toBase64());
+    ui->rsa_pubkey_input->setText(mKeyring.getPublicKey().toBase64());
     ui->rsa_generate_pb->setMaximumWidth(ui->rsa_generate_bt->width());
     ui->rsa_generate_pb->setVisible(false);
 
@@ -84,8 +84,8 @@ void SettingsWindow::rsaGenerate(){
 void SettingsWindow::rsaKeyGenFinished(){
     ui->rsa_generate_pb->setVisible(false);
     ui->rsa_generate_bt->setEnabled(true);
-    ui->rsa_privkey_input->setText(mKeyring.getPrivateKey()->toBase64());
-    ui->rsa_pubkey_input->setText(mKeyring.getPublicKey()->toBase64());
+    ui->rsa_privkey_input->setText(mKeyring.getPrivateKey().toBase64());
+    ui->rsa_pubkey_input->setText(mKeyring.getPublicKey().toBase64());
 }
 
 void SettingsWindow::rsaImportPrivate(){
@@ -95,7 +95,7 @@ void SettingsWindow::rsaImportPrivate(){
                                                     tr("Key file")+" (*.key)");
     if(!filename.isNull()){
         mKeyring.importPrivateKey(filename);
-        ui->rsa_privkey_input->setText(mKeyring.getPrivateKey()->toBase64());
+        ui->rsa_privkey_input->setText(mKeyring.getPrivateKey().toBase64());
     }
 }
 
@@ -106,7 +106,7 @@ void SettingsWindow::rsaImportPublic(){
                                                     tr("Key file")+" (*.key)");
     if(!filename.isNull()){
         mKeyring.importPublicKey(filename);
-        ui->rsa_pubkey_input->setText(mKeyring.getPublicKey()->toBase64());
+        ui->rsa_pubkey_input->setText(mKeyring.getPublicKey().toBase64());
     }
 }
 

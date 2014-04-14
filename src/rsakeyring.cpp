@@ -62,12 +62,12 @@ void RsaKeyring::generateKeypair(){
     mWatcher.setFuture(generateFuture);
 }
 
-QByteArray* RsaKeyring::getPrivateKey(){
-    return &mPrivateKey;
+QByteArray RsaKeyring::getPrivateKey(){
+    return mPrivateKey;
 }
 
-QByteArray *RsaKeyring::getPublicKey(){
-    return &mPublicKey;
+QByteArray RsaKeyring::getPublicKey(){
+    return mPublicKey;
 }
 
 void RsaKeyring::importPrivateKey(QString filename){

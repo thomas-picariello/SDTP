@@ -30,8 +30,8 @@ public:
     void exportPrivateKey(QString filename);
     void exportPublicKey(QString filename);
     void generateKeypair();
-    QByteArray *getPrivateKey();
-    QByteArray *getPublicKey();
+    QByteArray getPrivateKey();
+    QByteArray getPublicKey();
     void importPrivateKey(QString filename);
     void importPublicKey(QString filename);
     void setPrivateKey(QByteArray privateKey);
