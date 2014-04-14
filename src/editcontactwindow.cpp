@@ -15,30 +15,49 @@ EditContactWindow::EditContactWindow(Contact *contact, ContactDB *contactDB, QWi
             this, SLOT(cancel()));
 
     ui->name->setText(mContact->getName());
-    if(!mContact->hostsList()->isEmpty())
-        ui->host->setText(mContact->hostsList()->first());
+    foreach(QString host, mContact->getHostsList()){
+        QListWidgetItem *item = new QListWidgetItem(host, ui->hostslist);
+        item->setFlags(item->flags()|Qt::ItemIsEditable);
+    }
     ui->port->setText(QString::number(mContact->getPort()));
     ui->key->setText(QString(mContact->getKey()));
 
     mPortValidator.setRange(0, 65535);
     ui->port->setValidator(&mPortValidator);
 
+    connect(ui->hostslist_add_bt, SIGNAL(clicked()),
+            this, SLOT(addHost()));
+    connect(ui->hostslist_rm_bt, SIGNAL(clicked()),
+            this, SLOT(removeHost()));
+
     this->show();
+}
+
+void EditContactWindow::addHost(){
+    QListWidgetItem *item = new QListWidgetItem("", ui->hostslist);
+    item->setFlags(item->flags()|Qt::ItemIsEditable);
+    ui->hostslist->editItem(item);
+}
+
+void EditContactWindow::cancel(){
+    close();
+    deleteLater();
 }
 
 void EditContactWindow::save(){
     QString name = ui->name->text();
-    QString host = ui->host->text();
+    QStringList hostsList;
+    foreach(QListWidgetItem *item, ui->hostslist->findItems("*", Qt::MatchWildcard))
+        hostsList.append(item->text());
     QString port = ui->port->text();
     QString key = ui->key->toPlainText();
 
-    if(name.isEmpty() || host.isEmpty() || port.isEmpty() || key.isEmpty()){
-        QMessageBox::warning(this, "Incomplete", "Please fill all the fields");
+    if(name.isEmpty() || hostsList.isEmpty() || port.isEmpty() || key.isEmpty()){
+        QMessageBox::warning(this, tr("Incomplete"), tr("Please fill all the fields"));
     }else{
         mContact->setName(name);
         mContact->setPort(port.toUInt());
-        mContact->hostsList()->clear();
-        mContact->hostsList()->append(host);
+        mContact->setHostsList(hostsList);
         mContact->setKey(key.toUtf8());
         mContactDB->write(mContact);
         emit contactChanged();
@@ -47,9 +66,8 @@ void EditContactWindow::save(){
     }
 }
 
-void EditContactWindow::cancel(){
-    close();
-    deleteLater();
+void EditContactWindow::removeHost(){
+    delete ui->hostslist->currentItem();
 }
 
 EditContactWindow::~EditContactWindow(){

@@ -30,8 +30,10 @@ signals:
     void contactChanged();
 
 public slots:
-    void save();
+    void addHost();
     void cancel();
+    void removeHost();
+    void save();
     
 private:
     ContactDB *mContactDB;
