@@ -43,12 +43,12 @@ void Contact::setHostsList(QStringList hostsList){
     mHostsList = hostsList;
 }
 
-void Contact::setKey(QByteArray key){
-    mKey = key;
-}
-
 void Contact::setId(int id){
     mId = id;
+}
+
+void Contact::setKey(QByteArray key){
+    mKey = key;
 }
 
 void Contact::setName(QString name){

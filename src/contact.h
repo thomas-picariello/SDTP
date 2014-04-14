@@ -80,27 +80,27 @@ public:
 
     /**
      * @brief Defines the unique ID of the contact.
-     * @param id the unique id of the contact.
+     * @param id the unique id of the contact
      */
     void setId(int id);
 
     /**
+     * @brief Defines the unique public key of the contact.
+     * @param key the public key of the contact
+     */
+    void setKey(QByteArray key);
+
+    /**
      * @brief Defines the name of the contact.
-     * @param name the name of the contact.
+     * @param name the name of the contact
      */
     void setName(QString name);
 
     /**
      * @brief Defines the port to be used for the contact.
-     * @param port the port to be used for the contact.
+     * @param port the port to be used for the contact
      */
     void setPort(quint16 port);
-
-    /**
-     * @brief Defines the unique public key of the contact.
-     * @param key the public key of the contact.
-     */
-    void setKey(QByteArray key);
 
 private :
     QStringList mHostsList;
