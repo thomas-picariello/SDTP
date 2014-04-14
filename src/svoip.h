@@ -18,6 +18,7 @@ class SVoIP: public QObject
     Q_OBJECT
 public: 
 	SVoIP(QObject *parent = 0);
+    ~SVoIP();
 
 public slots:
     void onPasswordInput(QString password);
@@ -26,7 +27,7 @@ private :
     QString mPwHash, mSalt;
     ContactDB mContactDB;
     PasswordWindow mPasswordWindow;
-    ContactListWindow mContactListWindow;
+    ContactListWindow *mContactListWindow;
     QPair<QByteArray,QByteArray> mFileKey;
 
     QByteArray deriveKey(QString password);

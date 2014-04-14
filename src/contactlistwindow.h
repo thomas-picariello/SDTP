@@ -6,6 +6,8 @@
 #include <QList>
 #include <QListWidgetItem>
 #include <QTcpServer>
+#include <QPixmap>
+#include <QPainter>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
 #include "contact.h"
@@ -21,13 +23,24 @@ class ContactListWindow : public QWidget
     
 public:
     enum ItemDataRole{
-        IdRole = 0x0101
+        IdRole = 0x0101,
+        StatusRole = 0x102
+    };
+    enum ContactStatus{
+        Offline,
+        Online,
+        Busy,
+        Away
     };
 
     explicit ContactListWindow(ContactDB *contactDB,
                                QPair<QByteArray,QByteArray> *fileKey,
                                QWidget *parent = 0);
     ~ContactListWindow();
+
+    void setContactStatusIcon(QListWidgetItem *item, ContactStatus status);
+    void setContactStatusIcon(int id, ContactStatus status);
+    void setContactStatusIcon(Contact *contact, ContactStatus status);
 
 public slots:
     void acceptConnection();
@@ -45,11 +58,10 @@ private:
     QPair<QByteArray,QByteArray> *mFileKey;
     Ui::ContactListWindow *ui;
     QTcpServer *mListener;
-    QList<QListWidgetItem*> mItemList;
-    QList<Contact*> mContactList;
     QList<NetworkManager*> mManagerList;
 
     Contact* getSelectedContact();
+    QListWidgetItem* findItemByContactId(int id);
 };
 
 #endif // CONTACTLISTWINDOW_H
