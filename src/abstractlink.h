@@ -5,16 +5,19 @@
 #include <QDebug>
 #include <QTcpSocket>
 #include "contact.h"
+#include "packetagent.h"
 
-class AbstractLink
+class AbstractLink: public QObject
 {
+    Q_OBJECT
 public:
-    enum STATE{OFFLINE,ONLINE,ERROR};
+    enum State{OFFLINE,ONLINE,Error};
 
     AbstractLink(Contact contact);
-    AbstractLink(QTcpSocket socket);
+    AbstractLink(QTcpSocket *socket);
+    ~AbstractLink();
 
-    const AbstractLink::STATE state();
+    State state();
 
 public slots:
     void write(QByteArray data);
@@ -27,12 +30,13 @@ signals:
 
 private:
     void connect();
-    void Handshake();
+    void handshake();
 
+    PacketAgent *mAgent;
     Contact mContact;
-    QByteArray mData;
-    QTcpSocket mSocket;
-    AbstractLink::STATE mState;
+    QByteArray *mData;
+    QTcpSocket *mSocket;
+    State mState;
 
 };
 

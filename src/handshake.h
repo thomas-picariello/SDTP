@@ -12,6 +12,7 @@
 #include <QSettings>
 #include <QCoreApplication>
 #include "contactdb.h"
+#include "rsakeyring.h"
 
 class Handshake : public QObject
 {
@@ -42,8 +43,8 @@ private :
     ContactDB *m_contactdb;
     QTcpSocket *m_Socket;
     Contact *m_contact;
-    QSettings *m_Settings;
     QByteArray *m_key;
+    QSettings *m_Settings;
     QStringList *m_CompatibleVersions;
 
 };

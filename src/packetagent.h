@@ -11,7 +11,7 @@
 class PacketAgent
 {
 public:
-    enum APPID{ROOT,MESSENGER,VOIP,SYNC,UNKNOWN, ERROR}; // 0-10 are reserved IDs.
+    enum APPID{HAHAHA}; // 0-10 are reserved IDs.
 
     PacketAgent(QPair<QByteArray,QByteArray> key);// key = key + IV
 

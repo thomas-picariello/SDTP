@@ -51,8 +51,13 @@ Handshake::Handshake(QTcpSocket *socket,ContactDB *contactdb,Contact *contact,  
 void Handshake::startCheckKey(){
 
 
-    m_Socket->write(m_Settings->value("keyring/public_key").toByteArray());
-    qDebug()<<"send : "<<m_Settings->value("keyring/public_key").toByteArray();
+
+
+
+    RsaKeyring keyring(new QPair<QByteArray,QByteArray>());
+
+
+    m_Socket->write(keyring.getPublicKey());
 
     connect(m_Socket,SIGNAL(readyRead()),
             this,SLOT(startCheckCompatibility()));

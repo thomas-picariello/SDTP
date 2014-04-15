@@ -19,7 +19,7 @@
 #include "handshake.h"
 #include "qjrtp.h"
 #include "contactdb.h"
-//#include "abstractlink.h"
+#include "abstractlink.h"
 
 
 
@@ -63,7 +63,7 @@ private :
     QDateTime *m_dateTime;
     CFB_Mode<AES>::Encryption mCfbAesEnc;
     CFB_Mode<AES>::Decryption mCfbAesDec;
-    //AbstractLink *m_root;
+    AbstractLink *m_root;
 };
 
 #endif // NETWORKMANAGER_H

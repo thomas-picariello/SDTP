@@ -1,12 +1,13 @@
 #include "networkmanager.h"
 
+//Starter
 NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *responder_contactdb, QObject *parent): QObject(parent){
     m_Socket = socket;
     m_contact = new Contact();
     m_TimeStamp = 0;
     m_PacketCounter = 0;
 
-    //m_root = new AbstractLink();
+    m_root = new AbstractLink(m_Socket);
 
 
 
@@ -15,7 +16,7 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *responder_contactd
 
 
 }
-
+//Responder
 NetworkManager::NetworkManager(Contact *contact, ContactDB *starter_contactdb, QObject *parent): QObject(parent){
     m_Socket = new QTcpSocket;
 
@@ -23,7 +24,7 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *starter_contactdb, Q
     m_PacketCounter = 0;
     m_contact = contact;
 
-    QString ip  = m_contact->getHost();
+    QString ip  = m_contact->hostsList()->first();
     quint16 port = m_contact->getPort();
 
 
