@@ -16,7 +16,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../res/res.qrc">
-    <normaloff>:/icon/app_icon.png</normaloff>:/icon/app_icon.png</iconset>
+    <normaloff>:/icons/app_icon</normaloff>:/icons/app_icon</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">/*Global*/

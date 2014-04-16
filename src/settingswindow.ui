@@ -5,30 +5,18 @@
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
   <property name="minimumSize">
    <size>
     <width>400</width>
-    <height>300</height>
-   </size>
-  </property>
-  <property name="baseSize">
-   <size>
-    <width>400</width>
-    <height>300</height>
+    <height>400</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>Settings</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icon/app_icon</normaloff>:/icon/app_icon</iconset>
+   <iconset resource="../res/res.qrc">
+    <normaloff>:/icons/app_icon</normaloff>:/icons/app_icon</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">/*Global*/
@@ -49,6 +37,9 @@ QPushButton::hover{
 }
 QPushButton::pressed{
 	background-color:#07f;
+}
+QPushButton::disabled{
+	background-color:#aaa;
 }
 
 /*QToolButton*/
@@ -125,7 +116,7 @@ QMenu::item::pressed{
    <item>
     <widget class="QTabWidget" name="tabs">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="pwd_tab">
       <attribute name="title">
@@ -151,9 +142,6 @@ QMenu::item::pressed{
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="pwd_oldpwd_input"/>
-       </item>
        <item row="2" column="0">
         <widget class="QLabel" name="pwd_newpwd_label">
          <property name="text">
@@ -163,6 +151,9 @@ QMenu::item::pressed{
           <cstring>pwd_newpwd_input</cstring>
          </property>
         </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="pwd_oldpwd_input"/>
        </item>
        <item row="0" column="2">
         <widget class="QLabel" name="pwd_oldpwd_state">
@@ -182,7 +173,7 @@ QMenu::item::pressed{
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="../res/res.qrc">:/img/icon_yes.png</pixmap>
+          <pixmap resource="../res/res.qrc">:/icons/yes</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
@@ -223,7 +214,7 @@ QMenu::item::pressed{
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="../res/res.qrc">:/img/icon_no.png</pixmap>
+          <pixmap resource="../res/res.qrc">:/icons/no</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
@@ -311,7 +302,7 @@ QMenu::item::pressed{
           <widget class="QToolButton" name="rsa_pubkey_opt_bt">
            <property name="icon">
             <iconset resource="../res/res.qrc">
-             <normaloff>:/img/settings_icon.png</normaloff>:/img/settings_icon.png</iconset>
+             <normaloff>:/icons/tools</normaloff>:/icons/tools</iconset>
            </property>
           </widget>
          </item>
@@ -371,7 +362,7 @@ QMenu::item::pressed{
           <widget class="QToolButton" name="rsa_privkey_opt_bt">
            <property name="icon">
             <iconset resource="../res/res.qrc">
-             <normaloff>:/img/settings_icon.png</normaloff>:/img/settings_icon.png</iconset>
+             <normaloff>:/icons/tools</normaloff>:/icons/tools</iconset>
            </property>
           </widget>
          </item>
@@ -404,7 +395,7 @@ QMenu::item::pressed{
             <bool>true</bool>
            </property>
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>

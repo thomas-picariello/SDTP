@@ -17,6 +17,10 @@
   <property name="windowTitle">
    <string>Messenger</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../res/res.qrc">
+    <normaloff>:/icons/app_icon</normaloff>:/icons/app_icon</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">/*Global*/
 QWidget{
@@ -102,6 +106,8 @@ p, li { white-space: pre-wrap; }
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../res/res.qrc"/>
+ </resources>
  <connections/>
 </ui>

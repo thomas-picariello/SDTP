@@ -1,10 +1,23 @@
 <RCC>
-    <qresource prefix="/icon">
-        <file>app_icon.png</file>
-    </qresource>
-    <qresource prefix="/img">
-        <file>icon_yes.png</file>
-        <file>icon_no.png</file>
-        <file>settings_icon.png</file>
+    <qresource prefix="/icons">
+        <file alias="app_icon">icons/app_icon.png</file>
+        <file alias="call_normal">icons/call_normal.png</file>
+        <file alias="messenger_normal">icons/messenger_normal.png</file>
+        <file alias="no">icons/no.png</file>
+        <file alias="tools">icons/tools.png</file>
+        <file alias="yes">icons/yes.png</file>
+        <file alias="call_hover">icons/call_hover.png</file>
+        <file alias="call_pressed">icons/call_pressed.png</file>
+        <file alias="messenger_hover">icons/messenger_hover.png</file>
+        <file alias="messenger_pressed">icons/messenger_pressed.png</file>
+        <file alias="options_hover">icons/options_hover.png</file>
+        <file alias="options_pressed">icons/options_pressed.png</file>
+        <file alias="options_normal">icons/options_normal.png</file>
+        <file alias="settings_hover">icons/settings_hover.png</file>
+        <file alias="settings_normal">icons/settings_normal.png</file>
+        <file alias="settings_pressed">icons/settings_pressed.png</file>
+        <file alias="addcontact_hover">icons/addcontact_hover.png</file>
+        <file alias="addcontact_normal">icons/addcontact_normal.png</file>
+        <file alias="addcontact_pressed">icons/addcontact_pressed.png</file>
     </qresource>
 </RCC>
