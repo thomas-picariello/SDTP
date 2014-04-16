@@ -18,6 +18,7 @@ find_package(JThread REQUIRED)
 #Set variables with all the sources to compile
 set(SVOIP_HEADERS
     contactlistwindow.h
+    contactitemwidget.h
     editcontactwindow.h
     messengerwindow.h
     settingswindow.h
@@ -40,6 +41,7 @@ set(SVOIP_HEADERS
 set(SVOIP_SOURCES
     main.cpp
     contactlistwindow.cpp
+    contactitemwidget.cpp
     editcontactwindow.cpp
     messengerwindow.cpp
     settingswindow.cpp
@@ -65,6 +67,7 @@ set(SVOIP_FORMS
     settingswindow.ui
     messengerwindow.ui
     passwordwindow.ui
+    contactitemwidget.ui
 )
 
 set(SVOIP_RES

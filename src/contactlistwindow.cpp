@@ -20,18 +20,12 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
             this,SLOT(acceptConnection()));
     connect(ui->add, SIGNAL(clicked()),
             this, SLOT(addContact()));
-    connect(ui->edit, SIGNAL(clicked()),
-            this, SLOT(editContact()));
-    connect(ui->remove, SIGNAL(clicked()),
-            this, SLOT(removeContact()));
-    connect(ui->connect, SIGNAL(clicked()),
-            this, SLOT(connectToContact()));
-    connect(ui->list, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
-            this, SLOT(connectToContact()));
+    connect(ui->list, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+            this, SLOT(listSelectionChanged(QListWidgetItem*,QListWidgetItem*)));
+    connect(ui->list, SIGNAL(itemClicked(QListWidgetItem*)),
+            this, SLOT(listItemClicked(QListWidgetItem*)));
     connect(ui->settings, SIGNAL(clicked()),
             this, SLOT(openSettingsWindow()));
-    connect(ui->exit, SIGNAL(clicked()),
-            this, SLOT(exitApp()));
 
     show();
 }
@@ -54,13 +48,13 @@ void ContactListWindow::editContact(){
     }
 }
 
-void ContactListWindow::removeContact(){
-    QListWidgetItem *currentItem = ui->list->currentItem();
-    if(currentItem){
-        int currentId = currentItem->data(IdRole).toInt();
-        mContactDB->erase(currentId);
-        refreshList();
-    }
+void ContactListWindow::listSelectionChanged(QListWidgetItem *current, QListWidgetItem *previous){
+    if(previous)
+        dynamic_cast<ContactItemWidget*>(ui->list->itemWidget(previous))->hide();
+}
+
+void ContactListWindow::listItemClicked(QListWidgetItem *item){
+    dynamic_cast<ContactItemWidget*>(ui->list->itemWidget(item))->show();
 }
 
 void ContactListWindow::connectToContact(){
@@ -75,11 +69,89 @@ void ContactListWindow::openSettingsWindow(){
             this, SLOT(restartListener()));
 }
 
-void ContactListWindow::exitApp(){
-    exit(0);
+void ContactListWindow::onListItemAction(int id, ContactItemWidget::Action action){
+    switch(action){
+    case ContactItemWidget::CallAction:
+        break;
+    case ContactItemWidget::MessengerAction:
+        connectToContact();
+        break;
+    case ContactItemWidget::EditAction:
+        editContact();
+        break;
+    case ContactItemWidget::DeleteAction:
+        deleteContact();
+        break;
+    }
 }
 
-void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, ContactStatus status){
+void ContactListWindow::refreshList(){
+    QList<Contact*> contactList = mContactDB->getAllContacts();
+
+    //check if contact added or modified
+    foreach(Contact *contact, contactList){
+        QListWidgetItem *contactListItem = findItemByContactId(contact->getId());
+        if(contactListItem){
+            //contact already in the item list
+            contactListItem->setText(contact->getName());
+        }else{
+            //new contact
+            QListWidgetItem *item = new QListWidgetItem(contact->getName());
+            item->setData(IdRole, contact->getId());
+            setContactStatusIcon(item, Offline);
+            ui->list->addItem(item);
+            ContactItemWidget *itemWidget = new ContactItemWidget(contact->getId());
+            ui->list->setItemWidget(item, itemWidget);
+            itemWidget->hide();
+            connect(itemWidget, SIGNAL(actionTriggered(int,ContactItemWidget::Action)),
+                    this, SLOT(onListItemAction(int,ContactItemWidget::Action)));
+        }
+    }
+
+    //check if contact deleted
+    QList<QListWidgetItem*> itemList = ui->list->findItems("*", Qt::MatchWildcard);
+    foreach(QListWidgetItem *item, itemList){
+        int id = item->data(IdRole).toInt();
+        bool found = false;
+        foreach(Contact *contact, contactList){
+            if(contact->getId() == id)
+                found = true;
+        }
+        if(!found){
+            delete item;
+        }
+    }
+
+    //clear selection and focus
+    ui->list->clearSelection();
+    ui->list->clearFocus();
+}
+
+void ContactListWindow::deleteContact(){
+    QListWidgetItem *currentItem = ui->list->currentItem();
+    if(currentItem){
+        int currentId = currentItem->data(IdRole).toInt();
+        mContactDB->erase(currentId);
+        refreshList();
+    }
+}
+
+void ContactListWindow::restartListener(){
+    qint16 listenPort = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toInt();
+    mListener->close();
+    mListener->listen(QHostAddress::Any, listenPort);
+}
+
+Contact* ContactListWindow::getSelectedContact(){
+    QListWidgetItem *currentItem = ui->list->currentItem();
+    if(currentItem){
+        int currentId = currentItem->data(IdRole).toInt();
+        return mContactDB->findById(currentId);
+    }
+    return NULL;
+}
+
+void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, Status status){
     QPixmap statusIcon(32,32);
     statusIcon.fill(Qt::transparent);
     QPainter painter(&statusIcon);
@@ -100,62 +172,14 @@ void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, ContactStatu
     item->setData(Qt::DecorationRole, statusIcon);
 }
 
-void ContactListWindow::setContactStatusIcon(int id, ContactStatus status){
+void ContactListWindow::setContactStatusIcon(int id, Status status){
     QListWidgetItem *item = findItemByContactId(id);
     if(item)
         setContactStatusIcon(item, status);
 }
 
-void ContactListWindow::setContactStatusIcon(Contact *contact, ContactStatus status){
+void ContactListWindow::setContactStatusIcon(Contact *contact, Status status){
     setContactStatusIcon(contact->getId(), status);
-}
-
-void ContactListWindow::refreshList(){
-    QList<Contact*> contactList = mContactDB->getAllContacts();
-
-    //check if contact added or modified
-    foreach(Contact *contact, contactList){
-        QListWidgetItem *contactListItem = findItemByContactId(contact->getId());
-        if(contactListItem){
-            //contact already in the item list
-            contactListItem->setText(contact->getName());
-        }else{
-            //new contact
-            QListWidgetItem *item = new QListWidgetItem(contact->getName());
-            item->setData(IdRole, contact->getId());
-            setContactStatusIcon(item, Offline);
-            ui->list->addItem(item);
-        }
-    }
-
-    //check if contact deleted
-    QList<QListWidgetItem*> itemList = ui->list->findItems("*", Qt::MatchWildcard);
-    foreach(QListWidgetItem *item, itemList){
-        int id = item->data(IdRole).toInt();
-        bool found = false;
-        foreach(Contact *contact, contactList){
-            if(contact->getId() == id)
-                found = true;
-        }
-        if(!found){
-            delete item;
-        }
-    }
-}
-
-void ContactListWindow::restartListener(){
-    qint16 listenPort = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toInt();
-    mListener->close();
-    mListener->listen(QHostAddress::Any, listenPort);
-}
-
-Contact* ContactListWindow::getSelectedContact(){
-    QListWidgetItem *currentItem = ui->list->currentItem();
-    if(currentItem){
-        int currentId = currentItem->data(IdRole).toInt();
-        return mContactDB->findById(currentId);
-    }
-    return NULL;
 }
 
 QListWidgetItem* ContactListWindow::findItemByContactId(int id){
