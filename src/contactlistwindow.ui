@@ -27,19 +27,25 @@ QWidget{
 	background-color:white;
 }
 
-/*QPushButton*/
-QPushButton{
-background-color:transparent;
-border:none;
-padding: 0 0;
-margin:0;
-}
-
 /*QListWidget*/
 QListWidget{
 	border: none;
 }
-</string>
+
+/*QMessageBox*/
+QPushButton{
+background-color:#08f;
+color:white;
+border:none;
+padding: 10 10;
+margin:1;
+}
+QPushButton::hover{
+background-color:#09f;
+}
+QPushButton::pressed{
+background-color:#07f;
+}</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="100,0">
    <property name="spacing">
@@ -81,7 +87,15 @@ QListWidget{
         </size>
        </property>
        <property name="styleSheet">
-        <string notr="true">QPushButton{
+        <string notr="true">/*QPushButton*/
+QPushButton{
+	background-color:transparent;
+	border:none;
+	padding: 0 0;
+	margin:0;
+}
+
+QPushButton{
 	image: url(&quot;:/icons/addcontact_normal&quot;);
 }
 QPushButton:hover{
@@ -127,7 +141,14 @@ QPushButton:pressed{
         </size>
        </property>
        <property name="styleSheet">
-        <string notr="true">QPushButton{
+        <string notr="true">/*QPushButton*/
+QPushButton{
+	background-color:transparent;
+	border:none;
+	padding: 0 0;
+	margin:0;
+}
+QPushButton{
 	image: url(&quot;:/icons/settings_normal&quot;);
  }
 QPushButton:hover{

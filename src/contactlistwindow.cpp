@@ -8,6 +8,9 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
     ui(new Ui::ContactListWindow)
 {
     ui->setupUi(this);
+    //scale window
+    setMinimumHeight(minimumHeight()*(logicalDpiX()/96));
+    setMinimumWidth (minimumWidth() *(logicalDpiX()/96));
 
     //scale buttons
     ui->add->setMinimumHeight(ui->add->minimumHeight()*(logicalDpiX()/96));
@@ -134,11 +137,11 @@ void ContactListWindow::refreshList(){
 void ContactListWindow::deleteContact(){
     QListWidgetItem *currentItem = ui->list->currentItem();
     if(currentItem){
-        QMessageBox::StandardButton result = QMessageBox::warning(this,
-                                                                  tr("Confirmation"),
-                                                                  tr("Are you sure want to delete this contact ?"),
-                                                                  QMessageBox::Yes);
-        if(result == QMessageBox::Yes){
+        if(QMessageBox::warning(this,
+                                tr("Confirmation"),
+                                tr("Are you sure want to delete this contact ?"),
+                                QMessageBox::No,
+                                QMessageBox::Yes) == QMessageBox::Yes){
             int currentId = currentItem->data(IdRole).toInt();
             mContactDB->erase(currentId);
             refreshList();
