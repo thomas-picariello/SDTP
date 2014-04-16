@@ -40,7 +40,7 @@ Contact* ContactDB::findById(int id){
         QString name = query.value(0).toString();
         QStringList hostList = deserializeStringList(query.value(1).toByteArray());
         quint16 port = query.value(2).toUInt();
-        QByteArray key = query.value(3).toByteArray();
+        QByteArray key = QByteArray::fromBase64(query.value(3).toByteArray());
         return new Contact(id, name, hostList, port, key, this);
     }else
         return NULL;
@@ -50,7 +50,7 @@ Contact* ContactDB::findByKey(QByteArray key){
     QSqlQuery query(mDb);
     query.prepare("SELECT id,name,hosts,port "
                   "FROM contacts WHERE key=:key");
-    query.bindValue(":key", key);
+    query.bindValue(":key", key.toBase64());
     if(query.exec()){
         query.next();
         int id = query.value(0).toInt();
@@ -71,7 +71,7 @@ QList<Contact*> ContactDB::getAllContacts(){
         QString name = query.value(1).toString();
         QStringList hostList = deserializeStringList(query.value(2).toByteArray());
         quint16 port = query.value(3).toUInt();
-        QByteArray key = query.value(4).toByteArray();
+        QByteArray key = QByteArray::fromBase64(query.value(4).toByteArray());
         returnList.append(new Contact(id, name, hostList, port, key, this));
     }
     return returnList;
@@ -86,7 +86,7 @@ int ContactDB::write(Contact *contact){
         query.bindValue(":name", contact->getName());
         query.bindValue(":hosts", serializeStringList(contact->getHostsList()));
         query.bindValue(":port", contact->getPort());
-        query.bindValue(":key", contact->getKey());
+        query.bindValue(":key", contact->getKey().toBase64());
         if(!query.exec())
             qDebug()<<query.lastError();
     }else{
@@ -97,7 +97,7 @@ int ContactDB::write(Contact *contact){
         query.bindValue(":name", contact->getName());
         query.bindValue(":hosts", serializeStringList(contact->getHostsList()));
         query.bindValue(":port", contact->getPort());
-        query.bindValue(":key", contact->getKey());
+        query.bindValue(":key", contact->getKey().toBase64());
         if(!query.exec())
               qDebug()<<query.lastError();
     }
