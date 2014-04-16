@@ -1,6 +1,7 @@
 #ifndef CONTACTITEMDELEGATE_H
 #define CONTACTITEMDELEGATE_H
 
+#include <QDebug>
 #include <QWidget>
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -34,7 +35,8 @@ public:
 signals:
     void actionTriggered(int id, ContactItemWidget::Action action);
 
-private slots:
+public slots:
+    void onButtonEvent(QEvent *event);
     void onCallButtonClick();
     void onMessengerButtonClick();
     void onEditActionClick();

@@ -13,12 +13,13 @@ ContactItemWidget::ContactItemWidget(int id, QWidget *parent) :
     mOptionsMenu->addAction(tr("Delete"),
                             this, SLOT(onDeleteActionClick()));
 
-    connect(ui->messenger_bt, SIGNAL(clicked()),
+    /*connect(ui->messenger_bt, SIGNAL(clicked()),
             this, SLOT(onMessengerButtonClick()));
     connect(ui->call_bt, SIGNAL(clicked()),
             this, SLOT(onCallButtonClick()));
     connect(ui->options_bt, SIGNAL(clicked()),
-            this, SLOT(showOptionsMenu()));
+            this, SLOT(showOptionsMenu()));*/
+//    connect(ui->messenger_bt, SIGNAL())
 }
 
 int ContactItemWidget::getId() const{
@@ -30,6 +31,15 @@ void ContactItemWidget::hide(){
     ui->call_bt->hide();
     ui->messenger_bt->hide();
     ui->options_bt->hide();
+}
+
+void ContactItemWidget::onButtonEvent(QEvent *event){
+    QPushButton* button = dynamic_cast<QPushButton*>(sender());
+    qDebug()<<event->type();
+    switch(event->type()){
+    case QEvent::MouseMove:
+        break;
+    }
 }
 
 void ContactItemWidget::onCallButtonClick(){

@@ -152,7 +152,9 @@ Contact* ContactListWindow::getSelectedContact(){
 }
 
 void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, Status status){
-    QPixmap statusIcon(32,32);
+    float iconScaleFactor = 96/logicalDpiX();
+    QPixmap statusIcon(32 * iconScaleFactor,
+                       32 * iconScaleFactor);
     statusIcon.fill(Qt::transparent);
     QPainter painter(&statusIcon);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -167,7 +169,8 @@ void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, Status statu
     else if(status == Away)
         painter.setBrush(QBrush(QColor(255, 192, 0)));
 
-    painter.drawEllipse(QPoint(16,16), 5, 5);
+    painter.drawEllipse(QPoint(16 * iconScaleFactor, 16 * iconScaleFactor),
+                        (int)(5*iconScaleFactor), (int)(5*iconScaleFactor));
 
     item->setData(Qt::DecorationRole, statusIcon);
 }

@@ -32,6 +32,7 @@ set(SVOIP_HEADERS
     networkmanager.h
     handshake.h
     qjrtp.h
+    qiconbutton.h
     rsakeyring.h
     packetagent.h
     abstractlink.h
@@ -54,6 +55,7 @@ set(SVOIP_SOURCES
     qpcmbuffer.cpp
     networkmanager.cpp
     handshake.cpp
+    qiconbutton.cpp
     qjrtp.cpp
     rsakeyring.cpp
     packetagent.cpp
