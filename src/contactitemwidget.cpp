@@ -13,13 +13,12 @@ ContactItemWidget::ContactItemWidget(int id, QWidget *parent) :
     mOptionsMenu->addAction(tr("Delete"),
                             this, SLOT(onDeleteActionClick()));
 
-    /*connect(ui->messenger_bt, SIGNAL(clicked()),
+    connect(ui->messenger_bt, SIGNAL(clicked()),
             this, SLOT(onMessengerButtonClick()));
     connect(ui->call_bt, SIGNAL(clicked()),
             this, SLOT(onCallButtonClick()));
     connect(ui->options_bt, SIGNAL(clicked()),
-            this, SLOT(showOptionsMenu()));*/
-//    connect(ui->messenger_bt, SIGNAL())
+            this, SLOT(showOptionsMenu()));
 }
 
 int ContactItemWidget::getId() const{

@@ -65,7 +65,6 @@ private:
 
     Contact* getSelectedContact();
     QListWidgetItem* findItemByContactId(int id);
-
 };
 
 #endif // CONTACTLISTWINDOW_H

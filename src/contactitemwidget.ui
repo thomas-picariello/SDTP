@@ -64,9 +64,15 @@ QMenu::item::pressed{
     </spacer>
    </item>
    <item>
-    <widget class="QIconButton" name="messenger_bt">
+    <widget class="QPushButton" name="messenger_bt">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+       <horstretch>1</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
+     </property>
      <property name="styleSheet">
-      <string notr="true">/*QPushButton{
+      <string notr="true">QPushButton{
 	image: url(&quot;:/icons/messenger_normal&quot;);
  }
 QPushButton:hover{
@@ -74,19 +80,7 @@ QPushButton:hover{
  }
 QPushButton:pressed{
 	image: url(&quot;:/icons/messenger_pressed&quot;);
- }*/</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../res/res.qrc">
-       <normaloff>:/icons/messenger_normal</normaloff>
-       <activeoff>:/icons/messenger_hover</activeoff>
-       <selectedoff>:/icons/messenger_pressed</selectedoff>:/icons/messenger_normal</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>24</width>
-       <height>24</height>
-      </size>
+ }</string>
      </property>
      <property name="checkable">
       <bool>false</bool>
@@ -149,15 +143,6 @@ QPushButton:pressed{
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QIconButton</class>
-   <extends>QPushButton</extends>
-   <header>qiconbutton.h</header>
-  </customwidget>
- </customwidgets>
- <resources>
-  <include location="../res/res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

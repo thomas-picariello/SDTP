@@ -9,6 +9,10 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
 {
     ui->setupUi(this);
 
+    //scale buttons
+    ui->add->setMaximumHeight(ui->add->minimumHeight()*(logicalDpiX()/96));
+    ui->settings->setMaximumHeight(ui->settings->minimumHeight()*(logicalDpiX()/96));
+
     qint16 listenPort = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toInt();
 
     mListener = new QTcpServer(this);
@@ -152,7 +156,7 @@ Contact* ContactListWindow::getSelectedContact(){
 }
 
 void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, Status status){
-    float iconScaleFactor = 96/logicalDpiX();
+    float iconScaleFactor = logicalDpiX()/96;
     QPixmap statusIcon(32 * iconScaleFactor,
                        32 * iconScaleFactor);
     statusIcon.fill(Qt::transparent);
