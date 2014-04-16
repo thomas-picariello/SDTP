@@ -10,8 +10,10 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
     ui->setupUi(this);
 
     //scale buttons
-    ui->add->setMaximumHeight(ui->add->minimumHeight()*(logicalDpiX()/96));
-    ui->settings->setMaximumHeight(ui->settings->minimumHeight()*(logicalDpiX()/96));
+    ui->add->setMinimumHeight(ui->add->minimumHeight()*(logicalDpiX()/96));
+    ui->add->setMinimumWidth(ui->add->minimumWidth() * (logicalDpiX()/96));
+    ui->settings->setMinimumHeight(ui->settings->minimumHeight()*(logicalDpiX()/96));
+    ui->settings->setMinimumWidth(ui->settings->minimumWidth() * (logicalDpiX()/96));
 
     qint16 listenPort = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toInt();
 
@@ -24,8 +26,6 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
             this,SLOT(acceptConnection()));
     connect(ui->add, SIGNAL(clicked()),
             this, SLOT(addContact()));
-    connect(ui->list, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
-            this, SLOT(listSelectionChanged(QListWidgetItem*,QListWidgetItem*)));
     connect(ui->list, SIGNAL(itemClicked(QListWidgetItem*)),
             this, SLOT(listItemClicked(QListWidgetItem*)));
     connect(ui->settings, SIGNAL(clicked()),
@@ -52,13 +52,12 @@ void ContactListWindow::editContact(){
     }
 }
 
-void ContactListWindow::listSelectionChanged(QListWidgetItem *current, QListWidgetItem *previous){
-    if(previous)
-        dynamic_cast<ContactItemWidget*>(ui->list->itemWidget(previous))->hide();
-}
-
-void ContactListWindow::listItemClicked(QListWidgetItem *item){
-    dynamic_cast<ContactItemWidget*>(ui->list->itemWidget(item))->show();
+void ContactListWindow::listItemClicked(QListWidgetItem *currentItem){
+    QList<QListWidgetItem*> itemList = ui->list->findItems("*", Qt::MatchWildcard);
+    foreach(QListWidgetItem *item, itemList){
+           dynamic_cast<ContactItemWidget*>(ui->list->itemWidget(item))->hide();
+    }
+    dynamic_cast<ContactItemWidget*>(ui->list->itemWidget(currentItem))->show();
 }
 
 void ContactListWindow::connectToContact(){
@@ -103,6 +102,7 @@ void ContactListWindow::refreshList(){
             QListWidgetItem *item = new QListWidgetItem(contact->getName());
             item->setData(IdRole, contact->getId());
             setContactStatusIcon(item, Offline);
+
             ui->list->addItem(item);
             ContactItemWidget *itemWidget = new ContactItemWidget(contact->getId());
             ui->list->setItemWidget(item, itemWidget);
@@ -134,9 +134,15 @@ void ContactListWindow::refreshList(){
 void ContactListWindow::deleteContact(){
     QListWidgetItem *currentItem = ui->list->currentItem();
     if(currentItem){
-        int currentId = currentItem->data(IdRole).toInt();
-        mContactDB->erase(currentId);
-        refreshList();
+        QMessageBox::StandardButton result = QMessageBox::warning(this,
+                                                                  tr("Confirmation"),
+                                                                  tr("Are you sure want to delete this contact ?"),
+                                                                  QMessageBox::Yes);
+        if(result == QMessageBox::Yes){
+            int currentId = currentItem->data(IdRole).toInt();
+            mContactDB->erase(currentId);
+            refreshList();
+        }
     }
 }
 

@@ -8,6 +8,7 @@
 #include <QTcpServer>
 #include <QPixmap>
 #include <QPainter>
+#include <QMessageBox>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
 #include "contact.h"
@@ -48,8 +49,7 @@ public slots:
     void addContact();
     void connectToContact();
     void editContact();
-    void listSelectionChanged(QListWidgetItem *current,QListWidgetItem *previous);
-    void listItemClicked(QListWidgetItem *item);
+    void listItemClicked(QListWidgetItem *currentItem);
     void openSettingsWindow();
     void onListItemAction(int id, ContactItemWidget::Action action);
     void refreshList();
