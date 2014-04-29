@@ -27,8 +27,8 @@ public:
 
     void changeFileKey(QPair<QByteArray,QByteArray> newKey);
     void commitToKeystore();
-    void exportPrivateKey(QString filename) const;
-    void exportPublicKey(QString filename) const;
+    void exportPrivateKey(QString filename);
+    void exportPublicKey(QString filename);
     void generateKeypair();
     QByteArray getPrivateKey() const;
     QByteArray getPublicKey() const;
@@ -41,6 +41,7 @@ public:
 
 signals:
     void keyGenerationFinished();
+    void error(QString err);
 
 public slots:
     void onKeyGenJobFinished();
