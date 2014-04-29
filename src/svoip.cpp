@@ -35,6 +35,7 @@ void SVoIP::onPasswordInput(QString password){
                                     false))); //no new line
     qDebug()<<"Hash from entered password"<<QString::fromStdString(digest);
     if(mPwHash.compare(QString::fromStdString(digest)) != 0){
+        emit error("Error: Password hashes do not match.");
         QMessageBox::critical(&mPasswordWindow, "Error", "Wrong password !");
     }else{
         mPasswordWindow.close();
@@ -66,7 +67,6 @@ QByteArray SVoIP::generateSalt(){
     std::string encodedBlock;
     CryptoPP::AutoSeededRandomPool rng;
     rng.GenerateBlock(randomBlock,blockSize);
-    qDebug()<<randomBlock;
     CryptoPP::ArraySource(randomBlock,
                           blockSize,
                           true,

@@ -23,6 +23,9 @@ public:
 public slots:
     void onPasswordInput(QString password);
 
+signals:
+    void error(QString err);
+
 private :
     QString mPwHash, mSalt;
     ContactDB mContactDB;
