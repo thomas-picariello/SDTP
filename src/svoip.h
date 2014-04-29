@@ -28,7 +28,7 @@ signals:
 
 private :
     QString mPwHash, mSalt;
-    ContactDB mContactDB;
+    ContactDB *mContactDB;
     PasswordWindow mPasswordWindow;
     ContactListWindow *mContactListWindow;
     QPair<QByteArray,QByteArray> mFileKey;
