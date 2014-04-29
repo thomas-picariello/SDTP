@@ -5,7 +5,8 @@
 #include <QtSql/QtSql>
 #include <QList>
 #include <QByteArray>
-#include <cryptopp/authenc.h>
+#include <cryptopp/sha.h>
+#include <cryptopp/base64.h>
 #include "contact.h"
 
 class ContactDB: public QObject
@@ -20,10 +21,18 @@ public:
     QList<Contact*> getAllContacts();
     int write(Contact *contact);
 
+signals:
+    void error(QString err);
+
 private :
-    QSqlDatabase mDb;
+    QSqlDatabase mMemoryDb;
+    QSqlDatabase mDiskDb;
     QPair<QByteArray, QByteArray> *mFileKey;
 
+    QByteArray hashMemoryDb();
+    void commitToDiskDb();
+    void importDiskDb();
+    void initTables();
     QByteArray serializeStringList(QStringList list);
     QStringList deserializeStringList(QByteArray byteArray);
 
