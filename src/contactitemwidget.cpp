@@ -1,10 +1,10 @@
 #include "contactitemwidget.h"
 #include "ui_contactitemwidget.h"
 
-ContactItemWidget::ContactItemWidget(int id, QWidget *parent) :
+ContactItemWidget::ContactItemWidget(int contactId, QWidget *parent) :
     QWidget(parent), ui(new Ui::ContactItemWidget)
 {
-    mId = id;
+    mContactId = contactId;
     ui->setupUi(this);
 
     mOptionsMenu = new QMenu(this);
@@ -21,12 +21,11 @@ ContactItemWidget::ContactItemWidget(int id, QWidget *parent) :
             this, SLOT(showOptionsMenu()));
 }
 
-int ContactItemWidget::getId() const{
-    return mId;
+int ContactItemWidget::getContactId() const{
+    return mContactId;
 }
 
 void ContactItemWidget::hide(){
-    QWidget::hide();
     ui->call_bt->hide();
     ui->messenger_bt->hide();
     ui->options_bt->hide();
@@ -42,28 +41,27 @@ void ContactItemWidget::onButtonEvent(QEvent *event){
 }
 
 void ContactItemWidget::onCallButtonClick(){
-    emit(actionTriggered(mId, CallAction));
+    emit(actionTriggered(mContactId, CallAction));
 }
 
 void ContactItemWidget::onMessengerButtonClick(){
-    emit actionTriggered(mId, MessengerAction);
+    emit actionTriggered(mContactId, MessengerAction);
 }
 
 void ContactItemWidget::onEditActionClick(){
-    emit actionTriggered(mId, EditAction);
+    emit actionTriggered(mContactId, EditAction);
 }
 
 void ContactItemWidget::onDeleteActionClick(){
-    emit actionTriggered(mId, DeleteAction);
+    emit actionTriggered(mContactId, DeleteAction);
 }
 
 
-void ContactItemWidget::setId(int id){
-    mId = id;
+void ContactItemWidget::setContactId(int id){
+    mContactId = id;
 }
 
 void ContactItemWidget::show(){
-    QWidget::show();
     ui->call_bt->show();
     ui->messenger_bt->show();
     ui->options_bt->show();

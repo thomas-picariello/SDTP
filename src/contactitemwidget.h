@@ -23,13 +23,13 @@ public:
         DeleteAction
     };
 
-    explicit ContactItemWidget(int id = 0,
+    explicit ContactItemWidget(int contactId = 0,
                                QWidget *parent = 0);
     ~ContactItemWidget();
 
-    int getId() const;
+    int getContactId() const;
     void hide();
-    void setId(int id);
+    void setContactId(int id);
     void show();
 
 signals:
@@ -45,7 +45,7 @@ public slots:
 
 private:
     Ui::ContactItemWidget *ui;
-    int mId;
+    int mContactId;
     QMenu *mOptionsMenu;
 };
 
