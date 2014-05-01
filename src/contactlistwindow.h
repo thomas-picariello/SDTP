@@ -51,6 +51,7 @@ public slots:
 
 signals:
     void startApp(int appId, int contactId);
+    void settingsUpdated();
     
 private:
     ContactDB *mContactDB;

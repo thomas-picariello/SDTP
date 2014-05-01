@@ -25,6 +25,18 @@ SVoIP::SVoIP(QObject *parent):
     }
 }
 
+void SVoIP::startProgram(QByteArray key){
+    mFileKey.first = key;
+    mContactDB = new ContactDB(&mFileKey, this);
+    mContactListWindow = new ContactListWindow(mContactDB, &mFileKey);
+    restartListener();
+    connect(&mListener, SIGNAL(newConnection()),
+            this, SLOT(onIncommingConnection()));
+    connect(mContactListWindow, SIGNAL(settingsUpdated()),
+            this, SLOT(restartListener()));
+    attemptConnectAll();
+}
+
 void SVoIP::onIncommingConnection(){
     //negative unique id for hanshaking network managers
     int id = -1;
@@ -64,16 +76,6 @@ void SVoIP::attemptConnectAll(){
             mNetworkManagerList.insert(id, networkManager);
         }
     }
-}
-
-void SVoIP::startProgram(QByteArray key){
-    mFileKey.first = key;
-    mContactDB = new ContactDB(&mFileKey, this);
-    mContactListWindow = new ContactListWindow(mContactDB, &mFileKey);
-    restartListener();
-    connect(&mListener, SIGNAL(newConnection()),
-            this, SLOT(onIncommingConnection()));
-    attemptConnectAll();
 }
 
 void SVoIP::restartListener(){

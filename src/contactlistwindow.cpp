@@ -55,7 +55,7 @@ void ContactListWindow::listItemClicked(QListWidgetItem *currentItem){
 void ContactListWindow::openSettingsWindow(){
     SettingsWindow *setWin = new SettingsWindow(mFileKey);
     connect(setWin, SIGNAL(settingsUpdated()),
-            this, SLOT(restartListener()));
+            this, SIGNAL(settingsUpdated()));
 }
 
 void ContactListWindow::onListItemAction(int id, ContactItemWidget::Action action){
