@@ -6,9 +6,19 @@ PacketAgent::PacketAgent( QPair<QByteArray,QByteArray> key){
     mIV = key.second;
 
 
+
+
+    qDebug()<<"PacketAgent::PacketAgent( QPair) Done";
+
+
+}
+PacketAgent::PacketAgent(){
+
 }
 
-bool PacketAgent::login(QObject* parent){
+bool PacketAgent::login(){
+
+    senddata("qwertzu");
 
     return 0;
 }
@@ -16,14 +26,12 @@ bool PacketAgent::logout(QObject* parent){
 
     return 0;
 }
-void PacketAgent::send(QByteArray data, QObject* parent){
+void PacketAgent::newdata(QByteArray data){
 
-}
-QByteArray PacketAgent::read(QObject* parent){
+    mContent = data;
 
-    mContent = 0;
+    qDebug()<<"recieved :"+mContent;
 
-    return mContent;
 }
 void PacketAgent::encrypt(){
 

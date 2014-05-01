@@ -8,22 +8,26 @@
 
 
 
-class PacketAgent
+class PacketAgent: public QObject
 {
+
+    Q_OBJECT
+
 public:
-    enum APPID{HAHAHA}; // 0-10 are reserved IDs.
+    enum APPID{Root,Chat,Voip,System,Unknown}; // 0-10 are reserved IDs.
 
     PacketAgent(QPair<QByteArray,QByteArray> key);// key = key + IV
+    PacketAgent();
 
-    bool login( QObject* parent );
+    bool login();
     bool logout( QObject* parent );
 
 public slots :
-    void send(QByteArray data, QObject* parent);
-    QByteArray read(QObject* parent);
+    void newdata(QByteArray data);
 
 signals:
-    QByteArray newdata(); // send signal specifically to one app...
+    void senddata(QByteArray data);
+
 
 private:
 

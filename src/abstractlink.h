@@ -13,7 +13,7 @@ class AbstractLink: public QObject
 public:
     enum State{OFFLINE,ONLINE,Error};
 
-    AbstractLink(Contact contact);
+    AbstractLink(Contact *contact);
     AbstractLink(QTcpSocket *socket);
     ~AbstractLink();
 
@@ -21,22 +21,30 @@ public:
 
 public slots:
     void write(QByteArray data);
-    QByteArray read();
+    void read();
+    void handshake();
+    void onConnected();
+    void tryConnect();
+    void onSocketError(QAbstractSocket::SocketError error);
 
 signals:
+    void statechanged();
     void newdata();
     void connected();
     void disconnected();
+    void error(QString);
+
+private slots :
+
 
 private:
-    void connect();
-    void handshake();
 
     PacketAgent *mAgent;
-    Contact mContact;
     QByteArray *mData;
     QTcpSocket *mSocket;
     State mState;
+    Contact *m_Contact;
+    int HostListLength;
 
 };
 

@@ -16,7 +16,6 @@
 #include "message.h"
 #include "messengerwindow.h"
 #include "contact.h"
-#include "handshake.h"
 #include "qjrtp.h"
 #include "contactdb.h"
 #include "abstractlink.h"
@@ -36,34 +35,14 @@ public:
     NetworkManager(Contact *contact, ContactDB *starter_contactdb,  QObject *parent=0);
     ~NetworkManager();
 
-public slots :
-    void readIncomingData();
-    void sendData(QByteArray,quint8);
-    void error(QAbstractSocket::SocketError);
-    void voipCall();
+signals :
+    void error(QString error);
 
-    void onVoIPReadyRead();
-    void onConnect();//for starter
-    void onIdentified();
 
 private :
-    ContactDB *responder_contactdb,*starter_contactdb;
+    ContactDB *m_Contact;
     QTcpSocket *m_Socket;
-    QSettings *m_settings;
-    QJrtp *m_QJrtp;
-    VoIP *m_voip;
-    Handshake *m_handshake;
-    Contact *m_contact;
-    MessengerWindow *m_MessengerWindow;
-    QByteArray mAesKey;
-    QByteArray mAesIv;
-    quint8 m_PacketCounter;
-    quint16 m_TimeStamp;
-    QTime *m_Time;
-    QDateTime *m_dateTime;
-    CFB_Mode<AES>::Encryption mCfbAesEnc;
-    CFB_Mode<AES>::Decryption mCfbAesDec;
-    AbstractLink *m_root;
+    AbstractLink *m_Root;
 };
 
 #endif // NETWORKMANAGER_H

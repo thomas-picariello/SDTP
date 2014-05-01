@@ -100,7 +100,7 @@ void Handshake::respondCheckKey(){
 
 
     //m_contact = ContactFactory::findByKey(msg.data());
-    m_contact = m_contactdb->findByKey(msg.data());
+    m_contact = m_contactdb->findByKey(msg.data() );
 
     if(m_contact == NULL)
     {
