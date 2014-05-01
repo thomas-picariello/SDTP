@@ -1,7 +1,12 @@
 #ifndef PASSWORDWINDOW_H
 #define PASSWORDWINDOW_H
 
+#include <QDebug>
 #include <QDialog>
+#include <QMessageBox>
+#include <cryptopp/sha.h>
+#include <cryptopp/base64.h>
+#include <cryptopp/pwdbased.h>
 
 namespace Ui {
 class PasswordWindow;
@@ -10,19 +15,22 @@ class PasswordWindow;
 class PasswordWindow : public QDialog
 {
     Q_OBJECT
+public:
+    explicit PasswordWindow(QString pwdHash, QString salt, QWidget *parent = 0);
+    ~PasswordWindow();
 
 signals:
-    void validate(QString password);
+    void error(QString err);
+    void validate(QByteArray key);
 
 public slots:
     void onOkClick();
 
-public:
-    explicit PasswordWindow(QWidget *parent = 0);
-    ~PasswordWindow();
-
 private:
+    QString mPwdHash, mSalt;
     Ui::PasswordWindow *ui;
+
+    QByteArray deriveKey(QString &password);
 };
 
 #endif // PASSWORDWINDOW_H

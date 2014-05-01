@@ -3,68 +3,36 @@
 SVoIP::SVoIP(QObject *parent):
     QObject(parent),
     mContactDB(NULL),
-    mContactListWindow(NULL)
+    mContactListWindow(NULL),
+    mPasswordWindow(NULL)
 {
     QSettings settings("settings.ini", QSettings::IniFormat);
-    mSalt = settings.value("encryption/salt").toString();
-    mPwHash = settings.value("encryption/password_hash").toString();
+    QString salt = settings.value("encryption/salt").toString();
+    QString pwdHash = settings.value("encryption/password_hash").toString();
 
-    if(mSalt.isEmpty()){
-        settings.setValue("encryption/salt", QString::fromUtf8(generateSalt()));
+    if(salt.isEmpty()){
+        settings.setValue("encryption/salt", generateSalt());
     }
-    mFileKey.second = QByteArray::fromBase64(mSalt.toUtf8()).left(16); //AES block size = 128 bits
+    //set IV (AES block size = 128 bits)
+    mFileKey.second = QByteArray::fromBase64(salt.toUtf8()).left(16);
 
-    if(mPwHash.isEmpty()){
-        mContactDB = new ContactDB(&mFileKey, this);
-        mContactListWindow = new ContactListWindow(mContactDB, &mFileKey);
+    if(pwdHash.isEmpty()){
+        startProgram();
     }else{
-        connect(&mPasswordWindow, SIGNAL(validate(QString)),
-                this, SLOT(onPasswordInput(QString)));
-        mPasswordWindow.show();
+        mPasswordWindow = new PasswordWindow(pwdHash, salt);
+        connect(mPasswordWindow, SIGNAL(validate(QByteArray)),
+                this, SLOT(startProgram(QByteArray)));
     }
 }
 
-void SVoIP::onPasswordInput(QString password){
-    std::string digest;
-    CryptoPP::SHA256 hash;
-    password.append(QByteArray::fromBase64(mSalt.toUtf8()));
-    CryptoPP::StringSource(password.toStdString(),
-                           true,
-                           new CryptoPP::HashFilter(hash,
-                                new CryptoPP::Base64Encoder(
-                                    new CryptoPP::StringSink(digest),
-                                    false))); //no new line
-    qDebug()<<"Hash from entered password"<<QString::fromStdString(digest);
-    if(mPwHash.compare(QString::fromStdString(digest)) != 0){
-        emit error("Error: Password hashes do not match.");
-        QMessageBox::critical(&mPasswordWindow, "Error", "Wrong password !");
-    }else{
-        mPasswordWindow.close();
-        mFileKey.first = deriveKey(password);
-        mContactDB = new ContactDB(&mFileKey, this);
-        mContactListWindow = new ContactListWindow(mContactDB, &mFileKey);
-    }
+void SVoIP::startProgram(QByteArray key){
+    mFileKey.first = key;
+    mContactDB = new ContactDB(&mFileKey, this);
+    mContactListWindow = new ContactListWindow(mContactDB, &mFileKey);
 }
 
-QByteArray SVoIP::deriveKey(QString password){
-    CryptoPP::PKCS5_PBKDF1<CryptoPP::SHA256> derivator;
-    uchar key[32];
-    derivator.DeriveKey(key,
-                        derivator.MaxDerivedKeyLength(),
-                        0,
-                        reinterpret_cast<const uchar*>(password.toUtf8().constData()),
-                        password.length(),
-                        reinterpret_cast<const uchar*>(mSalt.toUtf8().constData()),
-                        mSalt.length(),
-                        1000,
-                        0);
-    qDebug()<<"Gen AES key"
-            <<QByteArray(reinterpret_cast<char*>(key), static_cast<uint>(derivator.MaxDerivedKeyLength())).toBase64();
-    return QByteArray(reinterpret_cast<char*>(key), static_cast<uint>(derivator.MaxDerivedKeyLength()));
-}
-
-QByteArray SVoIP::generateSalt(){
-    const unsigned int blockSize = 256;
+QString SVoIP::generateSalt(){
+    const unsigned int blockSize = 32;
     byte randomBlock[blockSize];
     std::string encodedBlock;
     CryptoPP::AutoSeededRandomPool rng;
@@ -75,10 +43,11 @@ QByteArray SVoIP::generateSalt(){
                           new CryptoPP::Base64Encoder(
                               new StringSink(encodedBlock),
                               false));
-    return QString::fromStdString(encodedBlock).toUtf8();
+    return QString::fromStdString(encodedBlock);
 }
 
 SVoIP::~SVoIP(){
     if(mContactDB) delete mContactDB;
     if(mContactListWindow) delete mContactListWindow;
+    if(mPasswordWindow) delete mPasswordWindow;
 }

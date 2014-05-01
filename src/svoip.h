@@ -4,10 +4,7 @@
 #include <QObject>
 #include <QByteArray>
 #include <QPair>
-#include <QMessageBox>
-#include <cryptopp/sha.h>
 #include <cryptopp/base64.h>
-#include <cryptopp/pwdbased.h>
 #include <cryptopp/osrng.h>
 #include "contactdb.h"
 #include "contactlistwindow.h"
@@ -21,20 +18,18 @@ public:
     ~SVoIP();
 
 public slots:
-    void onPasswordInput(QString password);
+    void startProgram(QByteArray key = QByteArray());
 
 signals:
     void error(QString err);
 
 private :
-    QString mPwHash, mSalt;
     ContactDB *mContactDB;
-    PasswordWindow mPasswordWindow;
+    PasswordWindow *mPasswordWindow;
     ContactListWindow *mContactListWindow;
     QPair<QByteArray,QByteArray> mFileKey;
 
-    QByteArray deriveKey(QString password);
-    QByteArray generateSalt();
+    QString generateSalt();
 
     Q_DISABLE_COPY(SVoIP)
 };
