@@ -2,17 +2,13 @@
 #define CONTACTLISTWINDOW_H
 
 #include <QWidget>
-#include <QSettings>
-#include <QList>
 #include <QListWidgetItem>
-#include <QTcpServer>
 #include <QPixmap>
 #include <QPainter>
 #include <QMessageBox>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
 #include "contact.h"
-#include "networkmanager.h"
 #include "contactitemwidget.h"
 
 namespace Ui {
@@ -45,23 +41,21 @@ public:
     void setContactStatusIcon(Contact *contact, Status status);
 
 public slots:
-    void acceptConnection();
     void addContact();
-    void connectToContact();
     void editContact();
     void listItemClicked(QListWidgetItem *currentItem);
     void openSettingsWindow();
     void onListItemAction(int id, ContactItemWidget::Action action);
     void refreshList();
     void deleteContact();
-    void restartListener();
+
+signals:
+    void startApp(int appId, int contactId);
     
 private:
     ContactDB *mContactDB;
     QPair<QByteArray,QByteArray> *mFileKey;
     Ui::ContactListWindow *ui;
-    QTcpServer *mListener;
-    QList<NetworkManager*> mManagerList;
 
     Contact* getSelectedContact();
     QListWidgetItem* findItemByContactId(int id);

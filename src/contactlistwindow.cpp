@@ -18,15 +18,8 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
     ui->settings->setMinimumHeight(ui->settings->minimumHeight()*(logicalDpiX()/96));
     ui->settings->setMinimumWidth(ui->settings->minimumWidth() * (logicalDpiX()/96));
 
-    qint16 listenPort = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toInt();
-
-    mListener = new QTcpServer(this);
-    mListener->listen(QHostAddress::Any, listenPort);
-
     refreshList();
 
-    connect(mListener, SIGNAL(newConnection()),
-            this,SLOT(acceptConnection()));
     connect(ui->add, SIGNAL(clicked()),
             this, SLOT(addContact()));
     connect(ui->list, SIGNAL(itemClicked(QListWidgetItem*)),
@@ -35,10 +28,6 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
             this, SLOT(openSettingsWindow()));
 
     show();
-}
-
-void ContactListWindow::acceptConnection(){
-    mManagerList.append(new NetworkManager(mListener->nextPendingConnection(),mContactDB, this));
 }
 
 void ContactListWindow::addContact(){
@@ -63,12 +52,6 @@ void ContactListWindow::listItemClicked(QListWidgetItem *currentItem){
     dynamic_cast<ContactItemWidget*>(ui->list->itemWidget(currentItem))->show();
 }
 
-void ContactListWindow::connectToContact(){
-    if(getSelectedContact()){
-        mManagerList.append(new NetworkManager(getSelectedContact(), mContactDB, this));
-    }
-}
-
 void ContactListWindow::openSettingsWindow(){
     SettingsWindow *setWin = new SettingsWindow(mFileKey);
     connect(setWin, SIGNAL(settingsUpdated()),
@@ -78,9 +61,10 @@ void ContactListWindow::openSettingsWindow(){
 void ContactListWindow::onListItemAction(int id, ContactItemWidget::Action action){
     switch(action){
     case ContactItemWidget::CallAction:
+        emit startApp(0, id);
         break;
     case ContactItemWidget::MessengerAction:
-        connectToContact();
+        //connectToContact();
         break;
     case ContactItemWidget::EditAction:
         editContact();
@@ -149,12 +133,6 @@ void ContactListWindow::deleteContact(){
     }
 }
 
-void ContactListWindow::restartListener(){
-    qint16 listenPort = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toInt();
-    mListener->close();
-    mListener->listen(QHostAddress::Any, listenPort);
-}
-
 Contact* ContactListWindow::getSelectedContact(){
     QListWidgetItem *currentItem = ui->list->currentItem();
     if(currentItem){
@@ -208,6 +186,5 @@ QListWidgetItem* ContactListWindow::findItemByContactId(int id){
 }
 
 ContactListWindow::~ContactListWindow(){
-    qDeleteAll(mManagerList);
-    delete ui, mListener;
+    delete ui;
 }

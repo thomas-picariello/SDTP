@@ -3,12 +3,15 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QTcpServer>
+#include <QMap>
 #include <QPair>
 #include <cryptopp/base64.h>
 #include <cryptopp/osrng.h>
 #include "contactdb.h"
 #include "contactlistwindow.h"
 #include "passwordwindow.h"
+#include "networkmanager.h"
 
 class SVoIP: public QObject
 {
@@ -19,6 +22,12 @@ public:
 
 public slots:
     void startProgram(QByteArray key = QByteArray());
+    void onIncommingConnection();
+    void attemptConnectAll();
+    void restartListener();
+    void deleteNetworkManager(NetworkManager* networkManager);
+    void updateNetworkManagerId(NetworkManager *networkManager, int newId);
+    void updateContactStatus(int contactId, ContactListWindow::Status status);
 
 signals:
     void error(QString err);
@@ -28,8 +37,11 @@ private :
     PasswordWindow *mPasswordWindow;
     ContactListWindow *mContactListWindow;
     QPair<QByteArray,QByteArray> mFileKey;
+    QTcpServer mListener;
+    QMap<int,NetworkManager*> mNetworkManagerList;
 
     QString generateSalt();
+    void connectNetworkManagerSignals(NetworkManager *networkManager);
 
     Q_DISABLE_COPY(SVoIP)
 };
