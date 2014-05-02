@@ -65,7 +65,7 @@ void AbstractLink::handshake(){
     QObject::connect(mAgent,SIGNAL(senddata(QByteArray)),this,SLOT(write(QByteArray)));
 
     mState = ONLINE;
-    emit connected();
+    emit connected(ContactListWindow::Status::Online);
 
 
 }

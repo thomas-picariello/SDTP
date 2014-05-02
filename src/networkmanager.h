@@ -20,6 +20,7 @@
 #include "contactdb.h"
 #include "abstractlink.h"
 #include "packetagent.h"
+#include "contactlistwindow.h"
 
 
 
@@ -45,7 +46,7 @@ public slots :
 
 signals :
     void error(QString error);
-    void onLinkOnline();
+    void onStatusChanged(ContactListWindow::Status);
 
 
 private :

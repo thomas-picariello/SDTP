@@ -6,6 +6,7 @@
 #include <QTcpSocket>
 #include "contact.h"
 #include "packetagent.h"
+#include "contactlistwindow.h"
 
 class AbstractLink: public QObject
 {
@@ -31,7 +32,7 @@ public slots:
 signals:
     void statechanged();
     void newdata();
-    void connected();
+    void connected(ContactListWindow::Status);
     void disconnected();
     void error(QString);
 

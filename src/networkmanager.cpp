@@ -18,7 +18,7 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *starter_contactdb, Q
     m_Socket = new QTcpSocket;
     m_Root = new AbstractLink(contact);
 
-    connect(m_Root,SIGNAL(connected()),this,SIGNAL(onLinkOnline()));
+    connect(m_Root,SIGNAL(connected(ContactListWindow::Status)),this,SIGNAL(onStatusChanged(ContactListWindow::Status)));
 
 
 
