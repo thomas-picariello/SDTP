@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QSettings>
 #include <QTcpServer>
 #include <QMap>
 #include <QPair>
@@ -25,7 +26,7 @@ public slots:
     void onIncommingConnection();
     void attemptConnectAll();
     void restartListener();
-    void deleteNetworkManager(NetworkManager* networkManager);
+    void onNetworkManagerDelete(QObject *object);
     void updateNetworkManagerId(NetworkManager *networkManager, int newId);
     void updateContactStatus(int contactId, ContactListWindow::Status status);
 

@@ -47,11 +47,9 @@ void SVoIP::onIncommingConnection(){
     mNetworkManagerList.insert(id, networkManager);
 }
 
-void SVoIP::deleteNetworkManager(NetworkManager *networkManager){
-    //disconnect(networkManager, SIGNAL())
-    int id = mNetworkManagerList.key(networkManager, 0); //TODO: replace by networkManager->getContact()->getId()
+void SVoIP::onNetworkManagerDelete(QObject *object){
+    int id = mNetworkManagerList.key(static_cast<NetworkManager*>(object), 0); //TODO: replace by networkManager->getContact()->getId()
     mNetworkManagerList.remove(id);
-    delete networkManager;
 }
 
 void SVoIP::updateNetworkManagerId(NetworkManager *networkManager, int newId){
@@ -85,8 +83,10 @@ void SVoIP::restartListener(){
 }
 
 void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
-//    connect(networkManager, SIGNAL(),
-//            this, SLOT(updateContactStatus(int,ContactListWindow::Status)));
+    connect(networkManager, SIGNAL(onStatusChanged(ContactListWindow::Status)),
+            this, SLOT(updateContactStatus(int,ContactListWindow::Status)));
+    connect(networkManager, SIGNAL(destroyed(QObject*)),
+            this, SLOT(onNetworkManagerDelete(QObject*)));
 }
 
 QString SVoIP::generateSalt(){
@@ -105,7 +105,6 @@ QString SVoIP::generateSalt(){
 }
 
 SVoIP::~SVoIP(){
-    qDeleteAll(mNetworkManagerList);
     if(mContactDB) delete mContactDB;
     if(mContactListWindow) delete mContactListWindow;
     if(mPasswordWindow) delete mPasswordWindow;
