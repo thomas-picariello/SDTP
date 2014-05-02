@@ -26,6 +26,7 @@ public slots:
     void onConnected();
     void tryConnect();
     void onSocketError(QAbstractSocket::SocketError error);
+    PacketAgent* getagent();
 
 signals:
     void statechanged();
@@ -33,9 +34,6 @@ signals:
     void connected();
     void disconnected();
     void error(QString);
-
-private slots :
-
 
 private:
 

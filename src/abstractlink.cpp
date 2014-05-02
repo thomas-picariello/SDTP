@@ -12,8 +12,6 @@ AbstractLink::AbstractLink(Contact *contact)
 
     tryConnect();
 
-    qDebug()<<"AbstractLink::AbstractLink(contact)                  Done";
-
 
 }
 AbstractLink::AbstractLink(QTcpSocket *socket){
@@ -23,7 +21,7 @@ AbstractLink::AbstractLink(QTcpSocket *socket){
     mAgent = new PacketAgent();
     handshake();
     connect(mSocket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(onSocketError(QAbstractSocket::SocketError)));
-    qDebug()<<"AbstractLink::AbstractLink(socket)                   Done";
+
 
 }
 AbstractLink::State AbstractLink::state(){
@@ -31,13 +29,11 @@ return mState;
 }
 void AbstractLink::write(QByteArray data){
     mSocket->write(data);
-    qDebug()<<"AbstractLink::write(QByteArray data)                 Done";
 }
 void AbstractLink::read(){
 
-    mAgent->newdata(mSocket->readAll());
+    mAgent->incomingdata(mSocket->readAll());
 
-    qDebug()<<"AbstractLink::read()                                 Done";
 
 }
 void AbstractLink::tryConnect(){
@@ -49,7 +45,6 @@ void AbstractLink::tryConnect(){
     }
     else error("No host found !  0/"+m_Contact->hostsList()->length());
 
-    qDebug()<<"AbstractLink::tryConnect()                           Done";
 }
 
 void AbstractLink::onConnected(){
@@ -57,7 +52,6 @@ void AbstractLink::onConnected(){
 
     handshake();
 
-    qDebug()<<"AbstractLink::onConnected()                          Done  ";
 }
 
 
@@ -66,24 +60,25 @@ void AbstractLink::handshake(){
 
 
 
+
     QObject::connect(mSocket,SIGNAL(readyRead()),this,SLOT(read()));
     QObject::connect(mAgent,SIGNAL(senddata(QByteArray)),this,SLOT(write(QByteArray)));
 
     mState = ONLINE;
-    mAgent->login();
+    emit connected();
 
-    qDebug()<<"AbstractLink::handshake()                            Done  ";
 
 }
+PacketAgent *AbstractLink::getagent(){
+    return mAgent;
+}
+
 void AbstractLink::onSocketError(QAbstractSocket::SocketError error){
 
     if(error == QAbstractSocket::ConnectionRefusedError);               //The connection was refused by the peer (or timed out).
     if(error == QAbstractSocket::RemoteHostClosedError);                //The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
     if(error == QAbstractSocket::HostNotFoundError)tryConnect();        //The host address was not found.
 
-
-
-    qDebug()<<"AbstractLink::onSocketError(error)                   Done  ";
 
 
 

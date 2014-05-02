@@ -8,6 +8,7 @@
 
 
 
+
 class PacketAgent: public QObject
 {
 
@@ -20,13 +21,15 @@ public:
     PacketAgent();
 
     bool login();
-    bool logout( QObject* parent );
+    bool logout();
 
 public slots :
-    void newdata(QByteArray data);
+    void incomingdata(QByteArray data);//link
+    void writedata(QByteArray data);//app
 
 signals:
-    void senddata(QByteArray data);
+    void senddata(QByteArray data);//link
+    void readdata(QByteArray data);//app
 
 
 private:
@@ -47,6 +50,8 @@ private:
     QByteArray mHash;
     QByteArray mKey;
     QByteArray mIV;
+
+
 
 };
 

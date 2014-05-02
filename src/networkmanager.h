@@ -19,6 +19,8 @@
 #include "qjrtp.h"
 #include "contactdb.h"
 #include "abstractlink.h"
+#include "packetagent.h"
+
 
 
 
@@ -35,14 +37,24 @@ public:
     NetworkManager(Contact *contact, ContactDB *starter_contactdb,  QObject *parent=0);
     ~NetworkManager();
 
+    PacketAgent* getRootAgent();
+    PacketAgent* newAgent();
+
+public slots :
+    void chat(QByteArray data);
+
 signals :
     void error(QString error);
+    void onLinkOnline();
 
 
 private :
     ContactDB *m_Contact;
     QTcpSocket *m_Socket;
     AbstractLink *m_Root;
+    PacketAgent *agent;
+
+    MessengerWindow *msgwin;
 };
 
 #endif // NETWORKMANAGER_H

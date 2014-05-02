@@ -29,7 +29,8 @@ void MessengerWindow::displayMessage(Message msg){
 
 void MessengerWindow::onSend(){
     QByteArray msg = ui->input->text().toUtf8();
-    emit sendMessage(msg,appID);
+    emit sendMessage(msg);
+    displayMessage(Message(msg.data(),Message::SENT));
     ui->input->clear();
 }
 

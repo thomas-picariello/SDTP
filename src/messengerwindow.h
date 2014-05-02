@@ -23,7 +23,7 @@ public:
     ~MessengerWindow();
 
 signals:
-    void sendMessage(QByteArray data,quint8 appID);
+    void sendMessage(QByteArray data);
     void callContact();
 
 public slots:

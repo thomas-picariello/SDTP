@@ -7,10 +7,6 @@ PacketAgent::PacketAgent( QPair<QByteArray,QByteArray> key){
 
 
 
-
-    qDebug()<<"PacketAgent::PacketAgent( QPair) Done";
-
-
 }
 PacketAgent::PacketAgent(){
 
@@ -18,19 +14,37 @@ PacketAgent::PacketAgent(){
 
 bool PacketAgent::login(){
 
-    senddata("qwertzu");
+//    if(m_appList.append(app));
+
+//    emit senddata("login at :" +m_appList.size());
+
+
 
     return 0;
 }
-bool PacketAgent::logout(QObject* parent){
+bool PacketAgent::logout(){
+
+
+//    emit senddata("logout"+m_appList.indexOf(app));
+//    m_appList.removeAll(app);
 
     return 0;
 }
-void PacketAgent::newdata(QByteArray data){
+
+void PacketAgent::writedata(QByteArray data){
+
+    emit senddata(data);
+    qDebug()<<"Sent : "<<data.data();
+}
+
+void PacketAgent::incomingdata(QByteArray data){
 
     mContent = data;
 
     qDebug()<<"recieved :"+mContent;
+
+    emit readdata(data);
+
 
 }
 void PacketAgent::encrypt(){
