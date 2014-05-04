@@ -40,6 +40,7 @@ public:
 
     PacketAgent* getRootAgent();
     PacketAgent* newAgent();
+    Contact* getcontactID();
 
 public slots :
     void chat(QByteArray data);
@@ -50,7 +51,7 @@ signals :
 
 
 private :
-    ContactDB *m_Contact;
+    Contact *m_contact;
     QTcpSocket *m_Socket;
     AbstractLink *m_Root;
     PacketAgent *agent;
