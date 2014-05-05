@@ -13,6 +13,15 @@ class Contact: public QObject
     Q_OBJECT
 public: 
     /**
+     * @brief The Event enum describs the events that can happen to a contact object.
+     */
+    enum Event{
+        Added,
+        Updated,
+        Deleted
+    };
+
+    /**
      * @brief Constructs an empty contact object.
      *
      * @param parent the parent **QObject**
