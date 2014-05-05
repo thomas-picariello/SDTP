@@ -45,9 +45,10 @@ void NetworkManager::chat(QByteArray data){
 void NetworkManager::onStatusChanged(ContactListWindow::Status status){
     emit statusChanged(getContactId(), status);
 }
-void NetworkManager::onContactChange(){
-    m_contact = m_ContactDB->findById(m_contact->getId());
-
+void NetworkManager::onContactEvent(Contact::Event event){
+    if(m_contact){
+        m_contact = m_ContactDB->findById(m_contact->getId());
+    }
 }
 
 PacketAgent* NetworkManager::newAgent(){

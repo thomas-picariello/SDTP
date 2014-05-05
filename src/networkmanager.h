@@ -43,7 +43,7 @@ public:
 public slots :
     void chat(QByteArray data);
     void onStatusChanged(ContactListWindow::Status status);
-    void onContactChange();
+    void onContactEvent(Contact::Event event);
 
 signals :
     void error(QString error);
