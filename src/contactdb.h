@@ -6,6 +6,8 @@
 #include <QList>
 #include <QByteArray>
 #include <cryptopp/sha.h>
+#include <cryptopp/modes.h>
+#include <cryptopp/aes.h>
 #include <cryptopp/base64.h>
 #include "contact.h"
 

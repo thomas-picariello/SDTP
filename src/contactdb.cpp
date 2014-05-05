@@ -33,13 +33,7 @@ bool ContactDB::erase(int id){
     if(!result)
         emit error(eraseMemoryEntryQuery.lastError().text());
 
-    //TODO: once commit delete everything on disk, remove this.
-    eraseDiskEntryQuery.prepare("DELETE FROM contacts WHERE id=:id");
-    eraseDiskEntryQuery.bindValue(":id", id);
-    result |= eraseDiskEntryQuery.exec();
-    if(!result)
-        emit error(eraseDiskEntryQuery.lastError().text());
-    //(to here)
+    commitToDiskDb();
     return result;
 }
 
@@ -149,7 +143,7 @@ void ContactDB::initTables(){
     QSqlQuery diskDbInitQuery(mDiskDb);
     QString createContactTableQuery = "CREATE TABLE IF NOT EXISTS contacts("
                                            "id      INTEGER PRIMARY KEY, "
-                                           "name    TEXT, "
+                                           "name    BLOB, "
                                            "hosts   BLOB, "
                                            "port    INTEGER, "
                                            "key     BLOB "
@@ -164,17 +158,28 @@ void ContactDB::initTables(){
 }
 
 void ContactDB::importDiskDb(){
+    CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption dec;
+    if(!mFileKey->first.isEmpty()){
+        dec.SetKeyWithIV((byte*)mFileKey->first.data(),
+                         mFileKey->first.length(),
+                         (byte*)mFileKey->second.data());
+    }
     QSqlQuery readDiskQuery(mDiskDb);
     QSqlQuery writeMemoryQuery(mMemoryDb);
     readDiskQuery.exec("SELECT id,name,hosts,port,key FROM contacts;");
     while(readDiskQuery.next()){
-        QString id = readDiskQuery.value(0).toString();             //id
-        QString name = readDiskQuery.value(1).toString();           //name
+        uint id = readDiskQuery.value(0).toUInt();                  //id
+        QByteArray name = readDiskQuery.value(1).toByteArray();     //name
         QByteArray hostList = readDiskQuery.value(2).toByteArray(); //serialized host list
-        QString port = readDiskQuery.value(3).toString();           //port
+        QByteArray port = readDiskQuery.value(3).toByteArray();     //port
         QByteArray key = readDiskQuery.value(4).toByteArray();      //key
 
-        //TODO: decrypt values here (not id)
+        if(!mFileKey->first.isEmpty()){
+            dec.ProcessString((byte*)name.data(), name.length());
+            dec.ProcessString((byte*)hostList.data(), hostList.length());
+            dec.ProcessString((byte*)port.data(), port.length());
+            dec.ProcessString((byte*)key.data(), key.length());
+        }
 
         writeMemoryQuery.prepare("INSERT INTO contacts (id,name,hosts,port,key) "
                                  "VALUES (:id,:name,:hosts,:port,:key);");
@@ -200,23 +205,33 @@ void ContactDB::importDiskDb(){
 }
 
 void ContactDB::commitToDiskDb(){
+    CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption enc;
+    if(!mFileKey->first.isEmpty()){
+        enc.SetKeyWithIV((byte*)mFileKey->first.data(),
+                         mFileKey->first.length(),
+                         (byte*)mFileKey->second.data());
+    }
     QSqlQuery readMemoryQuery(mMemoryDb);
     QSqlQuery writeDiskQuery(mDiskDb);
-
-    //TODO: clear contacts table on disk
-
+    if(!writeDiskQuery.exec("DELETE FROM contacts"))
+        emit error(writeDiskQuery.lastError().text());
     if(!readMemoryQuery.exec("SELECT id,name,hosts,port,key FROM contacts;"))
         emit error(readMemoryQuery.lastError().text());
     while(readMemoryQuery.next()){
-        QString id = readMemoryQuery.value(0).toString();             //id
-        QString name = readMemoryQuery.value(1).toString();           //name
+        uint id = readMemoryQuery.value(0).toUInt();                  //id
+        QByteArray name = readMemoryQuery.value(1).toByteArray();     //name
         QByteArray hostList = readMemoryQuery.value(2).toByteArray(); //serialized host list
-        QString port = readMemoryQuery.value(3).toString();           //port
+        QByteArray port = readMemoryQuery.value(3).toByteArray();     //port
         QByteArray key = readMemoryQuery.value(4).toByteArray();      //key
 
-        //TODO: encrypt data (not id)
+        if(!mFileKey->first.isEmpty()){
+            enc.ProcessString((byte*)name.data(), name.length());
+            enc.ProcessString((byte*)hostList.data(), hostList.length());
+            enc.ProcessString((byte*)port.data(), port.length());
+            enc.ProcessString((byte*)key.data(), key.length());
+        }
 
-        writeDiskQuery.prepare("REPLACE INTO contacts "
+        writeDiskQuery.prepare("INSERT INTO contacts(id,name,hosts,port,key) "
                       "VALUES (:id,:name,:hosts,:port,:key);");
         writeDiskQuery.bindValue(":id", id);
         writeDiskQuery.bindValue(":name", name);
