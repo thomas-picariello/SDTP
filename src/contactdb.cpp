@@ -92,7 +92,6 @@ QList<Contact*> ContactDB::getAllContacts(){
 }
 
 int ContactDB::write(Contact *contact){
-    contact->setParent(this); //avoid contact to be deleted automatically
     QSqlQuery query(mMemoryDb);
     if(contact->getId() == 0){
         query.prepare("INSERT INTO contacts (name,hosts,port,key) "
@@ -111,8 +110,10 @@ int ContactDB::write(Contact *contact){
           emit error(query.lastError().text());
 
     commitToDiskDb();
-    delete(contact);
-    return 0;
+    if(contact->getId() == 0)
+        return query.lastInsertId().toInt();
+    else
+        return contact->getId();
 }
 
 QByteArray ContactDB::hashMemoryDb(){
