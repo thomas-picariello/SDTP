@@ -27,7 +27,7 @@ public:
     void clear();
 
 signals:
-    void contactChanged();
+    void contactEvent(int, Contact::Event);
 
 public slots:
     void addHost();

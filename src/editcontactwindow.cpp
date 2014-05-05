@@ -59,8 +59,11 @@ void EditContactWindow::save(){
         mContact->setPort(port.toUInt());
         mContact->setHostsList(hostsList);
         mContact->setKey(QByteArray::fromBase64(key.toUtf8()));
-        mContactDB->write(mContact);
-        emit contactChanged();
+        int id = mContactDB->write(mContact);
+        if(mContact->getId() == 0)
+            emit contactEvent(id, Contact::Added);
+        else
+            emit contactEvent(id, Contact::Updated);
         close();
         deleteLater();
     }
@@ -71,5 +74,5 @@ void EditContactWindow::removeHost(){
 }
 
 EditContactWindow::~EditContactWindow(){
-    delete ui;
+    delete ui, mContact;
 }

@@ -34,7 +34,16 @@ void SVoIP::startProgram(QByteArray key){
             this, SLOT(onIncommingConnection()));
     connect(mContactListWindow, SIGNAL(settingsUpdated()),
             this, SLOT(restartListener()));
-    attemptConnectAll();
+    connect(mContactListWindow, SIGNAL(contactEvent(int,Contact::Event)),
+            this, SLOT(onContactEvent(int,Contact::Event)));
+
+    //start a NetworkManager for each contact
+    QList<Contact*> contactList = mContactDB->getAllContacts();
+    foreach(Contact *contact, contactList){
+        NetworkManager* networkManager = new NetworkManager(contact, mContactDB, this);
+        connectNetworkManagerSignals(networkManager);
+        mNetworkManagerList.insert(contact->getId(), networkManager);
+    }
 }
 
 void SVoIP::onIncommingConnection(){
@@ -48,13 +57,12 @@ void SVoIP::onIncommingConnection(){
 }
 
 void SVoIP::onNetworkManagerDelete(QObject *object){
-    int id = mNetworkManagerList.key(static_cast<NetworkManager*>(object), 0); //TODO: replace by networkManager->getContact()->getId()
-    mContactListWindow->setContactStatusIcon(id, ContactListWindow::Offline);
+    int id = mNetworkManagerList.key(static_cast<NetworkManager*>(object), 0);
     mNetworkManagerList.remove(id);
 }
 
 void SVoIP::updateNetworkManagerId(NetworkManager *networkManager, int newId){
-    int oldId = mNetworkManagerList.key(networkManager, 0); //TODO: replace by networkManager->getContact()->getId()
+    int oldId = mNetworkManagerList.key(networkManager, 0);
     if(oldId){
         mNetworkManagerList.remove(oldId);
         mNetworkManagerList.insert(newId, networkManager);
@@ -66,15 +74,20 @@ void SVoIP::updateContactStatus(int id, ContactListWindow::Status status){
         mContactListWindow->setContactStatusIcon(id, status);
 }
 
-void SVoIP::attemptConnectAll(){
-    QList<Contact*> contactList = mContactDB->getAllContacts();
-    foreach(Contact *contact, contactList){
-        int id = contact->getId();
-        if(!mNetworkManagerList.contains(id)){
-            NetworkManager* networkManager = new NetworkManager(contact, mContactDB, this);
-            connectNetworkManagerSignals(networkManager);
-            mNetworkManagerList.insert(id, networkManager);
-        }
+void SVoIP::onContactEvent(int id, Contact::Event event){
+    NetworkManager* networkManager;
+    switch(event){
+    case Contact::Added:
+        networkManager = new NetworkManager(mContactDB->findById(id), mContactDB, this);
+        connectNetworkManagerSignals(networkManager);
+        mNetworkManagerList.insert(id, networkManager);
+        break;
+    case Contact::Deleted:
+        delete mNetworkManagerList.value(id);
+        break;
+    case Contact::Updated:
+        mNetworkManagerList.value(id)->onContactEvent(event);
+        break;
     }
 }
 

@@ -24,11 +24,11 @@ public:
 public slots:
     void startProgram(QByteArray key = QByteArray());
     void onIncommingConnection();
-    void attemptConnectAll();
     void restartListener();
     void onNetworkManagerDelete(QObject *object);
     void updateNetworkManagerId(NetworkManager *networkManager, int newId);
     void updateContactStatus(int id, ContactListWindow::Status status);
+    void onContactEvent(int id, Contact::Event event);
 
 signals:
     void error(QString err);

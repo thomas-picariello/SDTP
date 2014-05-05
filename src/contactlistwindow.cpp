@@ -32,15 +32,19 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
 
 void ContactListWindow::addContact(){
     EditContactWindow *ecw = new EditContactWindow(new Contact(), mContactDB);
-    connect(ecw, SIGNAL(contactChanged()),
+    connect(ecw, SIGNAL(contactEvent(int,Contact::Event)),
             this, SLOT(refreshList()));
+    connect(ecw, SIGNAL(contactEvent(int,Contact::Event)),
+            this, SIGNAL(contactEvent(int, Contact::Event)));
 }
 
 void ContactListWindow::editContact(){
     if(getSelectedContact()){
         EditContactWindow *ecw = new EditContactWindow(getSelectedContact(), mContactDB);
-        connect(ecw, SIGNAL(contactChanged()),
+        connect(ecw, SIGNAL(contactEvent(int,Contact::Event)),
                 this, SLOT(refreshList()));
+        connect(ecw, SIGNAL(contactEvent(int,Contact::Event)),
+                this, SIGNAL(contactEvent(int,Contact::Event)));
     }
 }
 
@@ -129,6 +133,7 @@ void ContactListWindow::deleteContact(){
             int currentId = currentItem->data(IdRole).toInt();
             mContactDB->erase(currentId);
             refreshList();
+            emit contactEvent(currentId, Contact::Deleted);
         }
     }
 }
@@ -170,10 +175,6 @@ void ContactListWindow::setContactStatusIcon(int id, Status status){
     QListWidgetItem *item = findItemByContactId(id);
     if(item)
         setContactStatusIcon(item, status);
-}
-
-void ContactListWindow::setContactStatusIcon(Contact *contact, Status status){
-    setContactStatusIcon(contact->getId(), status);
 }
 
 QListWidgetItem* ContactListWindow::findItemByContactId(int id){

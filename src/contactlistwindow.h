@@ -38,7 +38,6 @@ public:
 
     void setContactStatusIcon(QListWidgetItem *item, Status status);
     void setContactStatusIcon(int id, Status status);
-    void setContactStatusIcon(Contact *contact, Status status);
 
 public slots:
     void addContact();
@@ -51,6 +50,7 @@ public slots:
 
 signals:
     void startApp(int appId, int contactId);
+    void contactEvent(int contactId, Contact::Event);
     void settingsUpdated();
     
 private:
