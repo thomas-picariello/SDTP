@@ -57,6 +57,8 @@ private:
     ContactDB *mContactDB;
     QPair<QByteArray,QByteArray> *mFileKey;
     Ui::ContactListWindow *ui;
+    SettingsWindow mSettingsWindow;
+    EditContactWindow mEditContactWindow;
 
     Contact* getSelectedContact();
     QListWidgetItem* findItemByContactId(int id);

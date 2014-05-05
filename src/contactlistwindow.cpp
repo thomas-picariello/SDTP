@@ -5,6 +5,8 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
     QWidget(parent),
     mContactDB(contactDB),
     mFileKey(fileKey),
+    mSettingsWindow(mFileKey),
+    mEditContactWindow(mContactDB),
     ui(new Ui::ContactListWindow)
 {
     ui->setupUi(this);
@@ -18,34 +20,31 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
     ui->settings->setMinimumHeight(ui->settings->minimumHeight()*(logicalDpiX()/96));
     ui->settings->setMinimumWidth(ui->settings->minimumWidth() * (logicalDpiX()/96));
 
-    refreshList();
-
     connect(ui->add, SIGNAL(clicked()),
             this, SLOT(addContact()));
     connect(ui->list, SIGNAL(itemClicked(QListWidgetItem*)),
             this, SLOT(listItemClicked(QListWidgetItem*)));
     connect(ui->settings, SIGNAL(clicked()),
             this, SLOT(openSettingsWindow()));
+    connect(&mSettingsWindow, SIGNAL(settingsUpdated()),
+            this, SIGNAL(settingsUpdated()));
+    connect(&mEditContactWindow, SIGNAL(contactEvent(int,Contact::Event)),
+            this, SLOT(refreshList()));
+    connect(&mEditContactWindow, SIGNAL(contactEvent(int,Contact::Event)),
+            this, SIGNAL(contactEvent(int, Contact::Event)));
 
+    refreshList();
     show();
 }
 
 void ContactListWindow::addContact(){
-    EditContactWindow *ecw = new EditContactWindow(new Contact(), mContactDB);
-    connect(ecw, SIGNAL(contactEvent(int,Contact::Event)),
-            this, SLOT(refreshList()));
-    connect(ecw, SIGNAL(contactEvent(int,Contact::Event)),
-            this, SIGNAL(contactEvent(int, Contact::Event)));
+    mEditContactWindow.open(new Contact());
 }
 
 void ContactListWindow::editContact(){
-    if(getSelectedContact()){
-        EditContactWindow *ecw = new EditContactWindow(getSelectedContact(), mContactDB);
-        connect(ecw, SIGNAL(contactEvent(int,Contact::Event)),
-                this, SLOT(refreshList()));
-        connect(ecw, SIGNAL(contactEvent(int,Contact::Event)),
-                this, SIGNAL(contactEvent(int,Contact::Event)));
-    }
+    Contact *contact = getSelectedContact();
+    if(contact)
+        mEditContactWindow.open(contact);
 }
 
 void ContactListWindow::listItemClicked(QListWidgetItem *currentItem){
@@ -57,9 +56,8 @@ void ContactListWindow::listItemClicked(QListWidgetItem *currentItem){
 }
 
 void ContactListWindow::openSettingsWindow(){
-    SettingsWindow *setWin = new SettingsWindow(mFileKey);
-    connect(setWin, SIGNAL(settingsUpdated()),
-            this, SIGNAL(settingsUpdated()));
+    mSettingsWindow.show();
+    mSettingsWindow.activateWindow();
 }
 
 void ContactListWindow::onListItemAction(int id, ContactItemWidget::Action action){
@@ -120,6 +118,8 @@ void ContactListWindow::refreshList(){
     //clear selection and focus
     ui->list->clearSelection();
     ui->list->clearFocus();
+
+    qDeleteAll(contactList);
 }
 
 void ContactListWindow::deleteContact(){

@@ -1,36 +1,39 @@
 #include "editcontactwindow.h"
 #include "ui_editcontactwindow.h"
 
-EditContactWindow::EditContactWindow(Contact *contact, ContactDB *contactDB, QWidget *parent):
-    QWidget(parent), ui(new Ui::EditContactWindow)
+EditContactWindow::EditContactWindow(ContactDB *contactDB, QWidget *parent):
+    QWidget(parent),
+    mContactDB(contactDB),
+    mContact(NULL),
+    ui(new Ui::EditContactWindow)
 {
-    mContact = contact;
-    mContactDB = contactDB;
-    mContact->setParent(this);
     ui->setupUi(this);
+    mPortValidator.setRange(0, 65535);
+    ui->port->setValidator(&mPortValidator);
 
     connect(ui->save, SIGNAL(clicked()),
             this, SLOT(save()));
     connect(ui->cancel, SIGNAL(clicked()),
             this, SLOT(cancel()));
+    connect(ui->hostslist_add_bt, SIGNAL(clicked()),
+            this, SLOT(addHost()));
+    connect(ui->hostslist_rm_bt, SIGNAL(clicked()),
+            this, SLOT(removeHost()));
+}
 
+void EditContactWindow::open(Contact *contact){
+    mContact = contact;
+    mContact->setParent(this);
     ui->name->setText(mContact->getName());
+    ui->hostslist->clear();
     foreach(QString host, mContact->getHostsList()){
         QListWidgetItem *item = new QListWidgetItem(host, ui->hostslist);
         item->setFlags(item->flags()|Qt::ItemIsEditable);
     }
     ui->port->setText(QString::number(mContact->getPort()));
     ui->key->setText(QString(mContact->getKey().toBase64()));
-
-    mPortValidator.setRange(0, 65535);
-    ui->port->setValidator(&mPortValidator);
-
-    connect(ui->hostslist_add_bt, SIGNAL(clicked()),
-            this, SLOT(addHost()));
-    connect(ui->hostslist_rm_bt, SIGNAL(clicked()),
-            this, SLOT(removeHost()));
-
-    this->show();
+    show();
+    activateWindow();
 }
 
 void EditContactWindow::addHost(){
@@ -41,7 +44,6 @@ void EditContactWindow::addHost(){
 
 void EditContactWindow::cancel(){
     close();
-    deleteLater();
 }
 
 void EditContactWindow::save(){
@@ -49,14 +51,14 @@ void EditContactWindow::save(){
     QStringList hostsList;
     foreach(QListWidgetItem *item, ui->hostslist->findItems("*", Qt::MatchWildcard))
         hostsList.append(item->text());
-    QString port = ui->port->text();
+    uint port = ui->port->text().toUInt();
     QString key = ui->key->toPlainText();
 
-    if(name.isEmpty() || hostsList.isEmpty() || port == 0 || key.isEmpty()){
+    if(name.isEmpty() || hostsList.isEmpty() || port==0 || key.isEmpty()){
         QMessageBox::warning(this, tr("Incomplete"), tr("Please fill all the fields"));
     }else{
         mContact->setName(name);
-        mContact->setPort(port.toUInt());
+        mContact->setPort(port);
         mContact->setHostsList(hostsList);
         mContact->setKey(QByteArray::fromBase64(key.toUtf8()));
         int id = mContactDB->write(mContact);
@@ -65,8 +67,12 @@ void EditContactWindow::save(){
         else
             emit contactEvent(id, Contact::Updated);
         close();
-        deleteLater();
     }
+}
+
+void EditContactWindow::hideEvent(QHideEvent *hideEvent){
+    delete mContact;
+    mContact = NULL;
 }
 
 void EditContactWindow::removeHost(){
@@ -74,5 +80,5 @@ void EditContactWindow::removeHost(){
 }
 
 EditContactWindow::~EditContactWindow(){
-    delete ui, mContact;
+    delete ui;
 }

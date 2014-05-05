@@ -38,12 +38,10 @@ SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, QWidget *
             this, SLOT(showRsaPrivkeyMenu()));
     connect(&mKeyring, SIGNAL(keyGenerationFinished()),
             this, SLOT(rsaKeyGenFinished()));
-    show();
 }
 
 void SettingsWindow::cancel(){
-    close();
-    deleteLater();
+    hide();
 }
 
 void SettingsWindow::changeRsaPubKey(){
@@ -115,8 +113,7 @@ void SettingsWindow::save(){
     mSettings->setValue("network/listen_port", ui->net_port_input->text());
     mKeyring.commitToKeystore();
     emit settingsUpdated();
-    close();
-    deleteLater();
+    hide();
 }
 
 void SettingsWindow::setupRsaMenus(){

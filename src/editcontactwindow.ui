@@ -2,9 +2,6 @@
 <ui version="4.0">
  <class>EditContactWindow</class>
  <widget class="QWidget" name="EditContactWindow">
-  <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
-  </property>
   <property name="minimumSize">
    <size>
     <width>300</width>

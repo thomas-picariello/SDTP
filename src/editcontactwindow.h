@@ -19,11 +19,10 @@ class EditContactWindow : public QWidget
     Q_OBJECT
     
 public:
-    explicit EditContactWindow(Contact *contact,
-                               ContactDB *contactDB,
+    explicit EditContactWindow(ContactDB *contactDB,
                                QWidget *parent = 0);
     ~EditContactWindow();
-    void fill(QString contactName);
+    void open(Contact* contact);
     void clear();
 
 signals:
@@ -35,6 +34,9 @@ public slots:
     void removeHost();
     void save();
     
+protected:
+    void hideEvent(QHideEvent* hideEvent);
+
 private:
     ContactDB *mContactDB;
     Ui::EditContactWindow *ui;
