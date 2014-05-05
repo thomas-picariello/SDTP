@@ -7,6 +7,7 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *responder_contactd
     m_Root = new AbstractLink(m_Socket);
 
     m_contact = NULL;
+    m_ContactDB = responder_contactdb;
 
     agent = m_Root->getagent();
 
@@ -25,6 +26,7 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *starter_contactdb, Q
             this,SLOT(onStatusChanged(ContactListWindow::Status)));
 
     m_contact = contact;
+    m_ContactDB = starter_contactdb;
 
 
 
@@ -39,8 +41,13 @@ void NetworkManager::chat(QByteArray data){
 
 }
 
+
 void NetworkManager::onStatusChanged(ContactListWindow::Status status){
     emit statusChanged(getContactId(), status);
+}
+void NetworkManager::onContactChange(){
+    m_contact = m_ContactDB->findById(m_contact->getId());
+
 }
 
 PacketAgent* NetworkManager::newAgent(){

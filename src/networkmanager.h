@@ -43,6 +43,7 @@ public:
 public slots :
     void chat(QByteArray data);
     void onStatusChanged(ContactListWindow::Status status);
+    void onContactChange();
 
 signals :
     void error(QString error);
@@ -54,6 +55,7 @@ private :
     QTcpSocket *m_Socket;
     AbstractLink *m_Root;
     PacketAgent *agent;
+    ContactDB *m_ContactDB;
 
     MessengerWindow *msgwin;
 };
