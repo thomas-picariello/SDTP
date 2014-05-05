@@ -52,8 +52,6 @@ QByteArray PasswordWindow::deriveKey(QString &password){
                         mSalt.length(),
                         1000, //iteration number
                         0);
-    qDebug()<<"Gen AES key"
-            <<QByteArray(reinterpret_cast<char*>(key), static_cast<uint>(derivator.MaxDerivedKeyLength())).toBase64();
     return QByteArray(reinterpret_cast<char*>(key), static_cast<uint>(derivator.MaxDerivedKeyLength()));
 }
 

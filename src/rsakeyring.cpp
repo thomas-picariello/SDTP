@@ -34,8 +34,8 @@ void RsaKeyring::commitToKeystore(){
         }else{
             std::string clearXml = xmlString.toStdString();
             CryptoPP::GCM<CryptoPP::AES>::Encryption gcmEnc;
-            gcmEnc.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),        //key
-                                   (byte*)mFileKey->second.data(), mFileKey->second.length());  //iv
+            gcmEnc.SetKeyWithIV((byte*)mFileKey->first.data(), mFileKey->first.length(),    //key
+                                (byte*)mFileKey->second.data(), mFileKey->second.length()); //iv
             CryptoPP::StringSource(clearXml, true,
                                        new CryptoPP::AuthenticatedEncryptionFilter(gcmEnc,
                                              new CryptoPP::FileSink("keystore.dat")));
