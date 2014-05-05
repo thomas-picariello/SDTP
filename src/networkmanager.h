@@ -32,22 +32,21 @@ class NetworkManager : public QObject
     Q_OBJECT
 
 public:
-    enum AppID{MESSENGER,VOIP ,SYSTEM,SYNC,UNKNOWN}; // 0-10 are reserved IDs.
-
     NetworkManager(QTcpSocket *socket, ContactDB *responder_contactdb,  QObject *parent=0);
     NetworkManager(Contact *contact, ContactDB *starter_contactdb,  QObject *parent=0);
     ~NetworkManager();
 
     PacketAgent* getRootAgent();
     PacketAgent* newAgent();
-    Contact* getcontactID();
+    int getContactId();
 
 public slots :
     void chat(QByteArray data);
+    void onStatusChanged(ContactListWindow::Status status);
 
 signals :
     void error(QString error);
-    void onStatusChanged(ContactListWindow::Status);
+    void statusChanged(int id, ContactListWindow::Status status);
 
 
 private :

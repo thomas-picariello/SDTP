@@ -49,6 +49,7 @@ void SVoIP::onIncommingConnection(){
 
 void SVoIP::onNetworkManagerDelete(QObject *object){
     int id = mNetworkManagerList.key(static_cast<NetworkManager*>(object), 0); //TODO: replace by networkManager->getContact()->getId()
+    mContactListWindow->setContactStatusIcon(id, ContactListWindow::Offline);
     mNetworkManagerList.remove(id);
 }
 
@@ -60,8 +61,9 @@ void SVoIP::updateNetworkManagerId(NetworkManager *networkManager, int newId){
     }
 }
 
-void SVoIP::updateContactStatus(int contactId, ContactListWindow::Status status){
-    mContactListWindow->setContactStatusIcon(contactId, status);
+void SVoIP::updateContactStatus(int id, ContactListWindow::Status status){
+    if(id)
+        mContactListWindow->setContactStatusIcon(id, status);
 }
 
 void SVoIP::attemptConnectAll(){
@@ -83,8 +85,8 @@ void SVoIP::restartListener(){
 }
 
 void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
-    connect(networkManager, SIGNAL(onStatusChanged(ContactListWindow::Status)),
-            this, SLOT(updateContactStatus(int,ContactListWindow::Status)));
+    connect(networkManager, SIGNAL(statusChanged(int, ContactListWindow::Status)),
+            this, SLOT(updateContactStatus(int, ContactListWindow::Status)));
     connect(networkManager, SIGNAL(destroyed(QObject*)),
             this, SLOT(onNetworkManagerDelete(QObject*)));
 }

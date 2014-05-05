@@ -28,7 +28,7 @@ public slots:
     void restartListener();
     void onNetworkManagerDelete(QObject *object);
     void updateNetworkManagerId(NetworkManager *networkManager, int newId);
-    void updateContactStatus(int contactId, ContactListWindow::Status status);
+    void updateContactStatus(int id, ContactListWindow::Status status);
 
 signals:
     void error(QString err);
