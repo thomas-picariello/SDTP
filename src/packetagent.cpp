@@ -12,25 +12,6 @@ PacketAgent::PacketAgent(){
 
 }
 
-bool PacketAgent::login(){
-
-//    if(m_appList.append(app));
-
-//    emit senddata("login at :" +m_appList.size());
-
-
-
-    return 0;
-}
-bool PacketAgent::logout(){
-
-
-//    emit senddata("logout"+m_appList.indexOf(app));
-//    m_appList.removeAll(app);
-
-    return 0;
-}
-
 void PacketAgent::writedata(QByteArray data){
 
     emit senddata(data);
@@ -78,4 +59,7 @@ void PacketAgent::parseHeader(){
 bool PacketAgent::verifyHash(){
 
     return 0;
+}
+PacketAgent::~PacketAgent(){
+
 }

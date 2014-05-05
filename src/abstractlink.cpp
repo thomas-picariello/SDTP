@@ -10,7 +10,10 @@ AbstractLink::AbstractLink(Contact *contact)
     connect(mSocket,SIGNAL(connected()),this,SLOT(onConnected()));
     connect(mSocket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(onSocketError(QAbstractSocket::SocketError)));
 
+
     tryConnect();
+
+
 
 
 }
@@ -38,18 +41,24 @@ void AbstractLink::read(){
 }
 void AbstractLink::tryConnect(){
 
-    if(HostListLength>0){
-        HostListLength--;
-        mSocket->abort();
-        mSocket->connectToHost(m_Contact->getHostsList().at(HostListLength),m_Contact->getPort());
+    if(mSocket->state()!=3){
+        if(HostListLength>0){
+            HostListLength--;
+            mSocket->abort();
+            qDebug()<<"try connecting to :" << m_Contact->getName() <<" at : "<<m_Contact->getHostsList().at(HostListLength);
+            mSocket->connectToHost(m_Contact->getHostsList().at(HostListLength),m_Contact->getPort());
+        }
+        else {
+            HostListLength = m_Contact->hostsList()->length();
+            error("No host found !  0/"+m_Contact->hostsList()->length());
+        }
+        m_timer->singleShot(5000,this,SLOT(tryConnect()));    // 10 sec for testing, should be more on release.
     }
-    else error("No host found !  0/"+m_Contact->hostsList()->length());
-
 }
 
 void AbstractLink::onConnected(){
 
-
+    qDebug()<<m_Contact->getName()<<"connected on : "<<m_Contact->getHostsList().at(HostListLength);
     handshake();
 
 }
@@ -77,8 +86,9 @@ void AbstractLink::onSocketError(QAbstractSocket::SocketError error){
 
     if(error == QAbstractSocket::ConnectionRefusedError);               //The connection was refused by the peer (or timed out).
     if(error == QAbstractSocket::RemoteHostClosedError);                //The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
-    if(error == QAbstractSocket::HostNotFoundError)tryConnect();        //The host address was not found.
+    if(error == QAbstractSocket::HostNotFoundError);        //The host address was not found.
 
+    qDebug()<<"onSocketError";
 
 
 
@@ -106,5 +116,8 @@ void AbstractLink::onSocketError(QAbstractSocket::SocketError error){
 }
 
 AbstractLink::~AbstractLink(){
+
+
+
 
 }

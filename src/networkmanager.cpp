@@ -17,7 +17,9 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *responder_contactd
 NetworkManager::NetworkManager(Contact *contact, ContactDB *starter_contactdb, QObject *parent): QObject(parent){
 
     m_Socket = new QTcpSocket;
+    qDebug()<<"Attempt to connect to "<<contact->getName();
     m_Root = new AbstractLink(contact);
+
 
     connect(m_Root,SIGNAL(connected(ContactListWindow::Status)),
             this,SLOT(onStatusChanged(ContactListWindow::Status)));
@@ -57,10 +59,8 @@ int NetworkManager::getContactId(){
 }
 
 NetworkManager::~NetworkManager(){
-    if(m_Socket)
-        m_Socket->close();
 
-    delete m_Socket, m_Root;
 
+    delete m_Root;
 
 }

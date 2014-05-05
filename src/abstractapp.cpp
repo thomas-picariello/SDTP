@@ -5,7 +5,6 @@ AbstractApp::AbstractApp(NetworkManager *manager)
 
     m_Root = manager->getRootAgent();
 
-//    m_Root->login(this);
 
 
 }
@@ -18,7 +17,6 @@ void AbstractApp::dataToRead(QByteArray *data){
 
 AbstractApp::~AbstractApp(){
 
-//    m_Root->logout(this);
 
     delete m_Root,m_Data;
 }

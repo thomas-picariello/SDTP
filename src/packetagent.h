@@ -19,9 +19,7 @@ public:
 
     PacketAgent(QPair<QByteArray,QByteArray> key);// key = key + IV
     PacketAgent();
-
-    bool login();
-    bool logout();
+    ~PacketAgent();
 
 public slots :
     void incomingdata(QByteArray data);//link

@@ -4,6 +4,7 @@
 #include <QString>
 #include <QDebug>
 #include <QTcpSocket>
+#include <QTimer>
 #include "contact.h"
 #include "packetagent.h"
 #include "contactlistwindow.h"
@@ -16,6 +17,8 @@ public:
 
     AbstractLink(Contact *contact);
     AbstractLink(QTcpSocket *socket);
+
+
     ~AbstractLink();
 
     State state();
@@ -29,6 +32,7 @@ public slots:
     void onSocketError(QAbstractSocket::SocketError error);
     PacketAgent* getagent();
 
+
 signals:
     void statechanged();
     void newdata();
@@ -38,6 +42,7 @@ signals:
 
 private:
 
+    QTimer *m_timer;
     PacketAgent *mAgent;
     QByteArray *mData;
     QTcpSocket *mSocket;
