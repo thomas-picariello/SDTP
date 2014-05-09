@@ -4,7 +4,7 @@
 NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *responder_contactdb, QObject *parent): QObject(parent){
 
     m_Socket = socket;
-    m_Root = new AbstractLink(m_Socket);
+    m_Root = new RootLink(m_Socket);
 
     m_contact = NULL;
     m_ContactDB = responder_contactdb;
@@ -19,11 +19,11 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *starter_contactdb, Q
 
     m_Socket = new QTcpSocket;
     qDebug()<<"Attempt to connect to "<<contact->getName();
-    m_Root = new AbstractLink(contact);
+    m_Root = new RootLink(contact);
 
 
-    connect(m_Root,SIGNAL(connected(ContactListWindow::Status)),
-            this,SLOT(onStatusChanged(ContactListWindow::Status)));
+    connect(m_Root,SIGNAL(connected(Contact::Status)),
+            this,SLOT(onStatusChanged(Contact::Status)));
 
     m_contact = contact;
     m_ContactDB = starter_contactdb;
@@ -36,13 +36,8 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *starter_contactdb, Q
 
 
 }
-void NetworkManager::chat(QByteArray data){
 
-
-}
-
-
-void NetworkManager::onStatusChanged(ContactListWindow::Status status){
+void NetworkManager::onStatusChanged(Contact::Status status){
     emit statusChanged(getContactId(), status);
 }
 void NetworkManager::onContactEvent(Contact::Event event){

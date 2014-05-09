@@ -9,18 +9,13 @@
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 #include <QDateTime>
-#include <QDataStream>
-#include <QtEndian>
 
-#include "voip.h"
-#include "message.h"
-#include "messengerwindow.h"
+
 #include "contact.h"
 #include "qjrtp.h"
 #include "contactdb.h"
-#include "abstractlink.h"
+#include "rootlink.h"
 #include "packetagent.h"
-#include "contactlistwindow.h"
 
 
 
@@ -41,23 +36,21 @@ public:
     int getContactId();
 
 public slots :
-    void chat(QByteArray data);
-    void onStatusChanged(ContactListWindow::Status status);
+    void onStatusChanged(Contact::Status status);
     void onContactEvent(Contact::Event event);
 
 signals :
     void error(QString error);
-    void statusChanged(int id, ContactListWindow::Status status);
+    void statusChanged(int id, Contact::Status status);
 
 
 private :
     Contact *m_contact;
     QTcpSocket *m_Socket;
-    AbstractLink *m_Root;
+    RootLink *m_Root;
     PacketAgent *agent;
     ContactDB *m_ContactDB;
 
-    MessengerWindow *msgwin;
 };
 
 #endif // NETWORKMANAGER_H

@@ -1,55 +1,46 @@
 #ifndef ABSTRACTLINK_H
 #define ABSTRACTLINK_H
 
-#include <QString>
-#include <QDebug>
+#include <QObject>
 #include <QTcpSocket>
 #include <QTimer>
-#include "contact.h"
 #include "packetagent.h"
-#include "contactlistwindow.h"
+#include "contact.h"
 
-class AbstractLink: public QObject
+class AbstractLink : public QObject
 {
     Q_OBJECT
 public:
     enum State{OFFLINE,ONLINE,Error};
 
-    AbstractLink(Contact *contact);
-    AbstractLink(QTcpSocket *socket);
-
-
+    AbstractLink(QString ip, PacketAgent*agent);
+    State state();
     ~AbstractLink();
 
-    State state();
+signals:
+    void stateChanged();
+    void newdata();
+    void error(QString);
+
 
 public slots:
     void write(QByteArray data);
     void read();
-    void handshake();
     void onConnected();
     void tryConnect();
-    void onSocketError(QAbstractSocket::SocketError error);
+    void onConnectionError();
     PacketAgent* getagent();
 
-
-signals:
-    void statechanged();
-    void newdata();
-    void connected(ContactListWindow::Status);
-    void disconnected();
-    void error(QString);
-
-private:
-
+private :
     QTimer *m_timer;
-    PacketAgent *mAgent;
-    QByteArray *mData;
-    QTcpSocket *mSocket;
-    State mState;
-    Contact *m_Contact;
+    PacketAgent *m_Agent;
+    QAbstractSocket *m_Socket;
+    State *m_State;
     int HostListLength;
+
+
+
 
 };
 
-#endif // LINK_H
+#endif // ABSTRACTLINK_H

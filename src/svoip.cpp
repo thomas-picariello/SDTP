@@ -98,8 +98,8 @@ void SVoIP::restartListener(){
 }
 
 void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
-    connect(networkManager, SIGNAL(statusChanged(int, ContactListWindow::Status)),
-            this, SLOT(updateContactStatus(int, ContactListWindow::Status)));
+    connect(networkManager, SIGNAL(statusChanged(int, Contact::Status)),
+            this, SLOT(updateContactStatus(int, Contact::Status)));
     connect(networkManager, SIGNAL(destroyed(QObject*)),
             this, SLOT(onNetworkManagerDelete(QObject*)));
 }

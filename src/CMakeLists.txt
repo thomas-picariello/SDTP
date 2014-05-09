@@ -34,8 +34,10 @@ set(SVOIP_HEADERS
     qjrtp.h
     rsakeyring.h
     packetagent.h
-    abstractlink.h
+    rootlink.h
     abstractapp.h
+    abstractlink.h
+    messengerapp.h
 )
 
 set(SVOIP_SOURCES
@@ -57,8 +59,10 @@ set(SVOIP_SOURCES
     qjrtp.cpp
     rsakeyring.cpp
     packetagent.cpp
-    abstractlink.cpp
+    rootlink.cpp
     abstractapp.cpp
+    abstractlink.cpp
+    messengerapp.cpp
 )
 
 set(SVOIP_FORMS
