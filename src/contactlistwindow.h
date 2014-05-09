@@ -20,12 +20,6 @@ class ContactListWindow : public QWidget
     Q_OBJECT
     
 public:
-    enum Status{
-        Offline,
-        Online,
-        Busy,
-        Away
-    };
     enum ItemDataRole{
         IdRole = 33,
         StatusRole = 34
@@ -36,8 +30,8 @@ public:
                                QWidget *parent = 0);
     ~ContactListWindow();
 
-    void setContactStatusIcon(QListWidgetItem *item, Status status);
-    void setContactStatusIcon(int id, Status status);
+    void setContactStatusIcon(QListWidgetItem *item, Contact::Status status);
+    void setContactStatusIcon(int id, Contact::Status status);
 
 public slots:
     void addContact();

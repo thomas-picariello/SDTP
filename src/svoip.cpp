@@ -69,7 +69,7 @@ void SVoIP::updateNetworkManagerId(NetworkManager *networkManager, int newId){
     }
 }
 
-void SVoIP::updateContactStatus(int id, ContactListWindow::Status status){
+void SVoIP::updateContactStatus(int id, Contact::Status status){
     if(id)
         mContactListWindow->setContactStatusIcon(id, status);
 }

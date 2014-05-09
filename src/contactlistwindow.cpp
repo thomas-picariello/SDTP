@@ -90,7 +90,7 @@ void ContactListWindow::refreshList(){
             //new contact
             QListWidgetItem *item = new QListWidgetItem(contact->getName());
             item->setData(IdRole, contact->getId());
-            setContactStatusIcon(item, Offline);
+            setContactStatusIcon(item, Contact::Offline);
 
             ui->list->addItem(item);
             ContactItemWidget *itemWidget = new ContactItemWidget(contact->getId());
@@ -147,7 +147,7 @@ Contact* ContactListWindow::getSelectedContact(){
     return NULL;
 }
 
-void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, Status status){
+void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, Contact::Status status){
     float iconScaleFactor = logicalDpiX()/96;
     QPixmap statusIcon(32 * iconScaleFactor,
                        32 * iconScaleFactor);
@@ -156,13 +156,13 @@ void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, Status statu
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QPen(Qt::transparent));
 
-    if(status == Offline)
+    if(status == Contact::Offline)
         painter.setBrush(QBrush(Qt::lightGray));
-    else if(status == Online)
+    else if(status == Contact::Online)
         painter.setBrush(QBrush(Qt::green));
-    else if(status == Busy)
+    else if(status == Contact::Busy)
         painter.setBrush(QBrush(Qt::red));
-    else if(status == Away)
+    else if(status == Contact::Away)
         painter.setBrush(QBrush(QColor(255, 192, 0)));
 
     painter.drawEllipse(QPoint(16 * iconScaleFactor, 16 * iconScaleFactor),
@@ -171,7 +171,7 @@ void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, Status statu
     item->setData(Qt::DecorationRole, statusIcon);
 }
 
-void ContactListWindow::setContactStatusIcon(int id, Status status){
+void ContactListWindow::setContactStatusIcon(int id, Contact::Status status){
     QListWidgetItem *item = findItemByContactId(id);
     if(item)
         setContactStatusIcon(item, status);

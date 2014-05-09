@@ -22,6 +22,16 @@ public:
     };
 
     /**
+     * @brief The Status enum enumerates the possibles states for a contact
+     */
+    enum Status{
+        Offline,
+        Online,
+        Busy,
+        Away
+    };
+
+    /**
      * @brief Constructs an empty contact object.
      *
      * @param parent the parent **QObject**
