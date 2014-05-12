@@ -1,16 +1,21 @@
 #ifndef ABSTRACTAPP_H
 #define ABSTRACTAPP_H
 
-#include <QObject>
+#include <QWidget>
+
 #include "networkmanager.h"
 #include "packetagent.h"
 
 
-class AbstractApp
-{
-public:
-    AbstractApp(NetworkManager * manager);
 
+class AbstractApp : public QWidget
+{
+
+    Q_OBJECT
+
+public:
+    AbstractApp(NetworkManager * manager, QWidget *parent = 0);
+    ~AbstractApp();
 
 public slots :
     void dataToRead(QByteArray *data);
@@ -20,11 +25,11 @@ signals :
     void dataToSend(QByteArray);
 
 
-private :
-    ~AbstractApp();
+protected :
 
-    PacketAgent *m_Root;
+
     QByteArray *m_Data;
+    QList<PacketAgent*> *m_AgentList;
 
 
 

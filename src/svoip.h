@@ -13,6 +13,7 @@
 #include "contactlistwindow.h"
 #include "passwordwindow.h"
 #include "networkmanager.h"
+#include "messengerapp.h"
 
 class SVoIP: public QObject
 {
@@ -29,6 +30,7 @@ public slots:
     void updateNetworkManagerId(NetworkManager *networkManager, int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
+    void onStartAppRequest(int appId,int contactId);
 
 signals:
     void error(QString err);
@@ -43,6 +45,8 @@ private :
 
     QString generateSalt();
     void connectNetworkManagerSignals(NetworkManager *networkManager);
+
+    MessengerApp *mapp;
 
     Q_DISABLE_COPY(SVoIP)
 };

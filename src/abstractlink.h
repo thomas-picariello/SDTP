@@ -31,7 +31,7 @@ public slots:
     void onConnectionError();
     PacketAgent* getagent();
 
-private :
+protected :
     QTimer *m_timer;
     PacketAgent *m_Agent;
     QAbstractSocket *m_Socket;

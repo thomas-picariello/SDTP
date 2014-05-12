@@ -23,6 +23,8 @@ SVoIP::SVoIP(QObject *parent):
         connect(mPasswordWindow, SIGNAL(validate(QByteArray)),
                 this, SLOT(startProgram(QByteArray)));
     }
+
+
 }
 
 void SVoIP::startProgram(QByteArray key){
@@ -36,6 +38,8 @@ void SVoIP::startProgram(QByteArray key){
             this, SLOT(restartListener()));
     connect(mContactListWindow, SIGNAL(contactEvent(int,Contact::Event)),
             this, SLOT(onContactEvent(int,Contact::Event)));
+    connect(mContactListWindow, SIGNAL(startApp(int,int)),
+            this,SLOT(onStartAppRequest(int,int)));
 
     //start a NetworkManager for each contact
     QList<Contact*> contactList = mContactDB->getAllContacts();
@@ -44,6 +48,8 @@ void SVoIP::startProgram(QByteArray key){
         connectNetworkManagerSignals(networkManager);
         mNetworkManagerList.insert(contact->getId(), networkManager);
     }
+
+
 }
 
 void SVoIP::onIncommingConnection(){
@@ -54,6 +60,8 @@ void SVoIP::onIncommingConnection(){
     NetworkManager* networkManager = new NetworkManager(mListener.nextPendingConnection(),mContactDB, this);
     connectNetworkManagerSignals(networkManager);
     mNetworkManagerList.insert(id, networkManager);
+
+
 }
 
 void SVoIP::onNetworkManagerDelete(QObject *object){
@@ -117,6 +125,10 @@ QString SVoIP::generateSalt(){
                               new StringSink(encodedBlock),
                               false));
     return QString::fromStdString(encodedBlock);
+}
+void SVoIP::onStartAppRequest(int appId, int contactId){
+
+    qDebug()<<"startAppRequest";
 }
 
 SVoIP::~SVoIP(){

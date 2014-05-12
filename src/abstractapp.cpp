@@ -1,9 +1,9 @@
 #include "abstractapp.h"
 
-AbstractApp::AbstractApp(NetworkManager *manager)
+AbstractApp::AbstractApp(NetworkManager *manager, QWidget *parent) :QWidget(parent)
 {
 
-    m_Root = manager->getRootAgent();
+    m_AgentList->append(manager->getRootAgent());
 
 
 
@@ -18,5 +18,5 @@ void AbstractApp::dataToRead(QByteArray *data){
 AbstractApp::~AbstractApp(){
 
 
-    delete m_Root,m_Data;
+    delete m_AgentList,m_Data;
 }

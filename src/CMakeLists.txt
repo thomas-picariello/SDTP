@@ -63,6 +63,7 @@ set(SVOIP_FORMS
     settingswindow.ui
     passwordwindow.ui
     contactitemwidget.ui
+    messengerapp.ui
 )
 
 set(SVOIP_RES

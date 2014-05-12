@@ -1,15 +1,28 @@
 #ifndef MESSENGERAPP_H
 #define MESSENGERAPP_H
 
-#include <QObject>
+#include <contact.h>
+#include <QList>
 #include "abstractapp.h"
+#include "networkmanager.h"
 
-class MessengerApp
+namespace Ui{
+class MessengerApp;
+
+}
+
+
+class MessengerApp : public AbstractApp
 {
 
-public:
-    MessengerApp();
+    Q_OBJECT
 
+public:
+    MessengerApp(NetworkManager *manager, QWidget *parent = 0);
+    void addContact(NetworkManager* manager);
+private:
+
+    Ui::MessengerApp *ui;
 
 };
 
