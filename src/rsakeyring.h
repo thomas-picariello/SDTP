@@ -23,7 +23,6 @@ class RsaKeyring : public QObject
 public:
     explicit RsaKeyring(QPair<QByteArray,QByteArray> *fileKey,
                         QObject *parent=0);
-    ~RsaKeyring();
 
     void changeFileKey(QPair<QByteArray,QByteArray> newKey);
     void commitToKeystore();
@@ -36,8 +35,8 @@ public:
     void importPublicKey(QString filename);
     void setPrivateKey(QByteArray privateKey);
     void setPublicKey(QByteArray publicKey);
-    bool validateKeypair();
-    bool validateKeypair(QByteArray privateKey, QByteArray publicKey);
+    bool validatePrivateKey(QByteArray privateKey, uint level = 2);
+    bool validatePublicKey(QByteArray publicKey, uint level = 2);
 
 signals:
     void keyGenerationFinished();

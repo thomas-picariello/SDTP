@@ -14,7 +14,7 @@ void RsaKeyring::changeFileKey(QPair<QByteArray,QByteArray> newKey){
 }
 
 void RsaKeyring::commitToKeystore(){
-    if(validateKeypair()){
+    //if(validatePrivateKey(mPrivateKey) && validatePublicKey(mPublicKey)){
         QString timestamp = QString::number(QDateTime::currentDateTimeUtc().toTime_t());
         QString xmlString;
         QXmlStreamWriter xml(&xmlString);
@@ -40,7 +40,7 @@ void RsaKeyring::commitToKeystore(){
                                        new CryptoPP::AuthenticatedEncryptionFilter(gcmEnc,
                                              new CryptoPP::FileSink("keystore.dat")));
         }
-    }
+    //}
 }
 
 void RsaKeyring::exportPrivateKey(QString filename){
@@ -81,7 +81,6 @@ void RsaKeyring::importPrivateKey(QString filename){
         file.close();
     }else
         emit error(QString(tr("Unable to access the file:")+filename));
-    //TODO: validate key pair
 }
 
 void RsaKeyring::importPublicKey(QString filename){
@@ -91,7 +90,6 @@ void RsaKeyring::importPublicKey(QString filename){
         file.close();
     }else
         emit error(QString(tr("Unable to access the file:")+filename));
-    //TODO: validate key pair
 }
 
 void RsaKeyring::onKeyGenJobFinished(){
@@ -130,24 +128,27 @@ QPair<QByteArray, QByteArray> RsaKeyring::generate(){
                                          QString::fromStdString(publicKey).toUtf8());
 }
 
-bool RsaKeyring::validateKeypair(){
-    if(!mPublicKey.isEmpty() && !mPrivateKey.isEmpty())
-        return true;
-    else{
-        emit error(tr("Keypair validation failed"));
-        return false;
+bool RsaKeyring::validatePrivateKey(QByteArray privateKey, uint level){
+    bool result;
+    CryptoPP::RSA::PrivateKey rsaPrivate;
+    std::string privKey = QString(privateKey).toStdString();
+    CryptoPP::StringSource source(privKey, true);
+    CryptoPP::ByteQueue queue;
+    source.CopyTo(queue);
+
+    try{
+        rsaPrivate.BERDecodePrivateKey(source, false, source.MaxRetrievable());
+        result = rsaPrivate.Validate(CryptoPP::AutoSeededRandomPool(), level);
+    }catch(CryptoPP::Exception& e){
+        qDebug()<<e.what();
+        //emit error(QString(e.what()));
+        result = false;
     }
-    //TODO: proper validation
+    return result;
 }
 
-bool RsaKeyring::validateKeypair(QByteArray publicKey, QByteArray privateKey){
-    if(!publicKey.isEmpty() && !privateKey.isEmpty())
-        return true;
-    else{
-        emit error(tr("Keypair validation failed"));
-        return false;
-    }
-    //TODO: proper validation
+bool RsaKeyring::validatePublicKey(QByteArray publicKey, uint level){
+    return true;
 }
 
 void RsaKeyring::readKeystore(){
@@ -187,12 +188,8 @@ void RsaKeyring::readKeystore(){
     }catch(CryptoPP::Exception& err ){
         emit error(QString(err.what()));
     }
-    if(validateKeypair(privateKey, publicKey)){
+    if(validatePrivateKey(privateKey) && validatePublicKey(publicKey)){
         mPrivateKey = privateKey;
         mPublicKey = publicKey;
     }
-}
-
-RsaKeyring::~RsaKeyring(){
-
 }

@@ -20,18 +20,14 @@ set(SVOIP_HEADERS
     contactlistwindow.h
     contactitemwidget.h
     editcontactwindow.h
-    #messengerwindow.h
     settingswindow.h
     passwordwindow.h
     contactdb.h
     contact.h
-    #message.h
     svoip.h
     voip.h
     qpcmbuffer.h
     networkmanager.h
-    #handshake.h
-    qjrtp.h
     rsakeyring.h
     packetagent.h
     rootlink.h
@@ -45,18 +41,14 @@ set(SVOIP_SOURCES
     contactlistwindow.cpp
     contactitemwidget.cpp
     editcontactwindow.cpp
-    #messengerwindow.cpp
     settingswindow.cpp
     passwordwindow.cpp
     contactdb.cpp
     contact.cpp
-    #message.cpp
     svoip.cpp
     voip.cpp
     qpcmbuffer.cpp
     networkmanager.cpp
-    #handshake.cpp
-    qjrtp.cpp
     rsakeyring.cpp
     packetagent.cpp
     rootlink.cpp
@@ -69,7 +61,6 @@ set(SVOIP_FORMS
     contactlistwindow.ui
     editcontactwindow.ui
     settingswindow.ui
-    #messengerwindow.ui
     passwordwindow.ui
     contactitemwidget.ui
 )

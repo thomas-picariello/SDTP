@@ -12,7 +12,6 @@
 
 
 #include "contact.h"
-#include "qjrtp.h"
 #include "contactdb.h"
 #include "rootlink.h"
 #include "packetagent.h"
