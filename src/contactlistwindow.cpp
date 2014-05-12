@@ -66,7 +66,7 @@ void ContactListWindow::onListItemAction(int id, ContactItemWidget::Action actio
         emit startApp(0, id);
         break;
     case ContactItemWidget::MessengerAction:
-        //connectToContact();
+        emit startApp(1, id);
         break;
     case ContactItemWidget::EditAction:
         editContact();
