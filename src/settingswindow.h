@@ -23,17 +23,17 @@ public:
 
 signals:
     void settingsUpdated();
+    void error(QString err);
 
 public slots:
     void cancel();
-    void changeRsaPubKey();
     void changeRsaPrivKey();
     void rsaExportPrivate();
     void rsaExportPublic();
-    void rsaGenerate();
+    void rsaGenerateKeypair();
     void rsaKeyGenFinished();
     void rsaImportPrivate();
-    void rsaImportPublic();
+    void rsaGeneratePublic();
     void showRsaPubkeyMenu();
     void showRsaPrivkeyMenu();
     void save();

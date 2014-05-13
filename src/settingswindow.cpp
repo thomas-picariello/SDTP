@@ -13,8 +13,6 @@ SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, QWidget *
     ui->net_port_input->setText(mSettings->value("network/listen_port").toString());
     ui->rsa_privkey_input->setText(mKeyring.getPrivateKey().toBase64());
     ui->rsa_pubkey_input->setText(mKeyring.getPublicKey().toBase64());
-    ui->rsa_generate_pb->setMaximumWidth(ui->rsa_generate_bt->width());
-    ui->rsa_generate_pb->setVisible(false);
 
     mPortValidator.setRange(0, 65535);
     ui->net_port_input->setValidator(&mPortValidator);
@@ -26,12 +24,8 @@ SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, QWidget *
     connect(ui->cancel_bt, SIGNAL(clicked()),
             this, SLOT(cancel()));
 
-    connect(ui->rsa_pubkey_input, SIGNAL(textChanged()),
-            this, SLOT(changeRsaPubKey()));
     connect(ui->rsa_privkey_input, SIGNAL(textChanged()),
             this, SLOT(changeRsaPrivKey()));
-    connect(ui->rsa_generate_bt, SIGNAL(clicked()),
-            this, SLOT(rsaGenerate()));
     connect(ui->rsa_pubkey_opt_bt, SIGNAL(clicked()),
             this, SLOT(showRsaPubkeyMenu()));
     connect(ui->rsa_privkey_opt_bt, SIGNAL(clicked()),
@@ -42,11 +36,6 @@ SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, QWidget *
 
 void SettingsWindow::cancel(){
     hide();
-}
-
-void SettingsWindow::changeRsaPubKey(){
-    QByteArray inputPubKey = ui->rsa_pubkey_input->toPlainText().toUtf8();
-    mKeyring.setPublicKey(QByteArray::fromBase64(inputPubKey));
 }
 
 void SettingsWindow::changeRsaPrivKey(){
@@ -72,16 +61,12 @@ void SettingsWindow::rsaExportPublic(){
         mKeyring.exportPublicKey(filename);
 }
 
-void SettingsWindow::rsaGenerate(){
-    //TODO: add confirmation dialog
-    ui->rsa_generate_pb->setVisible(true);
-    ui->rsa_generate_bt->setEnabled(false);
-    mKeyring.generateKeypair();
+void SettingsWindow::rsaGenerateKeypair(){
+    if(!mKeyring.isGenerating())
+        mKeyring.generateKeypair();
 }
 
 void SettingsWindow::rsaKeyGenFinished(){
-    ui->rsa_generate_pb->setVisible(false);
-    ui->rsa_generate_bt->setEnabled(true);
     ui->rsa_privkey_input->setText(mKeyring.getPrivateKey().toBase64());
     ui->rsa_pubkey_input->setText(mKeyring.getPublicKey().toBase64());
 }
@@ -97,20 +82,20 @@ void SettingsWindow::rsaImportPrivate(){
     }
 }
 
-void SettingsWindow::rsaImportPublic(){
-    QString filename = QFileDialog::getOpenFileName(this,
-                                                    tr("Import public key"),
-                                                    QDir::home().absolutePath(),
-                                                    tr("Key file")+" (*.key)");
-    if(!filename.isNull()){
-        mKeyring.importPublicKey(filename);
+void SettingsWindow::rsaGeneratePublic(){
+    if(!mKeyring.getPrivateKey().isEmpty()){
+        mKeyring.generatePublicKey();
         ui->rsa_pubkey_input->setText(mKeyring.getPublicKey().toBase64());
+    }else{
+        //TODO: show error
     }
 }
 
 void SettingsWindow::save(){
-    //TODO: set default values
-    mSettings->setValue("network/listen_port", ui->net_port_input->text());
+    QString input = ui->net_port_input->text();
+    if(input.isEmpty())
+        input = "8000"; //default listen port number
+    mSettings->setValue("network/listen_port", input);
     mKeyring.commitToKeystore();
     emit settingsUpdated();
     hide();
@@ -120,14 +105,16 @@ void SettingsWindow::setupRsaMenus(){
     mRsaPubkeyMenu = new QMenu(ui->rsa_pubkey_opt_bt);
     mRsaPubkeyMenu->addAction(tr("Export public key"),
                               this, SLOT(rsaExportPublic()));
-    mRsaPubkeyMenu->addAction(tr("Import public key"),
-                              this, SLOT(rsaImportPublic()));
+    mRsaPubkeyMenu->addAction(tr("Generate public key from private key"),
+                              this, SLOT(rsaGeneratePublic()));
 
     mRsaPrivkeyMenu = new QMenu(ui->rsa_privkey_opt_bt);
     mRsaPrivkeyMenu->addAction(tr("Export private key"),
                                this, SLOT(rsaExportPrivate()));
     mRsaPrivkeyMenu->addAction(tr("Import private key"),
                                this, SLOT(rsaImportPrivate()));
+    mRsaPrivkeyMenu->addAction(tr("Generate Keypair"),
+                               this, SLOT(rsaGenerateKeypair()));
 }
 
 void SettingsWindow::showRsaPubkeyMenu(){
