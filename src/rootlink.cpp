@@ -84,9 +84,9 @@ PacketAgent *RootLink::getagent(){
 
 void RootLink::onSocketError(QAbstractSocket::SocketError error){
 
-    if(error == QAbstractSocket::ConnectionRefusedError);               //The connection was refused by the peer (or timed out).
+/*    if(error == QAbstractSocket::ConnectionRefusedError);               //The connection was refused by the peer (or timed out).
     if(error == QAbstractSocket::RemoteHostClosedError);                //The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
-    if(error == QAbstractSocket::HostNotFoundError);        //The host address was not found.
+    if(error == QAbstractSocket::HostNotFoundError); */       //The host address was not found.
 
     qDebug()<<"onSocketError";
 

@@ -3,6 +3,7 @@
 
 #include <contact.h>
 #include <QList>
+#include <QtWebKitWidgets/QWebView>
 #include "abstractapp.h"
 #include "networkmanager.h"
 
@@ -18,10 +19,10 @@ class MessengerApp : public AbstractApp
     Q_OBJECT
 
 public:
-    MessengerApp(NetworkManager *manager, QWidget *parent = 0);
+    explicit MessengerApp(NetworkManager *manager, QWidget *parent = 0);
     void addContact(NetworkManager* manager);
-private:
 
+private:
     Ui::MessengerApp *ui;
 
 };

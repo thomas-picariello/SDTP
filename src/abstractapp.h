@@ -29,7 +29,7 @@ protected :
 
 
     QByteArray *m_Data;
-    QList<PacketAgent*> *m_AgentList;
+    QList<PacketAgent*> m_AgentList;
 
 
 

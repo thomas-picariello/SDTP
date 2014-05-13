@@ -52,7 +52,7 @@ PacketAgent* NetworkManager::newAgent(){
 }
 PacketAgent* NetworkManager::getRootAgent(){
 
-    return m_Root->getagent();
+    return agent;
 }
 int NetworkManager::getContactId(){
     if(m_contact)

@@ -10,6 +10,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Multimedia REQUIRED)
 find_package(Qt5Sql REQUIRED)
 
+
 find_package(Cryptlib REQUIRED)
 find_package(Opus REQUIRED)
 find_package(Jrtplib REQUIRED)
@@ -32,8 +33,9 @@ set(SVOIP_HEADERS
     packetagent.h
     rootlink.h
     abstractapp.h
-    abstractlink.h
     messengerapp.h
+    abstractlink.h
+
 )
 
 set(SVOIP_SOURCES
@@ -53,8 +55,9 @@ set(SVOIP_SOURCES
     packetagent.cpp
     rootlink.cpp
     abstractapp.cpp
-    abstractlink.cpp
     messengerapp.cpp
+    abstractlink.cpp
+
 )
 
 set(SVOIP_FORMS
