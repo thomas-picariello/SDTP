@@ -1,6 +1,8 @@
 #include "abstractapp.h"
 
-AbstractApp::AbstractApp(NetworkManager *manager, QWidget *parent) :QWidget(parent)
+AbstractApp::AbstractApp(NetworkManager *manager, QWidget *parent):
+    QWidget(parent),
+    m_Data(NULL)
 {
 
     PacketAgent* agent = manager->getRootAgent();
