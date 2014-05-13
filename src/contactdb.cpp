@@ -22,6 +22,10 @@ ContactDB::~ContactDB(){
     mDiskDb.close();
 }
 
+void ContactDB::updateFileKey(){
+    commitToDiskDb();
+}
+
 bool ContactDB::erase(int id){
     QSqlQuery eraseMemoryEntryQuery(mMemoryDb);
     QSqlQuery eraseDiskEntryQuery(mDiskDb);

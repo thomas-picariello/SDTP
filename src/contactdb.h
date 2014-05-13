@@ -17,6 +17,7 @@ class ContactDB: public QObject
 public:
     explicit ContactDB(QPair<QByteArray, QByteArray> *fileKey, QObject *parent = 0);
     ~ContactDB();
+    void updateFileKey();
     bool erase(int id);
     Contact* findById(int id);
     Contact* findByKey(QByteArray key);
