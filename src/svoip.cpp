@@ -110,6 +110,8 @@ void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
             this, SLOT(updateContactStatus(int, Contact::Status)));
     connect(networkManager, SIGNAL(destroyed(QObject*)),
             this, SLOT(onNetworkManagerDelete(QObject*)));
+    connect(networkManager,SIGNAL(startAppRequest(int,int)),
+            this,SLOT(onStartAppRequest(int,int)));
 }
 
 QString SVoIP::generateSalt(){
@@ -129,6 +131,23 @@ QString SVoIP::generateSalt(){
 void SVoIP::onStartAppRequest(int appId, int contactId){
 
     qDebug()<<"startAppRequest";
+    ID.first = appId;
+    ID.second = contactId;
+
+if(applist.find(ID) == applist.end())
+{
+
+
+    if(appId == 1)applist.insert(ID,new MessengerApp(mNetworkManagerList.value(contactId)));
+    else qDebug()<<"invalid appId";
+
+
+
+}
+
+
+
+
 }
 
 SVoIP::~SVoIP(){

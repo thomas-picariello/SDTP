@@ -32,6 +32,7 @@ public slots:
     void onContactEvent(int id, Contact::Event event);
     void onStartAppRequest(int appId,int contactId);
 
+
 signals:
     void error(QString err);
 
@@ -46,7 +47,9 @@ private :
     QString generateSalt();
     void connectNetworkManagerSignals(NetworkManager *networkManager);
 
-    MessengerApp *mapp;
+    QPair<int,int> ID;
+    QMap<QPair<int,int>,AbstractApp*> applist;
+
 
     Q_DISABLE_COPY(SVoIP)
 };

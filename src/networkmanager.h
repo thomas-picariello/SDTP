@@ -41,6 +41,7 @@ public slots :
 signals :
     void error(QString error);
     void statusChanged(int id, Contact::Status status);
+    void startAppRequest(int appid, int contactId);
 
 
 private :
