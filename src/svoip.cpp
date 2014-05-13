@@ -39,7 +39,7 @@ void SVoIP::startProgram(QByteArray key){
     connect(mContactListWindow, SIGNAL(contactEvent(int,Contact::Event)),
             this, SLOT(onContactEvent(int,Contact::Event)));
     connect(mContactListWindow, SIGNAL(startApp(int,int)),
-            this,SLOT(onStartAppRequest(int,int)));
+            this,SLOT(startApp(int,int)));
 
     //start a NetworkManager for each contact
     QList<Contact*> contactList = mContactDB->getAllContacts();
@@ -48,8 +48,6 @@ void SVoIP::startProgram(QByteArray key){
         connectNetworkManagerSignals(networkManager);
         mNetworkManagerList.insert(contact->getId(), networkManager);
     }
-
-
 }
 
 void SVoIP::onIncommingConnection(){
@@ -60,8 +58,6 @@ void SVoIP::onIncommingConnection(){
     NetworkManager* networkManager = new NetworkManager(mListener.nextPendingConnection(),mContactDB, this);
     connectNetworkManagerSignals(networkManager);
     mNetworkManagerList.insert(id, networkManager);
-
-
 }
 
 void SVoIP::onNetworkManagerDelete(QObject *object){
@@ -111,7 +107,7 @@ void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
     connect(networkManager, SIGNAL(destroyed(QObject*)),
             this, SLOT(onNetworkManagerDelete(QObject*)));
     connect(networkManager,SIGNAL(startAppRequest(int,int)),
-            this,SLOT(onStartAppRequest(int,int)));
+            this,SLOT(startApp(int,int)));
 }
 
 QString SVoIP::generateSalt(){
@@ -128,29 +124,19 @@ QString SVoIP::generateSalt(){
                               false));
     return QString::fromStdString(encodedBlock);
 }
-void SVoIP::onStartAppRequest(int appId, int contactId){
 
-    qDebug()<<"startAppRequest";
-    ID.first = appId;
-    ID.second = contactId;
-
-if(applist.find(ID) == applist.end())
-{
-
-
-    if(appId == 1)applist.insert(ID,new MessengerApp(mNetworkManagerList.value(contactId)));
-    else qDebug()<<"invalid appId";
-
-
-
-}
-
-
-
-
+void SVoIP::startApp(int appId, int contactId){
+    QPair<int,int> key;
+    key.first = appId;
+    key.second = contactId;
+    if(mAppList.find(key) == mAppList.end()){
+        if(appId == 1)mAppList.insert(key,new MessengerApp(mNetworkManagerList.value(contactId)));
+        emit error(tr("Invalid appId"));
+    }
 }
 
 SVoIP::~SVoIP(){
+    qDeleteAll(mAppList);
     if(mContactDB) delete mContactDB;
     if(mContactListWindow) delete mContactListWindow;
     if(mPasswordWindow) delete mPasswordWindow;

@@ -30,7 +30,7 @@ public slots:
     void updateNetworkManagerId(NetworkManager *networkManager, int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
-    void onStartAppRequest(int appId,int contactId);
+    void startApp(int appId,int contactId);
 
 
 signals:
@@ -43,13 +43,10 @@ private :
     QPair<QByteArray,QByteArray> mFileKey;
     QTcpServer mListener;
     QMap<int,NetworkManager*> mNetworkManagerList;
+    QMap<QPair<int,int>,AbstractApp*> mAppList;
 
     QString generateSalt();
     void connectNetworkManagerSignals(NetworkManager *networkManager);
-
-    QPair<int,int> ID;
-    QMap<QPair<int,int>,AbstractApp*> applist;
-
 
     Q_DISABLE_COPY(SVoIP)
 };
