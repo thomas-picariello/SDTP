@@ -2,8 +2,7 @@
 
 RsaKeyring::RsaKeyring(QPair<QByteArray, QByteArray> *fileKey, QObject *parent):
     QObject(parent),
-    mFileKey(fileKey),
-    mGeneratingFlag(false)
+    mFileKey(fileKey)
 {
     readKeystore();
     connect(&mWatcher, SIGNAL(finished()),
@@ -15,7 +14,7 @@ void RsaKeyring::changeFileKey(QPair<QByteArray,QByteArray> newKey){
 }
 
 void RsaKeyring::commitToKeystore(){
-    //if(validatePrivateKey(mPrivateKey) && validatePublicKey(mPublicKey)){
+    if(validatePrivateKey(mPrivateKey) && validatePublicKey(mPublicKey)){
         QString timestamp = QString::number(QDateTime::currentDateTimeUtc().toTime_t());
         QString xmlString;
         QXmlStreamWriter xml(&xmlString);
@@ -41,7 +40,7 @@ void RsaKeyring::commitToKeystore(){
                                        new CryptoPP::AuthenticatedEncryptionFilter(gcmEnc,
                                              new CryptoPP::FileSink("keystore.dat")));
         }
-    //}
+    }
 }
 
 void RsaKeyring::exportPrivateKey(QString filename){
@@ -63,13 +62,11 @@ void RsaKeyring::exportPublicKey(QString filename){
 }
 
 void RsaKeyring::generateKeypair(){
-    mGeneratingFlag = true;
     QFuture<QByteArray> generateFuture = QtConcurrent::run(this, &RsaKeyring::generatePrivateKeyRunnable);
     mWatcher.setFuture(generateFuture);
 }
 
 void RsaKeyring::generatePublicKey(){
-    mGeneratingFlag = true;
     std::string pubKeyStr;
     CryptoPP::StringSink pubSink(pubKeyStr);
     CryptoPP::RSA::PrivateKey rsaPrivate;
@@ -78,7 +75,6 @@ void RsaKeyring::generatePublicKey(){
     rsaPublic.Save(pubSink);
     mPublicKey.clear();
     mPublicKey.append(pubKeyStr.data(), pubKeyStr.size());
-    mGeneratingFlag = false;
     emit keyGenerationFinished();
 }
 
@@ -100,20 +96,16 @@ void RsaKeyring::importPrivateKey(QString filename){
 }
 
 bool RsaKeyring::isGenerating() const{
-    return mGeneratingFlag;
+    return mWatcher.isRunning();
 }
 
 void RsaKeyring::onPrivateKeyGenJobFinished(){
-    mGeneratingFlag = false;
     mPrivateKey = mWatcher.result();
     generatePublicKey();
 }
 
-bool RsaKeyring::setPrivateKey(QByteArray privateKey){
-    bool valid = validatePrivateKey(privateKey);
-    if(valid)
+void RsaKeyring::setPrivateKey(QByteArray privateKey){
         mPrivateKey = privateKey;
-    return valid;
 }
 
 QByteArray RsaKeyring::generatePrivateKeyRunnable(){
@@ -121,7 +113,7 @@ QByteArray RsaKeyring::generatePrivateKeyRunnable(){
     CryptoPP::StringSink privateSink(privateKey);
     try{
         CryptoPP::RSAES_OAEP_SHA_Decryptor rsaPrivate;
-        rsaPrivate.AccessKey().GenerateRandomWithKeySize(CryptoPP::AutoSeededRandomPool(), 2048);
+        rsaPrivate.AccessKey().GenerateRandomWithKeySize(CryptoPP::AutoSeededRandomPool(), 4096);
         rsaPrivate.AccessKey().Save(privateSink);
     }catch(CryptoPP::Exception& e){
         emit error(QString(e.what()));
@@ -135,7 +127,7 @@ bool RsaKeyring::validatePrivateKey(QByteArray privateKey){
     CryptoPP::ArraySource source((byte*)privateKey.data(), privateKey.size(), true);
     try{
         rsaPrivate.Load(source);
-        success = rsaPrivate.Validate(CryptoPP::AutoSeededRandomPool(), 2);
+        success = rsaPrivate.Validate(CryptoPP::AutoSeededRandomPool(), 3);
     }catch(CryptoPP::Exception& e){
        emit error(QString(e.what()));
     }

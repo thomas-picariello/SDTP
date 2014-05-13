@@ -34,7 +34,7 @@ public:
     QByteArray getPublicKey() const;
     void importPrivateKey(QString filename);
     bool isGenerating() const;
-    bool setPrivateKey(QByteArray privateKey);
+    void setPrivateKey(QByteArray privateKey);
     bool validatePrivateKey(QByteArray privateKey);
     bool validatePublicKey(QByteArray publicKey);
 
@@ -50,7 +50,6 @@ private:
     QByteArray mPrivateKey;
     QByteArray mPublicKey;
     QFutureWatcher<QByteArray> mWatcher;
-    bool mGeneratingFlag;
 
     QByteArray generatePrivateKeyRunnable();
     void readKeystore();
