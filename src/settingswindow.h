@@ -34,6 +34,7 @@ public slots:
     void rsaKeyGenFinished();
     void rsaImportPrivate();
     void rsaGeneratePublic();
+    void rsaGenerateAnimate();
     void showRsaPubkeyMenu();
     void showRsaPrivkeyMenu();
     void save();
@@ -47,6 +48,7 @@ private:
 
     QMenu *mRsaPubkeyMenu;
     QMenu *mRsaPrivkeyMenu;
+    QTimer mGeneratingAnimTimer;
 
     void setupRsaMenus();
 };

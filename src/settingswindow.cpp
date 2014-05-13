@@ -32,6 +32,8 @@ SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, QWidget *
             this, SLOT(showRsaPrivkeyMenu()));
     connect(&mKeyring, SIGNAL(keyGenerationFinished()),
             this, SLOT(rsaKeyGenFinished()));
+    connect(&mGeneratingAnimTimer, SIGNAL(timeout()),
+            this, SLOT(rsaGenerateAnimate()));
 }
 
 void SettingsWindow::cancel(){
@@ -62,11 +64,14 @@ void SettingsWindow::rsaExportPublic(){
 }
 
 void SettingsWindow::rsaGenerateKeypair(){
-    if(!mKeyring.isGenerating())
+    if(!mKeyring.isGenerating()){
+        mGeneratingAnimTimer.start(100);
         mKeyring.generateKeypair();
+    }
 }
 
 void SettingsWindow::rsaKeyGenFinished(){
+    mGeneratingAnimTimer.stop();
     ui->rsa_privkey_input->setText(mKeyring.getPrivateKey().toBase64());
     ui->rsa_pubkey_input->setText(mKeyring.getPublicKey().toBase64());
 }
@@ -89,6 +94,15 @@ void SettingsWindow::rsaGeneratePublic(){
     }else{
         //TODO: show error
     }
+}
+
+void SettingsWindow::rsaGenerateAnimate(){
+    if(ui->rsa_privkey_input->toPlainText().length() > 3){
+        ui->rsa_pubkey_input->clear();
+        ui->rsa_privkey_input->clear();
+    }
+    ui->rsa_pubkey_input->setText(ui->rsa_pubkey_input->toPlainText()+"|");
+    ui->rsa_privkey_input->setText(ui->rsa_privkey_input->toPlainText()+"|");
 }
 
 void SettingsWindow::save(){
