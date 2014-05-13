@@ -29,29 +29,30 @@ public:
     void exportPrivateKey(QString filename);
     void exportPublicKey(QString filename);
     void generateKeypair();
+    void generatePublicKey();
     QByteArray getPrivateKey() const;
     QByteArray getPublicKey() const;
     void importPrivateKey(QString filename);
-    void importPublicKey(QString filename);
-    void setPrivateKey(QByteArray privateKey);
-    void setPublicKey(QByteArray publicKey);
-    bool validatePrivateKey(QByteArray privateKey, uint level = 2);
-    bool validatePublicKey(QByteArray publicKey, uint level = 2);
+    bool isGenerating() const;
+    bool setPrivateKey(QByteArray privateKey);
+    bool validatePrivateKey(QByteArray privateKey);
+    bool validatePublicKey(QByteArray publicKey);
 
 signals:
     void keyGenerationFinished();
     void error(QString err);
 
 public slots:
-    void onKeyGenJobFinished();
+    void onPrivateKeyGenJobFinished();
 
 private:
     QPair<QByteArray,QByteArray> *mFileKey;
     QByteArray mPrivateKey;
     QByteArray mPublicKey;
-    QFutureWatcher<QPair<QByteArray,QByteArray>> mWatcher;
+    QFutureWatcher<QByteArray> mWatcher;
+    bool mGeneratingFlag;
 
-    QPair<QByteArray, QByteArray> generate();
+    QByteArray generatePrivateKeyRunnable();
     void readKeystore();
 
     Q_DISABLE_COPY(RsaKeyring)

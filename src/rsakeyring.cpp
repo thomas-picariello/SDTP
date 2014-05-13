@@ -2,11 +2,12 @@
 
 RsaKeyring::RsaKeyring(QPair<QByteArray, QByteArray> *fileKey, QObject *parent):
     QObject(parent),
-    mFileKey(fileKey)
+    mFileKey(fileKey),
+    mGeneratingFlag(false)
 {
     readKeystore();
     connect(&mWatcher, SIGNAL(finished()),
-            this, SLOT(onKeyGenJobFinished()));
+            this, SLOT(onPrivateKeyGenJobFinished()));
 }
 
 void RsaKeyring::changeFileKey(QPair<QByteArray,QByteArray> newKey){
@@ -62,8 +63,23 @@ void RsaKeyring::exportPublicKey(QString filename){
 }
 
 void RsaKeyring::generateKeypair(){
-    QFuture<QPair<QByteArray,QByteArray>> generateFuture = QtConcurrent::run(this, &RsaKeyring::generate);
+    mGeneratingFlag = true;
+    QFuture<QByteArray> generateFuture = QtConcurrent::run(this, &RsaKeyring::generatePrivateKeyRunnable);
     mWatcher.setFuture(generateFuture);
+}
+
+void RsaKeyring::generatePublicKey(){
+    mGeneratingFlag = true;
+    std::string pubKeyStr;
+    CryptoPP::StringSink pubSink(pubKeyStr);
+    CryptoPP::RSA::PrivateKey rsaPrivate;
+    rsaPrivate.Load(CryptoPP::ArraySource((byte*)mPrivateKey.data(), mPrivateKey.size(), true));
+    CryptoPP::RSA::PublicKey rsaPublic(rsaPrivate);
+    rsaPublic.Save(pubSink);
+    mPublicKey.clear();
+    mPublicKey.append(pubKeyStr.data(), pubKeyStr.size());
+    mGeneratingFlag = false;
+    emit keyGenerationFinished();
 }
 
 QByteArray RsaKeyring::getPrivateKey() const{
@@ -83,71 +99,50 @@ void RsaKeyring::importPrivateKey(QString filename){
         emit error(QString(tr("Unable to access the file:")+filename));
 }
 
-void RsaKeyring::importPublicKey(QString filename){
-    QFile file(filename);
-    if(file.open(QFile::ReadOnly)){
-        mPublicKey = file.readAll();
-        file.close();
-    }else
-        emit error(QString(tr("Unable to access the file:")+filename));
+bool RsaKeyring::isGenerating() const{
+    return mGeneratingFlag;
 }
 
-void RsaKeyring::onKeyGenJobFinished(){
-    mPrivateKey = mWatcher.result().first;
-    mPublicKey = mWatcher.result().second;
-    emit keyGenerationFinished();
+void RsaKeyring::onPrivateKeyGenJobFinished(){
+    mGeneratingFlag = false;
+    mPrivateKey = mWatcher.result();
+    generatePublicKey();
 }
 
-void RsaKeyring::setPrivateKey(QByteArray privateKey){
-    mPrivateKey = privateKey;
+bool RsaKeyring::setPrivateKey(QByteArray privateKey){
+    bool valid = validatePrivateKey(privateKey);
+    if(valid)
+        mPrivateKey = privateKey;
+    return valid;
 }
 
-void RsaKeyring::setPublicKey(QByteArray publicKey){
-    mPublicKey = publicKey;
-}
-
-QPair<QByteArray, QByteArray> RsaKeyring::generate(){
+QByteArray RsaKeyring::generatePrivateKeyRunnable(){
     std::string privateKey;
-    std::string publicKey;
     CryptoPP::StringSink privateSink(privateKey);
-    CryptoPP::StringSink publicSink(publicKey);
-    CryptoPP::ByteQueue queue;
-
     try{
         CryptoPP::RSAES_OAEP_SHA_Decryptor rsaPrivate;
         rsaPrivate.AccessKey().GenerateRandomWithKeySize(CryptoPP::AutoSeededRandomPool(), 2048);
-        CryptoPP::RSAES_OAEP_SHA_Encryptor rsaPublic(rsaPrivate);
-        rsaPrivate.AccessKey().Save(queue);
-        queue.CopyTo(privateSink);
-        rsaPublic.AccessKey().Save(queue);
-        queue.CopyTo(publicSink);
+        rsaPrivate.AccessKey().Save(privateSink);
     }catch(CryptoPP::Exception& e){
         emit error(QString(e.what()));
     }
-    return QPair<QByteArray, QByteArray>(QString::fromStdString(privateKey).toUtf8(),
-                                         QString::fromStdString(publicKey).toUtf8());
+    return QByteArray(privateKey.data(), privateKey.size());
 }
 
-bool RsaKeyring::validatePrivateKey(QByteArray privateKey, uint level){
-    bool result;
+bool RsaKeyring::validatePrivateKey(QByteArray privateKey){
+    bool success = false;
     CryptoPP::RSA::PrivateKey rsaPrivate;
-    std::string privKey = QString(privateKey).toStdString();
-    CryptoPP::StringSource source(privKey, true);
-    CryptoPP::ByteQueue queue;
-    source.CopyTo(queue);
-
+    CryptoPP::ArraySource source((byte*)privateKey.data(), privateKey.size(), true);
     try{
-        rsaPrivate.BERDecodePrivateKey(source, false, source.MaxRetrievable());
-        result = rsaPrivate.Validate(CryptoPP::AutoSeededRandomPool(), level);
+        rsaPrivate.Load(source);
+        success = rsaPrivate.Validate(CryptoPP::AutoSeededRandomPool(), 2);
     }catch(CryptoPP::Exception& e){
-        qDebug()<<e.what();
-        //emit error(QString(e.what()));
-        result = false;
+       emit error(QString(e.what()));
     }
-    return result;
+    return success;
 }
 
-bool RsaKeyring::validatePublicKey(QByteArray publicKey, uint level){
+bool RsaKeyring::validatePublicKey(QByteArray publicKey){
     return true;
 }
 
