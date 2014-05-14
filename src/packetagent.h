@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QPair>
 
+#include "abstractapp.h"
 
 
 
@@ -24,13 +25,13 @@ public:
     PacketAgent();
     ~PacketAgent();
 
+    void logApp(AbstractApp* app);
+
 public slots :
     void incomingdata(QByteArray data);//link
-    void writedata(QByteArray data);//app
 
 signals:
     void senddata(QByteArray data);//link
-    void readdata(QByteArray data);//app
 
 
 private:
@@ -51,6 +52,8 @@ private:
     QByteArray mHash;
     QByteArray mKey;
     QByteArray mIV;
+
+    QList<AbstractApp*> mAppList;
 
 
 

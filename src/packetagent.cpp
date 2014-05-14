@@ -11,11 +11,10 @@ PacketAgent::PacketAgent( QPair<QByteArray,QByteArray> key){
 PacketAgent::PacketAgent(){
 
 }
+void PacketAgent::logApp(AbstractApp *app){
+mAppList.append(app);
 
-void PacketAgent::writedata(QByteArray data){
-
-    emit senddata(data);
-    qDebug()<<"Sent : "<<data.data();
+connect(app,SIGNAL(dataToSend(QByteArray)),this,SLOT(incomingdata(QByteArray)));
 }
 
 void PacketAgent::incomingdata(QByteArray data){
@@ -24,7 +23,7 @@ void PacketAgent::incomingdata(QByteArray data){
 
     qDebug()<<"recieved :"+mContent;
 
-    emit readdata(data);
+    mAppList.first()->dataToRead(data);
 
 
 }

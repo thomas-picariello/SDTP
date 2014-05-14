@@ -2,7 +2,6 @@
 #define ABSTRACTAPP_H
 
 #include <QWidget>
-#include "packetagent.h"
 
 
 
@@ -12,7 +11,7 @@ class AbstractApp : public QWidget
     Q_OBJECT
 
 public:
-    AbstractApp(PacketAgent *agent, QWidget *parent = 0);
+    AbstractApp(QWidget *parent = 0);
     ~AbstractApp();
 
 public slots :

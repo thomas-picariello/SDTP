@@ -1,10 +1,9 @@
 #include "abstractapp.h"
 
-AbstractApp::AbstractApp(PacketAgent *agent, QWidget *parent):
+AbstractApp::AbstractApp( QWidget *parent):
     QWidget(parent)
 {
 
-    //PacketAgent* agent = manager->getRootAgent();
 
 
 

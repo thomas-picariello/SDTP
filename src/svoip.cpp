@@ -128,7 +128,8 @@ void SVoIP::startApp(int appId, int contactId){
     key.first = appId;
     key.second = contactId;
     if(mAppList.find(key) == mAppList.end()){
-        if(appId == 1)mAppList.insert(key,new MessengerApp(mNetworkManagerList.value(contactId)->getRootAgent()));
+        if(appId == 1)mAppList.insert(key,new MessengerApp());
+        mNetworkManagerList.value(contactId)->getRootAgent()->logApp(mAppList.find(key).value());
         emit error(tr("Invalid appId"));
     }
     else mAppList.find(key).value()->show();

@@ -5,10 +5,10 @@
 #include <QHostAddress>
 #include <QObject>
 #include <QDebug>
-#include <QSettings>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
-#include <QDateTime>
+#include <QList>
+
 
 
 #include "contact.h"
@@ -50,6 +50,7 @@ private :
     RootLink *m_Root;
     PacketAgent *agent;
     ContactDB *m_ContactDB;
+
 
 };
 

@@ -2,8 +2,8 @@
 #include "ui_messengerapp.h"
 
 
-MessengerApp::MessengerApp(PacketAgent *agent, QWidget* parent) :
-    AbstractApp(agent, parent),
+MessengerApp::MessengerApp(QWidget* parent) :
+    AbstractApp(parent),
     ui(new Ui::MessengerApp)
 {
 
@@ -11,11 +11,29 @@ MessengerApp::MessengerApp(PacketAgent *agent, QWidget* parent) :
     ui->setupUi(this);
     show();
 
+
+
+    emit dataToSend("hahahaha");
 }
 
-void MessengerApp::addContact(PacketAgent *agent)
+void MessengerApp::addContact()
 {
 
     //m_AgentList.append(manager->getRootAgent());
 
+}
+void MessengerApp::updateDisplay(QByteArray data){
+
+    ui->textEdit->setText(data.data());
+}
+void MessengerApp::dataToSend(QByteArray data){
+
+    AbstractApp::dataToSend(data);
+
+    updateDisplay(data);
+}
+
+void MessengerApp::on_mGetText_returnPressed()
+{
+    emit dataToSend((QByteArray)ui->mGetText->text().toUtf8());
 }
