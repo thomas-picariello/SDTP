@@ -1,24 +1,22 @@
 #include "abstractapp.h"
 
-AbstractApp::AbstractApp(NetworkManager *manager, QWidget *parent):
-    QWidget(parent),
-    m_Data(NULL)
+AbstractApp::AbstractApp(PacketAgent *agent, QWidget *parent):
+    QWidget(parent)
 {
 
-    PacketAgent* agent = manager->getRootAgent();
-    m_AgentList.append(agent);
+    //PacketAgent* agent = manager->getRootAgent();
+
 
 
 }
 
-void AbstractApp::dataToRead(QByteArray *data){
+void AbstractApp::dataToRead(QByteArray data){
 
-    m_Data = data;
+
 
 }
 
 AbstractApp::~AbstractApp(){
 
 
-    delete m_Data;
 }

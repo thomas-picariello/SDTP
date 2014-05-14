@@ -2,25 +2,20 @@
 #include "ui_messengerapp.h"
 
 
-MessengerApp::MessengerApp(NetworkManager *manager, QWidget* parent) :
-    AbstractApp(manager, parent),
+MessengerApp::MessengerApp(PacketAgent *agent, QWidget* parent) :
+    AbstractApp(agent, parent),
     ui(new Ui::MessengerApp)
 {
 
 
     ui->setupUi(this);
-
-
-
     show();
-
-
 
 }
 
-void MessengerApp::addContact(NetworkManager *manager)
+void MessengerApp::addContact(PacketAgent *agent)
 {
 
-    m_AgentList.append(manager->getRootAgent());
+    //m_AgentList.append(manager->getRootAgent());
 
 }

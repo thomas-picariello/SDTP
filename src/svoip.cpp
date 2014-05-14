@@ -130,8 +130,16 @@ void SVoIP::startApp(int appId, int contactId){
     key.first = appId;
     key.second = contactId;
     if(mAppList.find(key) == mAppList.end()){
-        if(appId == 1)mAppList.insert(key,new MessengerApp(mNetworkManagerList.value(contactId)));
+        if(appId == 1)mAppList.insert(key,new MessengerApp(mNetworkManagerList.value(contactId)->getRootAgent()));
         emit error(tr("Invalid appId"));
+    }
+    else{
+        if(appId == 1 ) {
+           QMap<QPair<int,int>,AbstractApp*>::iterator i = mAppList.find(key);
+            i.value()->show();
+
+        }
+
     }
 }
 
