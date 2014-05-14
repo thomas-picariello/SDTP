@@ -7,7 +7,11 @@
 #include <QMessageBox>
 #include <QIntValidator>
 #include <QFileDialog>
+#include <cryptopp/sha.h>
+#include <cryptopp/base64.h>
+#include <cryptopp/pwdbased.h>
 #include "rsakeyring.h"
+#include "contactdb.h"
 
 namespace Ui {
 class SettingsWindow;
@@ -18,7 +22,9 @@ class SettingsWindow : public QWidget
     Q_OBJECT
     
 public:
-    explicit SettingsWindow(QPair<QByteArray,QByteArray> *fileKey, QWidget *parent = 0);
+    explicit SettingsWindow(QPair<QByteArray,QByteArray> *fileKey,
+                            ContactDB *contactDB,
+                            QWidget *parent = 0);
     ~SettingsWindow();
 
 signals:
@@ -27,7 +33,9 @@ signals:
 
 public slots:
     void cancel();
-    void changeRsaPrivKey();
+    bool pwdTestMatch();
+    void pwdSetVisible(bool visible);
+    bool pwdValidateOld();
     void rsaExportPrivate();
     void rsaExportPublic();
     void rsaGenerateKeypair();
@@ -39,10 +47,15 @@ public slots:
     void showRsaPrivkeyMenu();
     void save();
 
+protected:
+    void showEvent(QShowEvent *event);
+    void hideEvent(QHideEvent *event);
+
 private:
     Ui::SettingsWindow *ui;
     QSettings *mSettings;
     QPair<QByteArray,QByteArray> *mFileKey;
+    ContactDB *mContactDB;
     QIntValidator mPortValidator;
     RsaKeyring mKeyring;
 
@@ -50,6 +63,8 @@ private:
     QMenu *mRsaPrivkeyMenu;
     QTimer mGeneratingAnimTimer;
 
+    QByteArray hashPassword(QString &password);
+    QByteArray deriveKey(QString &password);
     void setupRsaMenus();
 };
 

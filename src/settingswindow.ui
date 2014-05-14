@@ -113,7 +113,7 @@ QMenu::item::pressed{
    <item>
     <widget class="QTabWidget" name="tabs">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="pwd_tab">
       <attribute name="title">
@@ -129,13 +129,16 @@ QMenu::item::pressed{
        <property name="verticalSpacing">
         <number>6</number>
        </property>
-       <item row="0" column="0">
-        <widget class="QLabel" name="pwd_oldpwd_label">
-         <property name="text">
-          <string>Old Password</string>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="pwd_actualpwd_input">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
          </property>
-         <property name="buddy">
-          <cstring>pwd_oldpwd_input</cstring>
+         <property name="placeholderText">
+          <string>Enter your actual password</string>
+         </property>
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -149,30 +152,15 @@ QMenu::item::pressed{
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="pwd_oldpwd_input"/>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="pwd_oldpwd_state">
-         <property name="minimumSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="pwd_confpwd_input">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
          </property>
-         <property name="maximumSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
+         <property name="placeholderText">
+          <string>Confirm your new password</string>
          </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap resource="../res/res.qrc">:/icons/yes</pixmap>
-         </property>
-         <property name="scaledContents">
+         <property name="clearButtonEnabled">
           <bool>true</bool>
          </property>
         </widget>
@@ -187,38 +175,20 @@ QMenu::item::pressed{
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
-        <widget class="QLineEdit" name="pwd_confpwd_input"/>
-       </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="pwd_newpwd_input"/>
-       </item>
-       <item row="4" column="2">
-        <widget class="QLabel" name="pwd_confpwd_state">
-         <property name="minimumSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
+        <widget class="QLineEdit" name="pwd_newpwd_input">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
          </property>
-         <property name="maximumSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
+         <property name="placeholderText">
+          <string>Enter your new password</string>
          </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap resource="../res/res.qrc">:/icons/no</pixmap>
-         </property>
-         <property name="scaledContents">
+         <property name="clearButtonEnabled">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="6" column="0">
         <spacer name="pwd_spacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -230,6 +200,23 @@ QMenu::item::pressed{
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="pwd_actualpwd_label">
+         <property name="text">
+          <string>Actual Password</string>
+         </property>
+         <property name="buddy">
+          <cstring>pwd_actualpwd_input</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QCheckBox" name="pwd_cleartxt_checkbox">
+         <property name="text">
+          <string>Show passwords</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -426,7 +413,7 @@ QMenu::item::pressed{
  </widget>
  <tabstops>
   <tabstop>tabs</tabstop>
-  <tabstop>pwd_oldpwd_input</tabstop>
+  <tabstop>pwd_actualpwd_input</tabstop>
   <tabstop>pwd_newpwd_input</tabstop>
   <tabstop>pwd_confpwd_input</tabstop>
   <tabstop>net_port_input</tabstop>

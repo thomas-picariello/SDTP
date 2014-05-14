@@ -7,14 +7,14 @@ SVoIP::SVoIP(QObject *parent):
     mPasswordWindow(NULL)
 {
     QSettings settings("settings.ini", QSettings::IniFormat);
-    QString salt = settings.value("encryption/salt").toString();
-    QString pwdHash = settings.value("encryption/password_hash").toString();
+    QByteArray salt = QByteArray::fromBase64(settings.value("encryption/salt").toByteArray());
+    QByteArray pwdHash = QByteArray::fromBase64(settings.value("encryption/password_hash").toByteArray());
 
     if(salt.isEmpty()){
         settings.setValue("encryption/salt", generateSalt());
     }
     //set IV (AES block size = 128 bits)
-    mFileKey.second = QByteArray::fromBase64(salt.toUtf8()).left(16);
+    mFileKey.second = salt.left(16);
 
     if(pwdHash.isEmpty()){
         startProgram();
@@ -23,8 +23,6 @@ SVoIP::SVoIP(QObject *parent):
         connect(mPasswordWindow, SIGNAL(validate(QByteArray)),
                 this, SLOT(startProgram(QByteArray)));
     }
-
-
 }
 
 void SVoIP::startProgram(QByteArray key){

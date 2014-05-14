@@ -5,7 +5,7 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QBy
     QWidget(parent),
     mContactDB(contactDB),
     mFileKey(fileKey),
-    mSettingsWindow(mFileKey),
+    mSettingsWindow(mFileKey, mContactDB),
     mEditContactWindow(mContactDB),
     ui(new Ui::ContactListWindow)
 {

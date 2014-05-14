@@ -1,7 +1,7 @@
 #include "passwordwindow.h"
 #include "ui_passwordwindow.h"
 
-PasswordWindow::PasswordWindow(QString pwdHash, QString salt, QWidget *parent) :
+PasswordWindow::PasswordWindow(QByteArray pwdHash, QByteArray salt, QWidget *parent) :
     QDialog(parent, Qt::CustomizeWindowHint|Qt::WindowCloseButtonHint),
     ui(new Ui::PasswordWindow),
     mPwdHash(pwdHash),
@@ -21,15 +21,14 @@ void PasswordWindow::onOkClick(){
         QString password = ui->password->text();
         std::string digest;
         CryptoPP::SHA256 hash;
-        password.append(QByteArray::fromBase64(mSalt.toUtf8()));
+        password.append(mSalt);
         CryptoPP::StringSource(password.toStdString(),
                                true,
                                new CryptoPP::HashFilter(hash,
-                                    new CryptoPP::Base64Encoder(
-                                        new CryptoPP::StringSink(digest),
-                                        false))); //no new line
-        qDebug()<<"Hash from entered password"<<QString::fromStdString(digest);
-        if(mPwdHash.compare(QString::fromStdString(digest)) != 0){
+                                        new CryptoPP::StringSink(digest)
+                                        ));
+        qDebug()<<"Hash from entered password"<<QByteArray(digest.data(), (int)digest.size()).toBase64(); //TODO:clean
+        if(mPwdHash != QByteArray(digest.data(), (int)digest.size())){
             emit error("Error: Password hashes do not match.");
             QMessageBox::critical(this, "Error", "Wrong password !");
         }else{
@@ -48,7 +47,7 @@ QByteArray PasswordWindow::deriveKey(QString &password){
                         0,
                         reinterpret_cast<const uchar*>(password.toUtf8().constData()),
                         password.length(),
-                        reinterpret_cast<const uchar*>(mSalt.toUtf8().constData()),
+                        reinterpret_cast<const uchar*>(mSalt.constData()),
                         mSalt.length(),
                         1000, //iteration number
                         0);

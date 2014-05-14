@@ -16,7 +16,7 @@ class PasswordWindow : public QDialog
 {
     Q_OBJECT
 public:
-    explicit PasswordWindow(QString pwdHash, QString salt, QWidget *parent = 0);
+    explicit PasswordWindow(QByteArray pwdHash, QByteArray salt, QWidget *parent = 0);
     ~PasswordWindow();
 
 signals:
@@ -27,7 +27,7 @@ public slots:
     void onOkClick();
 
 private:
-    QString mPwdHash, mSalt;
+    QByteArray mPwdHash, mSalt;
     Ui::PasswordWindow *ui;
 
     QByteArray deriveKey(QString &password);
