@@ -16,58 +16,10 @@ find_package(Opus REQUIRED)
 find_package(Jrtplib REQUIRED)
 find_package(JThread REQUIRED)
 
-#Set variables with all the sources to compile
-set(SVOIP_HEADERS
-    contactlistwindow.h
-    contactitemwidget.h
-    editcontactwindow.h
-    settingswindow.h
-    passwordwindow.h
-    contactdb.h
-    contact.h
-    svoip.h
-    voip.h
-    qpcmbuffer.h
-    networkmanager.h
-    rsakeyring.h
-    packetagent.h
-    rootlink.h
-    abstractapp.h
-    messengerapp.h
-    abstractlink.h
-
-)
-
-set(SVOIP_SOURCES
-    main.cpp
-    contactlistwindow.cpp
-    contactitemwidget.cpp
-    editcontactwindow.cpp
-    settingswindow.cpp
-    passwordwindow.cpp
-    contactdb.cpp
-    contact.cpp
-    svoip.cpp
-    voip.cpp
-    qpcmbuffer.cpp
-    networkmanager.cpp
-    rsakeyring.cpp
-    packetagent.cpp
-    rootlink.cpp
-    abstractapp.cpp
-    messengerapp.cpp
-    abstractlink.cpp
-
-)
-
-set(SVOIP_FORMS
-    contactlistwindow.ui
-    editcontactwindow.ui
-    settingswindow.ui
-    passwordwindow.ui
-    contactitemwidget.ui
-    messengerapp.ui
-)
+#Globbing of all the files to compile
+FILE(GLOB SVOIP_HEADERS "*.h")
+FILE(GLOB SVOIP_SOURCES "*.cpp")
+FILE(GLOB SVOIP_FORMS "*.ui")
 
 set(SVOIP_RES
    ../res/res.qrc
