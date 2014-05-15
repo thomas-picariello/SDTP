@@ -12,9 +12,18 @@ PacketAgent::PacketAgent(){
 
 }
 void PacketAgent::logApp(AbstractApp *app){
-mAppList.append(app);
 
-connect(app,SIGNAL(dataToSend(QByteArray)),this,SLOT(incomingdata(QByteArray)));
+appIdPair.first = app->getAppID();
+
+static int appId = app->getAppID();
+uint i=0;
+while(mAppMap.contains(qMakePair(appId, i)) && i<(sizeof(uint)-1))  i++;
+appIdPair.second = i;
+
+mAppMap.insert(appIdPair,app);
+
+
+connect(app,SIGNAL(dataToSend(QByteArray)),this,SLOT(incomingdata(QByteArray)));//loopback for testing
 }
 
 void PacketAgent::incomingdata(QByteArray data){

@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QDebug>
 #include <QPair>
+#include <QMap>
 
 #include "abstractapp.h"
 
@@ -19,7 +20,7 @@ class PacketAgent: public QObject
     Q_OBJECT
 
 public:
-    enum APPID{Root,Chat,Voip,System,Unknown}; // 0-10 are reserved IDs.
+    enum APPID{root,msgr,voip,vids,data}; // 0-10 are reserved IDs.
 
     PacketAgent(QPair<QByteArray,QByteArray> key);// key = key + IV
     PacketAgent();
@@ -54,6 +55,9 @@ private:
     QByteArray mIV;
 
     QList<AbstractApp*> mAppList;
+    QPair<int,int> appIdPair;
+    QMap<QPair<int,int>,AbstractApp*> mAppMap;
+
 
 
 

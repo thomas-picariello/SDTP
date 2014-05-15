@@ -2,16 +2,22 @@
 #define ROOTAPP_H
 
 #include <QObject>
+#include "abstractapp.h"
 
-class RootApp : public QObject
+class RootApp : public AbstractApp
 {
     Q_OBJECT
 public:
-    explicit RootApp(QObject *parent = 0);
+    explicit RootApp(QWidget *parent = 0);
 
-signals:
+    int getAppID();
 
-public slots:
+public slots :
+    virtual void dataToRead(QByteArray data);
+
+
+private :
+
 
 };
 

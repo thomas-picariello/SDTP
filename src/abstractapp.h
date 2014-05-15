@@ -14,6 +14,8 @@ public:
     AbstractApp(QWidget *parent = 0);
     ~AbstractApp();
 
+    int getAppID();
+
 public slots :
     void dataToRead(QByteArray data);
 
@@ -21,9 +23,9 @@ public slots :
 signals :
     void dataToSend(QByteArray);
 
-private :
+protected :
 
-
+    int mAppID;
 
 };
 

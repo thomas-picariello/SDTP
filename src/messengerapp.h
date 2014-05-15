@@ -23,14 +23,11 @@ public:
 
 public slots :
     virtual void dataToSend(QByteArray data);
-
-
-
-private slots:
     void on_mGetText_returnPressed();
 
 private:
     Ui::MessengerApp *ui;
+
 
 };
 

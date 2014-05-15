@@ -7,6 +7,7 @@ MessengerApp::MessengerApp(QWidget* parent) :
     ui(new Ui::MessengerApp)
 {
 
+    mAppID = 1;
 
     ui->setupUi(this);
     show();
