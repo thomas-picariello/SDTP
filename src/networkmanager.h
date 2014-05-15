@@ -16,6 +16,7 @@
 #include "rootlink.h"
 #include "packetagent.h"
 
+#include "abstractapp.h"
 
 
 

@@ -19,7 +19,6 @@ MessengerApp::MessengerApp(QWidget* parent) :
 void MessengerApp::addContact()
 {
 
-    //m_AgentList.append(manager->getRootAgent());
 
 }
 void MessengerApp::updateDisplay(QByteArray data){
