@@ -28,6 +28,7 @@ public:
 
     void logApp(AbstractApp* app);
 
+
 public slots :
     void incomingdata(QByteArray data);//link
 
@@ -36,6 +37,9 @@ signals:
 
 
 private:
+
+    void routeToApp(QPair<int,int> idPair, QByteArray data);
+    void routeToLink(QPair<int, int> idPair, QByteArray data);
 
     void encrypt();
     void decrypt();
@@ -54,9 +58,9 @@ private:
     QByteArray mKey;
     QByteArray mIV;
 
-    QList<AbstractApp*> mAppList;
     QPair<int,int> appIdPair;
     QMap<QPair<int,int>,AbstractApp*> mAppMap;
+    QMap<QPair<int,int>,QPair<int,int>> routeMap;
 
 
 

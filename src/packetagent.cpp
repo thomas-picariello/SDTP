@@ -26,13 +26,26 @@ mAppMap.insert(appIdPair,app);
 connect(app,SIGNAL(dataToSend(QByteArray)),this,SLOT(incomingdata(QByteArray)));//loopback for testing
 }
 
+void PacketAgent::routeToApp(QPair<int,int> idPair ,QByteArray data){
+
+    // parse header etc...
+    mAppMap.find(routeMap.find(idPair).value()).value()->dataToRead(data);
+
+
+}
+void PacketAgent::routeToLink(QPair<int,int> idPair, QByteArray data){
+
+
+    //add header etc...
+    emit senddata(data);
+
+}
+
 void PacketAgent::incomingdata(QByteArray data){
 
     mContent = data;
 
     qDebug()<<"recieved :"+mContent;
-
-    mAppList.first()->dataToRead(data);
 
 
 }
