@@ -10,11 +10,11 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Multimedia REQUIRED)
 find_package(Qt5Sql REQUIRED)
 
-
 find_package(Cryptlib REQUIRED)
 find_package(Opus REQUIRED)
 find_package(Jrtplib REQUIRED)
 find_package(JThread REQUIRED)
+find_package(Libvpx REQUIRED)
 
 #Globbing of all the files to compile
 FILE(GLOB SVOIP_HEADERS "*.h")
