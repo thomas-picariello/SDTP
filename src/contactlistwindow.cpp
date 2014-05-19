@@ -60,13 +60,13 @@ void ContactListWindow::openSettingsWindow(){
     mSettingsWindow.activateWindow();
 }
 
-void ContactListWindow::onListItemAction(int id, ContactItemWidget::Action action){
+void ContactListWindow::onListItemAction(int contactId, ContactItemWidget::Action action){
     switch(action){
     case ContactItemWidget::CallAction:
-        emit startApp(0, id);
+        emit startApp(contactId, VoIP);
         break;
     case ContactItemWidget::MessengerAction:
-        emit startApp(1, id);
+        emit startApp(contactId, Messenger);
         break;
     case ContactItemWidget::EditAction:
         editContact();
@@ -75,6 +75,7 @@ void ContactListWindow::onListItemAction(int id, ContactItemWidget::Action actio
         deleteContact();
         break;
     }
+    //TODO: put AppTypeId in ContactItemWidget and separate signal
 }
 
 void ContactListWindow::refreshList(){

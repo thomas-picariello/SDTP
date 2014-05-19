@@ -36,8 +36,8 @@ void SVoIP::startProgram(QByteArray key){
             this, SLOT(restartListener()));
     connect(mContactListWindow, SIGNAL(contactEvent(int,Contact::Event)),
             this, SLOT(onContactEvent(int,Contact::Event)));
-    connect(mContactListWindow, SIGNAL(startApp(int,int)),
-            this,SLOT(startApp(int,int)));
+    connect(mContactListWindow, SIGNAL(startApp(int,AppTypeID)),
+            this,SLOT(startApp(int,AppTypeID)));
 
     //start a NetworkManager for each contact
     QList<Contact*> contactList = mContactDB->getAllContacts();
@@ -104,8 +104,8 @@ void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
             this, SLOT(updateContactStatus(int, Contact::Status)));
     connect(networkManager, SIGNAL(destroyed(QObject*)),
             this, SLOT(onNetworkManagerDelete(QObject*)));
-    connect(networkManager,SIGNAL(startAppRequest(int,int)),
-            this,SLOT(startApp(int,int)));
+    connect(networkManager,SIGNAL(startAppRequest(int,AppTypeID)),
+            this,SLOT(startApp(int,AppTypeID)));
 }
 
 QString SVoIP::generateSalt(){
@@ -123,19 +123,20 @@ QString SVoIP::generateSalt(){
     return QString::fromStdString(encodedBlock);
 }
 
-void SVoIP::startApp(int appId, int contactId){
-    QPair<int,int> key(appId, contactId);
+void SVoIP::startApp(int contactId, AppTypeID appTypeId){
+    QPair<int, AbstractApp::AppUID> key(contactId, AbstractApp::AppUID(appTypeId));
     if(mNetworkManagerList.contains(contactId)){
-        if(mAppList.find(key) == mAppList.end()){
-            if(appId == 1){
+        if(mAppList.contains(key)){
+            mAppList.value(key)->show();
+        }else{
+            if(appTypeId == Messenger){
                 MessengerApp *msgApp = new MessengerApp();
+                key.second.appInstanceID = mNetworkManagerList.value(contactId)->getRootAgent()->logApp(msgApp, Messenger);
                 mAppList.insert(key, msgApp);
-                mNetworkManagerList.value(contactId)->getRootAgent()->logApp(msgApp);
             }else
                 emit error(tr("Invalid appId"));
         }
-        else
-            mAppList.value(key)->show();
+
     }else
         emit error(tr("Invalid contactId"));
 }

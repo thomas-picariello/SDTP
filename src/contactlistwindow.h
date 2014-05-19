@@ -10,6 +10,8 @@
 #include "settingswindow.h"
 #include "contact.h"
 #include "contactitemwidget.h"
+#include "abstractapp.h"
+#include "apptypeidenum.h"
 
 namespace Ui {
 class ContactListWindow;
@@ -38,12 +40,12 @@ public slots:
     void editContact();
     void listItemClicked(QListWidgetItem *currentItem);
     void openSettingsWindow();
-    void onListItemAction(int id, ContactItemWidget::Action action);
+    void onListItemAction(int contactId, ContactItemWidget::Action action);
     void refreshList();
     void deleteContact();
 
 signals:
-    void startApp(int appId, int contactId);
+    void startApp(int contactId, AppTypeID appTypeId);
     void contactEvent(int contactId, Contact::Event);
     void settingsUpdated();
     

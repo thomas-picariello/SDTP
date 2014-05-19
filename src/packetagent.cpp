@@ -1,39 +1,29 @@
 #include "packetagent.h"
 
+PacketAgent::PacketAgent(){
+
+}
+
 PacketAgent::PacketAgent( QPair<QByteArray,QByteArray> key){
 
     mKey = key.first;
     mIV = key.second;
-
-
-
-}
-PacketAgent::PacketAgent(){
-
-}
-void PacketAgent::logApp(AbstractApp *app){
-
-appIdPair.first = app->getAppID();
-
-static int appId = app->getAppID();
-uint i=0;
-while(mAppMap.contains(qMakePair(appId, i)) && i<(sizeof(uint)-1))  i++;
-appIdPair.second = i;
-
-mAppMap.insert(appIdPair,app);
-
-
-connect(app,SIGNAL(dataToSend(QByteArray)),this,SLOT(incomingdata(QByteArray)));//loopback for testing
 }
 
-void PacketAgent::routeToApp(QPair<int,int> idPair ,QByteArray data){
+uint PacketAgent::logApp(AbstractApp *app, AppTypeID appTypeId){
+    AbstractApp::AppUID appUID(appTypeId);
+    mAppMap.insert(appUID, app);
+    return appUID.appInstanceID;
+}
+
+void PacketAgent::routeToApp(AbstractApp::AppUID appUID, QByteArray data){
 
     // parse header etc...
-    mAppMap.find(routeMap.find(idPair).value()).value()->dataToRead(data);
+    mAppMap.value(mRouteMap.value(appUID))->dataToRead(data);
 
 
 }
-void PacketAgent::routeToLink(QPair<int,int> idPair, QByteArray data){
+void PacketAgent::routeToLink(AbstractApp::AppUID appUID, QByteArray data){
 
 
     //add header etc...

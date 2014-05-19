@@ -15,10 +15,17 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTextEdit" name="textEdit"/>
+    <widget class="QTextEdit" name="message_list">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="mGetText"/>
+    <widget class="QLineEdit" name="text_input"/>
    </item>
   </layout>
  </widget>

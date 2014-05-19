@@ -13,6 +13,8 @@
 #include "contactlistwindow.h"
 #include "passwordwindow.h"
 #include "networkmanager.h"
+#include "apptypeidenum.h"
+#include "rootapp.h"
 #include "messengerapp.h"
 
 class SVoIP: public QObject
@@ -30,7 +32,7 @@ public slots:
     void updateNetworkManagerId(NetworkManager *networkManager, int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
-    void startApp(int appId,int contactId);
+    void startApp(int contactId, AppTypeID appTypeId);
 
 signals:
     void error(QString err);
@@ -42,7 +44,7 @@ private :
     QPair<QByteArray,QByteArray> mFileKey;
     QTcpServer mListener;
     QMap<int,NetworkManager*> mNetworkManagerList;
-    QMap<QPair<int,int>,AbstractApp*> mAppList;
+    QMap<QPair<int,AbstractApp::AppUID>, AbstractApp*> mAppList;
 
     QString generateSalt();
     void connectNetworkManagerSignals(NetworkManager *networkManager);

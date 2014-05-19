@@ -10,24 +10,23 @@ class MessengerApp;
 
 }
 
-
 class MessengerApp : public AbstractApp
 {
-
     Q_OBJECT
 
 public:
+    static const uint APPID = 1;
+
     explicit MessengerApp( QWidget *parent = 0);
     void addContact();
-    void updateDisplay(QByteArray data);
+    void updateDisplay(QByteArray msg);
 
 public slots :
-    virtual void dataToSend(QByteArray data);
-    void on_mGetText_returnPressed();
+    void dataToRead(QByteArray data);
+    void sendMessage();
 
 private:
     Ui::MessengerApp *ui;
-
 
 };
 

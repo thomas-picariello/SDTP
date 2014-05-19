@@ -3,37 +3,30 @@
 
 
 MessengerApp::MessengerApp(QWidget* parent) :
-    AbstractApp(parent),
     ui(new Ui::MessengerApp)
 {
-
-    mAppID = 1;
-
     ui->setupUi(this);
     show();
 
-
-
-    emit dataToSend("hahahaha");
+    connect(ui->text_input, SIGNAL(returnPressed()),
+            this, SLOT(sendMessage()));
 }
 
-void MessengerApp::addContact()
-{
-
+void MessengerApp::addContact(){
 
 }
-void MessengerApp::updateDisplay(QByteArray data){
 
-    ui->textEdit->setText(data.data());
+void MessengerApp::updateDisplay(QByteArray msg){
+    ui->message_list->setText(msg.data());
 }
-void MessengerApp::dataToSend(QByteArray data){
 
-    AbstractApp::dataToSend(data);
-
+void MessengerApp::dataToRead(QByteArray data){
     updateDisplay(data);
 }
 
-void MessengerApp::on_mGetText_returnPressed()
-{
-    emit dataToSend((QByteArray)ui->mGetText->text().toUtf8());
+void MessengerApp::sendMessage(){
+    QByteArray msg = ui->text_input->text().toUtf8();
+    emit dataToSend(msg);
+    updateDisplay(msg); //Loopback for testing
+    ui->text_input->clear();
 }

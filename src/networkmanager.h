@@ -9,14 +9,13 @@
 #include <cryptopp/modes.h>
 #include <QList>
 
-
-
 #include "contact.h"
 #include "contactdb.h"
 #include "rootlink.h"
 #include "packetagent.h"
 
 #include "abstractapp.h"
+#include "apptypeidenum.h"
 
 
 
@@ -42,7 +41,7 @@ public slots :
 signals :
     void error(QString error);
     void statusChanged(int id, Contact::Status status);
-    void startAppRequest(int appid, int contactId);
+    void startAppRequest(int contactId, AppTypeID appTypeId);
 
 
 private :

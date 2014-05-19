@@ -8,26 +8,19 @@
 #include <QMap>
 
 #include "abstractapp.h"
-
-
-
-
-
+#include "apptypeidenum.h"
 
 class PacketAgent: public QObject
 {
-
     Q_OBJECT
 
 public:
-    enum APPID{root,msgr,voip,vids,data}; // 0-10 are reserved IDs.
 
     PacketAgent(QPair<QByteArray,QByteArray> key);// key = key + IV
     PacketAgent();
     ~PacketAgent();
 
-    void logApp(AbstractApp* app);
-
+    uint logApp(AbstractApp* app, AppTypeID appTypeId);
 
 public slots :
     void incomingdata(QByteArray data);//link
@@ -38,8 +31,8 @@ signals:
 
 private:
 
-    void routeToApp(QPair<int,int> idPair, QByteArray data);
-    void routeToLink(QPair<int, int> idPair, QByteArray data);
+    void routeToApp(AbstractApp::AppUID appUID, QByteArray data);
+    void routeToLink(AbstractApp::AppUID appUID, QByteArray data);
 
     void encrypt();
     void decrypt();
@@ -58,13 +51,10 @@ private:
     QByteArray mKey;
     QByteArray mIV;
 
-    QPair<int,int> appIdPair;
-    QMap<QPair<int,int>,AbstractApp*> mAppMap;
-    QMap<QPair<int,int>,QPair<int,int>> routeMap;
+    QMap<AbstractApp::AppUID, AbstractApp*> mAppMap;
+    QMap<AbstractApp::AppUID, AbstractApp::AppUID> mRouteMap;
 
-
-
-
+    Q_DISABLE_COPY(PacketAgent)
 };
 
 #endif // PACKET_H
