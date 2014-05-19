@@ -124,15 +124,20 @@ QString SVoIP::generateSalt(){
 }
 
 void SVoIP::startApp(int appId, int contactId){
-    QPair<int,int> key;
-    key.first = appId;
-    key.second = contactId;
-    if(mAppList.find(key) == mAppList.end()){
-        if(appId == 1)mAppList.insert(key,new MessengerApp());
-        mNetworkManagerList.value(contactId)->getRootAgent()->logApp(mAppList.find(key).value());
-        emit error(tr("Invalid appId"));
-    }
-    else mAppList.find(key).value()->show();
+    QPair<int,int> key(appId, contactId);
+    if(mNetworkManagerList.contains(contactId)){
+        if(mAppList.find(key) == mAppList.end()){
+            if(appId == 1){
+                MessengerApp *msgApp = new MessengerApp();
+                mAppList.insert(key, msgApp);
+                mNetworkManagerList.value(contactId)->getRootAgent()->logApp(msgApp);
+            }else
+                emit error(tr("Invalid appId"));
+        }
+        else
+            mAppList.value(key)->show();
+    }else
+        emit error(tr("Invalid contactId"));
 }
 
 SVoIP::~SVoIP(){

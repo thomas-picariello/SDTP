@@ -32,7 +32,6 @@ public slots:
     void onContactEvent(int id, Contact::Event event);
     void startApp(int appId,int contactId);
 
-
 signals:
     void error(QString err);
 
