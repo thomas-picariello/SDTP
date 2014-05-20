@@ -35,13 +35,12 @@ void RootLink::write(QByteArray data){
 }
 void RootLink::read(){
 
-    mAgent->incomingdata(mSocket->readAll());
+    mAgent->incomingData(mSocket->readAll());
 
 
 }
 void RootLink::tryConnect(){
-
-    if(mSocket->state()!=3){
+    if(mSocket->state() != QTcpSocket::ConnectedState){
         if(HostListLength>0){
             HostListLength--;
             mSocket->abort();

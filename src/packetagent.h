@@ -9,6 +9,8 @@
 
 #include "abstractapp.h"
 #include "apptypeidenum.h"
+#include "abstractlink.h"
+#include "tcplink.h"
 
 class PacketAgent: public QObject
 {
@@ -23,7 +25,7 @@ public:
     uint logApp(AbstractApp* app, AppTypeID appTypeId);
 
 public slots :
-    void incomingdata(QByteArray data);//link
+    void incomingData(QByteArray data);//link
 
 signals:
     void senddata(QByteArray data);//link

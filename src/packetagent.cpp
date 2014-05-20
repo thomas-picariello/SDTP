@@ -31,7 +31,7 @@ void PacketAgent::routeToLink(AbstractApp::AppUID appUID, QByteArray data){
 
 }
 
-void PacketAgent::incomingdata(QByteArray data){
+void PacketAgent::incomingData(QByteArray data){
 
     mContent = data;
 
