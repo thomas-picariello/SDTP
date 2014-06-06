@@ -8,7 +8,7 @@
 #include <QMap>
 
 #include "abstractapp.h"
-#include "apptypeidenum.h"
+#include "typesenums.h"
 #include "abstractlink.h"
 #include "tcplink.h"
 
@@ -17,12 +17,11 @@ class PacketAgent: public QObject
     Q_OBJECT
 
 public:
-
-    PacketAgent(QPair<QByteArray,QByteArray> key);// key = key + IV
     PacketAgent();
+    PacketAgent(QPair<QByteArray,QByteArray> key);// key = key + IV
     ~PacketAgent();
 
-    uint logApp(AbstractApp* app, AppTypeID appTypeId);
+    uint logApp(AbstractApp* app, AppType appTypeId);
 
 public slots :
     void incomingData(QByteArray data);//link

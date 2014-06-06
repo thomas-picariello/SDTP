@@ -1,10 +1,10 @@
 #ifndef ABSTRACTLINK_H
 #define ABSTRACTLINK_H
 
-//#include <QObject>
+#include <QIODevice>
 #include <QAbstractSocket>
 
-class AbstractLink : public QObject
+class AbstractLink : public QIODevice
 {
     Q_OBJECT
 
@@ -15,34 +15,32 @@ public:
         Error
     };
 
-    AbstractLink():
-        m_State(Offline),
-        m_Socket(NULL)
+    AbstractLink(QObject *parent=0):
+        QIODevice(parent),
+        m_State(Offline)
     {}
 
-    AbstractLink(QAbstractSocket *socket):
-        m_State(Offline),
-        m_Socket(socket)
-    {}
-
-    State state(){ return m_State; }
-    virtual QByteArray readAll() = 0;
+    inline State state(){ return m_State; }
+    virtual bool isSequential(){ return true; }
+    virtual QPair<QString,quint16> getHost() const = 0;
+    virtual void setHost(QPair<QString,quint16> &host) = 0;
 
 signals:
-    void stateChanged();
-    void newDataAvailable();
+    void stateChanged(AbstractLink::State);
     void error(QString);
 
 
 public slots:
-    virtual void write(QByteArray data) = 0;
-    virtual void onConnected() = 0;
+    virtual void onConnected(){ setOpenMode(ReadWrite); emit stateChanged(Online); }
     virtual void onConnectionError(QAbstractSocket::SocketError) = 0;
 
 protected :
-    QAbstractSocket *m_Socket;
     State m_State;
 
+    qint64 readData(char * data, qint64 maxSize) = 0;
+    qint64 writeData(const char * data, qint64 size) = 0;
+
+    Q_DISABLE_COPY(AbstractLink)
 };
 
 #endif // ABSTRACTLINK_H

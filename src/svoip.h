@@ -13,7 +13,7 @@
 #include "contactlistwindow.h"
 #include "passwordwindow.h"
 #include "networkmanager.h"
-#include "apptypeidenum.h"
+#include "typesenums.h"
 #include "rootapp.h"
 #include "messengerapp.h"
 
@@ -32,7 +32,8 @@ public slots:
     void updateNetworkManagerId(NetworkManager *networkManager, int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
-    void startApp(int contactId, AppTypeID appTypeId);
+    void startApp(int contactId, AppType appType);
+    inline void startRootApp(int contactId){ startApp(contactId, Root); }
 
 signals:
     void error(QString err);

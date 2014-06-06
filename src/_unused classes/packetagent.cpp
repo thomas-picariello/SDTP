@@ -10,10 +10,10 @@ PacketAgent::PacketAgent( QPair<QByteArray,QByteArray> key){
     mIV = key.second;
 }
 
-uint PacketAgent::logApp(AbstractApp *app, AppTypeID appTypeId){
+uint PacketAgent::logApp(AbstractApp *app, AppType appTypeId){
     AbstractApp::AppUID appUID(appTypeId);
     mAppMap.insert(appUID, app);
-    return appUID.appInstanceID;
+    return appUID.instanceID;
 }
 
 void PacketAgent::routeToApp(AbstractApp::AppUID appUID, QByteArray data){

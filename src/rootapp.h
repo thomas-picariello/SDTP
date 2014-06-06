@@ -1,20 +1,22 @@
 #ifndef ROOTAPP_H
 #define ROOTAPP_H
 
-#include <QObject>
 #include "abstractapp.h"
+#include "typesenums.h"
+#include "contact.h"
+#include "contactdb.h"
 
 class RootApp : public AbstractApp
 {
     Q_OBJECT
 public:
-    static const uint APPID = 0;
+    static const AppType APPTYPE = Root;
 
-    explicit RootApp(QWidget *parent = 0);
+    explicit RootApp(ContactDB *contactDB, QWidget *parent = 0);
+    explicit RootApp(QList<Contact*> contactList, ContactDB *contactDB, QWidget *parent = 0);
+    virtual ~RootApp();
 
-    int getAppID();
-
-public slots :
+public slots:
     virtual void dataToRead(QByteArray data);
 
 };

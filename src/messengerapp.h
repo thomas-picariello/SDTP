@@ -17,12 +17,16 @@ class MessengerApp : public AbstractApp
 public:
     static const uint APPID = 1;
 
-    explicit MessengerApp( QWidget *parent = 0);
+    explicit MessengerApp(QList<Contact*> contactList, ContactDB *contactDB, QWidget *parent = 0);
+    virtual ~MessengerApp();
+
     void addContact();
     void updateDisplay(QByteArray msg);
 
 public slots :
-    void dataToRead(QByteArray data);
+    virtual void readIncommingData(QByteArray &data);
+
+private slots:
     void sendMessage();
 
 private:

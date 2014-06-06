@@ -1,99 +1,84 @@
 #include "rootlink.h"
 
-RootLink::RootLink(Contact *contact)
+RootLink::RootLink(Contact *contact, QObject *parent):
+    AbstractLink(parent),
+    m_Contact(contact),
+    m_Timer(new QTimer(this))
 {
-    mState = OFFLINE;
-    mSocket = new QTcpSocket;
-    m_Contact = contact;
-    mAgent = new PacketAgent(QPair<QByteArray,QByteArray>(m_Contact->getKey(),"000"));
-    HostListLength = m_Contact->hostsList()->length();
-    connect(mSocket,SIGNAL(connected()),this,SLOT(onConnected()));
-    connect(mSocket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(onSocketError(QAbstractSocket::SocketError)));
+    m_Socket = new QTcpSocket();
+    //mAgent = new PacketAgent(QPair<QByteArray,QByteArray>(m_Contact->getKey(),"000"));
+    m_HostListIndex = m_Contact->hostsList()->length();
 
+    connect(m_Socket,SIGNAL(connected()),
+            this,SLOT(onConnected()));
+    connect(m_Socket,SIGNAL(error(QAbstractSocket::SocketError)),
+            this,SLOT(onConnectionError(QAbstractSocket::SocketError)));
+    connect(m_Timer, SIGNAL(timeout()),
+            this, SLOT(tryConnect()));
 
-    tryConnect();
-
-
-
-
+    m_Timer->start(5000); // 5 sec for testing, should be more on release.
 }
-RootLink::RootLink(QTcpSocket *socket){
 
-    mState = OFFLINE;
-    mSocket = socket;
-    mAgent = new PacketAgent();
+RootLink::RootLink(QTcpSocket *socket, QObject *parent):
+    AbstractLink(socket, parent),
+    m_Contact(NULL),
+    m_Timer(NULL)
+{
+    //mAgent = new PacketAgent();
+
+    connect(m_Socket,SIGNAL(error(QAbstractSocket::SocketError)),
+            this,SLOT(onConnectionError(QAbstractSocket::SocketError)));
+
     handshake();
-    connect(mSocket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(onSocketError(QAbstractSocket::SocketError)));
-
-
 }
-RootLink::State RootLink::state(){
-return mState;
-}
-void RootLink::write(QByteArray data){
-    mSocket->write(data);
-}
-void RootLink::read(){
 
-    mAgent->incomingData(mSocket->readAll());
-
-
+void RootLink::send(QByteArray &data){
+    m_Socket->write(data);
 }
+
+QByteArray RootLink::readAll(){
+    return m_Socket->readAll();
+}
+
 void RootLink::tryConnect(){
-    if(mSocket->state() != QTcpSocket::ConnectedState){
-        if(HostListLength>0){
-            HostListLength--;
-            mSocket->abort();
-            qDebug()<<"try connecting to :" << m_Contact->getName() <<" at : "<<m_Contact->getHostsList().at(HostListLength);
-            mSocket->connectToHost(m_Contact->getHostsList().at(HostListLength),m_Contact->getPort());
+    if(m_Socket->state() != QTcpSocket::ConnectedState){
+        QString host;
+        if(m_HostListIndex > 0){
+            m_HostListIndex--;
+            host = m_Contact->getHostsList().at(m_HostListIndex);
+            m_Socket->abort();
+            m_Socket->connectToHost(host,m_Contact->getPort());
+
+            qDebug()<<"try connecting to :" << m_Contact->getName() <<" at : "<<host;
+        }else {
+            m_HostListIndex = m_Contact->hostsList()->length();
+            //error("No host found !  0/"+m_Contact->hostsList()->length());
         }
-        else {
-            HostListLength = m_Contact->hostsList()->length();
-            error("No host found !  0/"+m_Contact->hostsList()->length());
-        }
-        m_timer->singleShot(5000,this,SLOT(tryConnect()));    // 10 sec for testing, should be more on release.
     }
 }
 
 void RootLink::onConnected(){
+    m_Timer->stop();
 
-    qDebug()<<m_Contact->getName()<<"connected on : "<<m_Contact->getHostsList().at(HostListLength);
+    qDebug()<<m_Contact->getName()<<"connected on : "<<m_Contact->getHostsList().at(m_HostListIndex);
     handshake();
-
 }
-
 
 void RootLink::handshake(){
-
-
-
-
-
-    QObject::connect(mSocket,SIGNAL(readyRead()),this,SLOT(read()));
-    QObject::connect(mAgent,SIGNAL(senddata(QByteArray)),this,SLOT(write(QByteArray)));
-
-    mState = ONLINE;
-    emit connected(Contact::Status::Online);
-
-
-}
-PacketAgent *RootLink::getagent(){
-    return mAgent;
+    QObject::connect(m_Socket,SIGNAL(readyRead()),
+                     this,SIGNAL(newDataAvailable()));
+    //QObject::connect(mAgent,SIGNAL(senddata(QByteArray)),this,SLOT(write(QByteArray)));
+    //TODO: see who is responsible for agent mgmt
+    m_State = Online;
+    emit stateChanged(m_State);
 }
 
-void RootLink::onSocketError(QAbstractSocket::SocketError error){
-
+void RootLink::onConnectionError(QAbstractSocket::SocketError error){
 /*    if(error == QAbstractSocket::ConnectionRefusedError);               //The connection was refused by the peer (or timed out).
     if(error == QAbstractSocket::RemoteHostClosedError);                //The remote host closed the connection. Note that the client socket (i.e., this socket) will be closed after the remote close notification has been sent.
     if(error == QAbstractSocket::HostNotFoundError); */       //The host address was not found.
 
     qDebug()<<"onSocketError";
-
-
-
-
-
-
 
 //    QAbstractSocket::SocketAccessError	3	The socket operation failed because the application lacked the required privileges.
 //    QAbstractSocket::SocketResourceError	4	The local system ran out of resources (e.g., too many sockets).
@@ -115,8 +100,6 @@ void RootLink::onSocketError(QAbstractSocket::SocketError error){
 }
 
 RootLink::~RootLink(){
-
-
-
-
+    if(m_Timer)
+        delete m_Timer;
 }

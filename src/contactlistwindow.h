@@ -11,7 +11,7 @@
 #include "contact.h"
 #include "contactitemwidget.h"
 #include "abstractapp.h"
-#include "apptypeidenum.h"
+#include "typesenums.h"
 
 namespace Ui {
 class ContactListWindow;
@@ -45,7 +45,7 @@ public slots:
     void deleteContact();
 
 signals:
-    void startApp(int contactId, AppTypeID appTypeId);
+    void startApp(int contactId, AppType appTypeId);
     void contactEvent(int contactId, Contact::Event);
     void settingsUpdated();
     

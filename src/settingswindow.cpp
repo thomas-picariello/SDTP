@@ -170,17 +170,20 @@ void SettingsWindow::save(){
             emit error(tr("Bad password"));
         }
     }
+
     //save port
     QString port = ui->net_port_input->text();
     if(port.isEmpty())
         port = "8000"; //default listen port number
     mSettings->setValue("network/listen_port", port);
+
     //save private key
     QByteArray inputPrivKey = QByteArray::fromBase64(ui->rsa_privkey_input->toPlainText().toUtf8());
     if(inputPrivKey != mKeyring.getPrivateKey()){
         mKeyring.setPrivateKey(inputPrivKey);
         mKeyring.commitToKeystore();
     }
+
     emit settingsUpdated();
     hide();
 }

@@ -36,13 +36,13 @@ void SVoIP::startProgram(QByteArray key){
             this, SLOT(restartListener()));
     connect(mContactListWindow, SIGNAL(contactEvent(int,Contact::Event)),
             this, SLOT(onContactEvent(int,Contact::Event)));
-    connect(mContactListWindow, SIGNAL(startApp(int,AppTypeID)),
-            this,SLOT(startApp(int,AppTypeID)));
+    connect(mContactListWindow, SIGNAL(startApp(int,AppType)),
+            this,SLOT(startApp(int,AppType)));
 
     //start a NetworkManager for each contact
     QList<Contact*> contactList = mContactDB->getAllContacts();
     foreach(Contact *contact, contactList){
-        NetworkManager* networkManager = new NetworkManager(contact, mContactDB, this);
+        NetworkManager* networkManager = new NetworkManager(contact, mContactDB, &mFileKey, this);
         connectNetworkManagerSignals(networkManager);
         mNetworkManagerList.insert(contact->getId(), networkManager);
     }
@@ -53,7 +53,7 @@ void SVoIP::onIncommingConnection(){
     int id = -1;
     while(mNetworkManagerList.contains(id))
         id--;
-    NetworkManager* networkManager = new NetworkManager(mListener.nextPendingConnection(),mContactDB, this);
+    NetworkManager* networkManager = new NetworkManager(mListener.nextPendingConnection(),mContactDB, &mFileKey, this);
     connectNetworkManagerSignals(networkManager);
     mNetworkManagerList.insert(id, networkManager);
 }
@@ -80,7 +80,7 @@ void SVoIP::onContactEvent(int id, Contact::Event event){
     NetworkManager* networkManager;
     switch(event){
     case Contact::Added:
-        networkManager = new NetworkManager(mContactDB->findById(id), mContactDB, this);
+        networkManager = new NetworkManager(mContactDB->findById(id), mContactDB, &mFileKey, this);
         connectNetworkManagerSignals(networkManager);
         mNetworkManagerList.insert(id, networkManager);
         break;
@@ -100,16 +100,17 @@ void SVoIP::restartListener(){
 }
 
 void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
-    connect(networkManager, SIGNAL(statusChanged(int, Contact::Status)),
+    connect(networkManager, SIGNAL(contactStatusChanged(int,Contact::Status)),
             this, SLOT(updateContactStatus(int, Contact::Status)));
     connect(networkManager, SIGNAL(destroyed(QObject*)),
             this, SLOT(onNetworkManagerDelete(QObject*)));
-    connect(networkManager,SIGNAL(startAppRequest(int,AppTypeID)),
-            this,SLOT(startApp(int,AppTypeID)));
+//    connect(networkManager,SIGNAL(startAppRequest(int,AppType)),
+//            this,SLOT(startApp(int,AppType)));
+    //TODO:root app emit this
 }
 
 QString SVoIP::generateSalt(){
-    const unsigned int blockSize = 32;
+    const uint blockSize = 32;
     byte randomBlock[blockSize];
     std::string encodedBlock;
     CryptoPP::AutoSeededRandomPool rng;
@@ -118,25 +119,33 @@ QString SVoIP::generateSalt(){
                           blockSize,
                           true,
                           new CryptoPP::Base64Encoder(
-                              new StringSink(encodedBlock),
+                              new CryptoPP::StringSink(encodedBlock),
                               false));
     return QString::fromStdString(encodedBlock);
 }
 
-void SVoIP::startApp(int contactId, AppTypeID appTypeId){
-    QPair<int, AbstractApp::AppUID> key(contactId, AbstractApp::AppUID(appTypeId));
+void SVoIP::startApp(int contactId, AppType appType){
+    QList<Contact*> contactList;
+    QPair<int, AbstractApp::AppUID> key(contactId, AbstractApp::AppUID(appType));
     if(mNetworkManagerList.contains(contactId)){
         if(mAppList.contains(key)){
             mAppList.value(key)->show();
         }else{
-            if(appTypeId == Messenger){
-                MessengerApp *msgApp = new MessengerApp();
-                key.second.appInstanceID = mNetworkManagerList.value(contactId)->getRootAgent()->logApp(msgApp, Messenger);
-                mAppList.insert(key, msgApp);
-            }else
+            AbstractApp *app = 0;
+            contactList.append(mContactDB->findById(contactId));
+            if(appType == Root){
+                //app = new RootApp(); //TODO: revise RootApp constructor
+            }else if(appType == Messenger){
+                app = new MessengerApp(contactList, mContactDB);
+            }else{
                 emit error(tr("Invalid appId"));
+            }
+            if(app != 0){
+                key.second.instanceID = 0; //TODO: generate instance id
+                mNetworkManagerList.value(contactId)->registerApp(key.second, app);
+                mAppList.insert(key, app);
+            }
         }
-
     }else
         emit error(tr("Invalid contactId"));
 }
