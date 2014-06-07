@@ -13,7 +13,6 @@ class Pinger : public QObject
     Q_OBJECT
 public:
     explicit Pinger(QObject *parent = 0);
-    explicit Pinger(Contact *contact, TcpLink *link, QObject *parent = 0);
 
     QString getActiveHost() const;
     void setLink(AbstractLink *link);
@@ -21,12 +20,13 @@ public:
     bool start();
 
 signals:
-    void connected(QString host);
+    void connected();
 
 public slots:
 
 
 private slots:
+    void onConnected();
     void connectToNextHost();
 
 private:

@@ -14,7 +14,10 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, QPair<QBy
     m_Pinger.setLink(tcpLink);
     m_Pinger.start();
 
-    connectSignals();
+    connect(&m_Pinger, SIGNAL(connected()),
+            this, SLOT(doStarterHandshake()));
+    connect(m_Handshaker, SIGNAL(handshakeFinished(bool)),
+            this, SLOT(onHandshakeFinished(bool)));
 }
 
 //Responder
@@ -27,16 +30,11 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, QPair<Q
     TcpLink *tcpLink = dynamic_cast<TcpLink*>(getLink(TCP));
     tcpLink->setSocket(socket); //give the socket to the TCP link
     m_Handshaker = new Handshaker(tcpLink, fileKey, this);
-    doResponderHandshake(tcpLink);
 
-    connectSignals();
-}
-
-void NetworkManager::connectSignals(){
-    connect(&m_Pinger, SIGNAL(connected(QString)),
-            this, SLOT(doStarterHandshake(QString)));
     connect(m_Handshaker, SIGNAL(handshakeFinished(bool)),
             this, SLOT(onHandshakeFinished(bool)));
+
+    doResponderHandshake(tcpLink);
 }
 
 int NetworkManager::getContactId() const{
@@ -89,8 +87,8 @@ void NetworkManager::doResponderHandshake(TcpLink *link){
     m_Handshaker->beginResponderHandshake(m_ContactDB);
 }
 
-void NetworkManager::doStarterHandshake(QString host){
-    qDebug() << "Starter hanshaking with:" << host;
+void NetworkManager::doStarterHandshake(){
+    qDebug() << "Starter hanshaking with:" << m_Pinger.getActiveHost();
     m_Handshaker->beginStarterHandshake(m_Contact);
 }
 

@@ -60,7 +60,7 @@ signals :
 
 private slots:
     void doResponderHandshake(TcpLink *link);
-    void doStarterHandshake(QString host);
+    void doStarterHandshake();
     void onHandshakeFinished(bool successfull);
     void processIncommingData();
     void onDisconnected();

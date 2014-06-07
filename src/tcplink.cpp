@@ -20,25 +20,19 @@ TcpLink::TcpLink(QTcpSocket *socket, QIODevice *parent):
     m_Socket(socket)
 {
     connectSocketSignals();
-    qDebug()<<m_Socket->isOpen();
+    m_State = Online;
+    setOpenMode(ReadWrite);
+    emit stateChanged(m_State);
+    emit connected();
 }
 
 void TcpLink::connectSocketSignals(){
-//    connect(m_Socket, SIGNAL(bytesWritten(qint64)),
-//            this, SLOT(test(qint64)));
-
     connect(m_Socket, SIGNAL(readyRead()),
             this, SIGNAL(readyRead()));
     connect(m_Socket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
             this, SLOT(internalStateChanged(QAbstractSocket::SocketState)));
-    connect(m_Socket, SIGNAL(connected()),
-            this, SLOT(onConnected()));
     connect(m_Socket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(onConnectionError(QAbstractSocket::SocketError)));
-}
-
-void TcpLink::test(qint64 size){
-
 }
 
 void TcpLink::onConnectionError(QAbstractSocket::SocketError){
@@ -56,15 +50,22 @@ void TcpLink::setHost(QPair<QString, quint16> &host){
 }
 
 void TcpLink::setSocket(QTcpSocket *socket){
+    delete m_Socket;
     m_Socket = socket;
+    connectSocketSignals();
+    m_State = Online;
+    setOpenMode(ReadWrite);
+    emit stateChanged(m_State);
+    emit connected();
 }
 
 void TcpLink::internalStateChanged(QAbstractSocket::SocketState state){
     switch(state){
     case QAbstractSocket::ConnectedState:
         m_State = Online;
-        emit stateChanged(m_State);
         setOpenMode(ReadWrite);
+        emit stateChanged(m_State);
+        emit connected();
         break;
     default:
         m_State = Offline;

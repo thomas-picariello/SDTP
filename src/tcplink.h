@@ -25,12 +25,12 @@ public:
 
 public slots:
     virtual void onConnectionError(QAbstractSocket::SocketError);
-    void test(qint64 size);
 
 private slots:
     void internalStateChanged(QAbstractSocket::SocketState state);
 
 signals:
+    void connected();
     void disconnected();
 
 private:
