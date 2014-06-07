@@ -20,19 +20,26 @@
 class Handshaker : public QObject
 {
     Q_OBJECT
+
 public:
     enum Error: byte{
         UndefinedError = 0x00,
-        NoSupportedVersionAvailable = 0x01,
-        IdentityCheckFailed = 0x02,
-        IntegrityCheckFailed = 0x03
+        BadPrivateKey = 0x01,
+        BadContactKey = 0x02,
+        BadSecurityLevel = 0x03,
+        NoSupportedVersionAvailable = 0x04,
+        IdentityCheckFailed = 0x05,
+        IntegrityCheckFailed = 0x06,
+        DataCorrupted = 0x07
     };
+    Q_ENUMS(Error)
 
     enum SecurityLevel: byte{
         UnverifiedIdentity = 0x00,
         ThirdPartyVerifiedIdentity = 0x01,
         PreSharedIdentity = 0x02
     };
+    Q_ENUMS(SecurityLevel)
 
     explicit Handshaker(TcpLink *link, QPair<QByteArray, QByteArray> *fileKey, QObject *parent = 0);
 
@@ -40,8 +47,14 @@ public:
     void beginResponderHandshake(ContactDB *contactDB);
     CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption* getAesEncryptor() const;
     CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption* getAesDecryptor() const;
-    uint getSecurityLevel() const;
-    void setSecurityLevel(uint level);
+    Contact* getContact() const;
+
+    void sayHello();
+    void respondHello(byte chosenVersion);
+    void sendHalfKeyAndPartnerIntegrity();
+    void sendPartnerIntegrity();
+    void sendHandshakeFinished();
+    void sendError();
 
 signals:
     void error(Handshaker::Error);
@@ -49,17 +62,11 @@ signals:
     void handshakeFinished(bool success);
 
 public slots:
-    void sayHello();
-    void recieveStarterHello();
-    void respondHello();
-    void recieveResponderHello();
-    void sendHalfKeyAndPartnerIntegrity();
-    void recieveHalfKeyAndPartnerIntegrity();
-    void sendPartnerIntegrity();
-    void recievePartnerIntegrity();
-    void sendHandshakeFinished();
-    void recieveHandshakeFinished();
-    void sendError();
+    void parseStarterHello();
+    void parseResponderHello();
+    void parseHalfKeyAndPartnerIntegrity();
+    void parsePartnerIntegrity();
+    void parseHandshakeFinished();
 
 private:
     QTimer m_Timeout;
@@ -76,12 +83,14 @@ private:
     QByteArray m_PartnerIntegrityHash;
     QByteArray m_SupportedVersions;
     bool m_HandshakeFinished;
-    uint m_SecurityLevel;
 
     QByteArray genHalfSymKey();
-    void updateIntegrityHash(QByteArray *currentHash, const QByteArray &data);
     bool isError() const;
+    QByteArray rsaDecrypt(QByteArray& cipherText);
+    QByteArray rsaEncrypt(QByteArray& clearText);
     QList<QByteArray*> splitData(QByteArray &data, uint chunkSize);
+    void updateIntegrityHash(QByteArray *currentHash, const QByteArray &data);
+
 
     Q_DISABLE_COPY(Handshaker)
 };
