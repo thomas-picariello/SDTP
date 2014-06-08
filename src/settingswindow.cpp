@@ -14,6 +14,9 @@ SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, ContactDB
     mPortValidator.setRange(0, 65535);
     ui->net_port_input->setValidator(&mPortValidator);
 
+    ui->rsa_privkey_input->setWordWrapMode(QTextOption::WrapAnywhere);
+    ui->rsa_pubkey_input->setWordWrapMode(QTextOption::WrapAnywhere);
+
     setupRsaMenus();
 
     connect(ui->save_bt, SIGNAL(clicked()),

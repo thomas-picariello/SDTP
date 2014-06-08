@@ -10,6 +10,7 @@ EditContactWindow::EditContactWindow(ContactDB *contactDB, QWidget *parent):
     ui->setupUi(this);
     mPortValidator.setRange(0, 65535);
     ui->port->setValidator(&mPortValidator);
+    ui->key->setWordWrapMode(QTextOption::WrapAnywhere);
 
     connect(ui->save, SIGNAL(clicked()),
             this, SLOT(save()));
