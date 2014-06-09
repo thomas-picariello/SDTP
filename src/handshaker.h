@@ -6,10 +6,11 @@
 #include <QTimer>
 
 #include <cryptopp/aes.h>
-#include <cryptopp/modes.h>
 #include <cryptopp/filters.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/sha.h>
+#include <cryptopp/authenc.h>
+#include <cryptopp/gcm.h>
 #include <cryptopp/rsa.h>
 
 #include "tcplink.h"
@@ -22,17 +23,25 @@ class Handshaker : public QObject
     Q_OBJECT
 
 public:
+    static const byte SUPPORTED_PROTOCOL_VERSION = 0x01;
+
     enum Error: byte{
         UndefinedError = 0x00,
         BadPrivateKey = 0x01,
         BadContactKey = 0x02,
-        BadSecurityLevel = 0x03,
-        NoSupportedVersionAvailable = 0x04,
-        IdentityCheckFailed = 0x05,
-        IntegrityCheckFailed = 0x06,
-        DataCorrupted = 0x07
+        BadSymmetricKey = 0x03,
+        BadSecurityLevel = 0x04,
+        IncompatibleProtocolVersions = 0x05,
+        IdentityCheckFailed = 0x06,
+        IntegrityCheckFailed = 0x07,
+        DataCorrupted = 0x08
     };
     Q_ENUMS(Error)
+
+    enum Success: byte{
+        HandshakeFinished = 0x10
+    };
+    Q_ENUMS(Success)
 
     enum SecurityLevel: byte{
         UnverifiedIdentity = 0x00,
@@ -45,28 +54,23 @@ public:
 
     void beginStarterHandshake(Contact *contact);
     void beginResponderHandshake(ContactDB *contactDB);
-    CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption* getAesEncryptor() const;
-    CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption* getAesDecryptor() const;
+    CryptoPP::GCM<CryptoPP::AES>::Encryption* getGcmEncryptor() const;
+    CryptoPP::GCM<CryptoPP::AES>::Decryption* getGcmDecryptor() const;
     Contact* getContact() const;
-
-    void sayHello();
-    void respondHello(byte chosenVersion);
-    void sendHalfKeyAndPartnerIntegrity();
-    void sendPartnerIntegrity();
-    void sendHandshakeFinished();
-    void sendError();
+    QString getErrorString(Error err) const;
 
 signals:
     void error(Handshaker::Error);
     void success();
     void handshakeFinished(bool success);
+    void newContactId(int id);
 
-public slots:
-    void parseStarterHello();
-    void parseResponderHello();
-    void parseHalfKeyAndPartnerIntegrity();
-    void parsePartnerIntegrity();
-    void parseHandshakeFinished();
+private slots:
+    void responderParseStarterHello();
+    void starterParseResponderHello();
+    void responderParseHalfKeyAndResponderIntegrity();
+    void starterParseStarterIntegrity();
+    void responderParseHandshakeFinished();
 
 private:
     QTimer m_Timeout;
@@ -74,18 +78,25 @@ private:
     Contact *m_Contact;
     ContactDB *m_ContactDB;
     CryptoPP::AutoSeededRandomPool m_RandomGenerator;
-    CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption *m_AesEncryptor;
-    CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption *m_AesDecryptor;
+    CryptoPP::GCM<CryptoPP::AES>::Encryption *m_GcmEncryptor;
+    CryptoPP::GCM<CryptoPP::AES>::Decryption *m_GcmDecryptor;
     CryptoPP::RSAES_OAEP_SHA_Encryptor m_RsaEncryptor;
     CryptoPP::RSAES_OAEP_SHA_Decryptor m_RsaDecryptor;
     RsaKeyring m_RsaKeyring;
-    QByteArray m_MyIntegrityHash;
-    QByteArray m_PartnerIntegrityHash;
-    QByteArray m_SupportedVersions;
-    bool m_HandshakeFinished;
+    QPair<QByteArray,QByteArray> m_GcmKey;
+    QByteArray m_StarterIntegrityHash;
+    QByteArray m_ResponderIntegrityHash;
 
-    QByteArray genHalfSymKey();
-    bool isError() const;
+    void starterSayHello();
+    void responderRespondHello();
+    void starterSendHalfKeyAndResponderIntegrity();
+    void responderSendStarterIntegrity();
+    void starterSendHandshakeFinished();
+    void processError(Error err);
+
+    QByteArray generateRandomBlock(uint size);
+    QByteArray gcmDecrypt(QByteArray& cipherText);
+    QByteArray gcmEncrypt(QByteArray& clearText);
     QByteArray rsaDecrypt(QByteArray& cipherText);
     QByteArray rsaEncrypt(QByteArray& clearText);
     QList<QByteArray*> splitData(QByteArray &data, uint chunkSize);

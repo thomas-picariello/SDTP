@@ -5,7 +5,9 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, QPair<QBy
     QObject(parent),
     m_ContactDB(contactDB),
     m_Contact(contact),
-    m_Status(Contact::Offline)
+    m_Status(Contact::Offline),
+    m_GcmDecryptor(NULL),
+    m_GcmEncryptor(NULL)
 {
     TcpLink *tcpLink = dynamic_cast<TcpLink*>(getLink(TCP));
     m_Contact->setParent(this); //take ownership of the contact
@@ -18,6 +20,10 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, QPair<QBy
             this, SLOT(doStarterHandshake()));
     connect(m_Handshaker, SIGNAL(handshakeFinished(bool)),
             this, SLOT(onHandshakeFinished(bool)));
+    connect(m_Handshaker, SIGNAL(newContactId(int)),
+            this, SIGNAL(newContactId(int)));
+    connect(m_Handshaker, SIGNAL(error(Handshaker::Error)),
+            this, SLOT(handshakeDebug(Handshaker::Error)));
 }
 
 //Responder
@@ -25,7 +31,9 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, QPair<Q
     QObject(parent),
     m_ContactDB(contactDB),
     m_Contact(NULL),
-    m_Status(Contact::Offline)
+    m_Status(Contact::Offline),
+    m_GcmDecryptor(NULL),
+    m_GcmEncryptor(NULL)
 {
     TcpLink *tcpLink = dynamic_cast<TcpLink*>(getLink(TCP));
     tcpLink->setSocket(socket); //give the socket to the TCP link
@@ -33,8 +41,10 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, QPair<Q
 
     connect(m_Handshaker, SIGNAL(handshakeFinished(bool)),
             this, SLOT(onHandshakeFinished(bool)));
+    connect(m_Handshaker, SIGNAL(error(Handshaker::Error)),
+            this, SLOT(handshakeDebug(Handshaker::Error)));
 
-    doResponderHandshake(tcpLink);
+    doResponderHandshake();
 }
 
 int NetworkManager::getContactId() const{
@@ -66,6 +76,7 @@ void NetworkManager::onDisconnected(){
 void NetworkManager::onContactEvent(Contact::Event event){
     if(m_Contact){
         //TODO: do something intelligent with event
+        //ie: if contact offline retry to connect after change other than name
         m_Contact = m_ContactDB->findById(m_Contact->getId());
     }
 }
@@ -82,20 +93,29 @@ void NetworkManager::processIncommingData(){
     //emit
 }
 
-void NetworkManager::doResponderHandshake(TcpLink *link){
-    qDebug() << "Responder hanshaking with:" << link->getHost().first;
+void NetworkManager::doResponderHandshake(){
     m_Handshaker->beginResponderHandshake(m_ContactDB);
 }
 
 void NetworkManager::doStarterHandshake(){
-    qDebug() << "Starter hanshaking with:" << m_Pinger.getActiveHost();
     m_Handshaker->beginStarterHandshake(m_Contact);
 }
 
 void NetworkManager::onHandshakeFinished(bool successfull){
-    //if sucessfull, get crypto info
-    if(successfull)
+    if(successfull){
+        if(m_GcmDecryptor) delete m_GcmDecryptor;
+        if(m_GcmEncryptor) delete m_GcmEncryptor;
+        m_GcmDecryptor = m_Handshaker->getGcmDecryptor();
+        m_GcmEncryptor = m_Handshaker->getGcmEncryptor();
+        m_Contact = m_Handshaker->getContact();
         emit contactStatusChanged(getContactId(), Contact::Online);
+    }else{
+
+    }
+}
+
+void NetworkManager::handshakeDebug(Handshaker::Error err){ //TODO: remove
+    qDebug()<<"Handshake error:"<<m_Handshaker->getErrorString(err);
 }
 
 AbstractLink* NetworkManager::getLink(LinkType linkType){

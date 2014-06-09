@@ -5,20 +5,18 @@ Handshaker::Handshaker(TcpLink *link, QPair<QByteArray,QByteArray> *fileKey, QOb
     m_Link(link),
     m_ContactDB(NULL),
     m_Contact(NULL),
-    m_AesDecryptor(new CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption()),
-    m_AesEncryptor(new CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption()),
-    m_HandshakeFinished(false),
+    m_GcmDecryptor(new CryptoPP::GCM<CryptoPP::AES>::Decryption()),
+    m_GcmEncryptor(new CryptoPP::GCM<CryptoPP::AES>::Encryption()),
     m_RsaKeyring(fileKey),
-    m_MyIntegrityHash(32, 0),       //256 bits Hash
-    m_PartnerIntegrityHash(32, 0)  //256 bits Hash
+    m_StarterIntegrityHash(32, 0),  //256 bits Hash
+    m_ResponderIntegrityHash(32, 0)  //256 bits Hash
 {
-    m_SupportedVersions.append(0x01); //(v0.1) TODO:find a better place
     //init rsa decryptor
     try{
         m_RsaDecryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_RsaKeyring.getPrivateKey().data(),
                                                               m_RsaKeyring.getPrivateKey().size(),
                                                               true));
-    }catch(CryptoPP::BERDecodeErr& err){
+    }catch(CryptoPP::BERDecodeErr&){
         emit error(BadPrivateKey);
     }
 }
@@ -26,8 +24,9 @@ Handshaker::Handshaker(TcpLink *link, QPair<QByteArray,QByteArray> *fileKey, QOb
 void Handshaker::beginResponderHandshake(ContactDB *contactDB){
     m_ContactDB = contactDB;
 
+    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     connect(m_Link, SIGNAL(readyRead()),
-            this, SLOT(parseStarterHello()));
+            this, SLOT(responderParseStarterHello()));
 }
 
 void Handshaker::beginStarterHandshake(Contact *contact){
@@ -37,25 +36,30 @@ void Handshaker::beginStarterHandshake(Contact *contact){
         m_RsaEncryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_Contact->getKey().data(),
                                                               m_Contact->getKey().size(),
                                                               true));
-        sayHello();
-    }catch(CryptoPP::BERDecodeErr& err){
+        starterSayHello();
+    }catch(CryptoPP::BERDecodeErr&){
         emit error(BadContactKey);
     }
 }
 
-CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption* Handshaker::getAesEncryptor() const{
-    return m_AesEncryptor;
+CryptoPP::GCM<CryptoPP::AES>::Encryption* Handshaker::getGcmEncryptor() const{
+    return m_GcmEncryptor;
 }
 
-CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption* Handshaker::getAesDecryptor() const{
-    return m_AesDecryptor;
+CryptoPP::GCM<CryptoPP::AES>::Decryption* Handshaker::getGcmDecryptor() const{
+    return m_GcmDecryptor;
 }
 
 Contact* Handshaker::getContact() const{
     return m_Contact;
 }
 
-void Handshaker::sayHello(){
+QString Handshaker::getErrorString(Error err) const{
+    QMetaEnum errorEnum = metaObject()->enumerator(metaObject()->indexOfEnumerator("Error"));
+    return QString(errorEnum.valueToKey(static_cast<int>(err)));
+}
+
+void Handshaker::starterSayHello(){ //S:1
     QByteArray packet;
     QByteArray clearText;
 
@@ -72,29 +76,34 @@ void Handshaker::sayHello(){
     //Public Key
     clearText.append(m_RsaKeyring.getPublicKey());
 
-    //Version List Lenght
-    clearText.append(m_SupportedVersions.size());
+    //Version
+    clearText.append(SUPPORTED_PROTOCOL_VERSION);
 
-    //Version List
-    clearText.append(m_SupportedVersions);
+    //compute starter integrity
+    updateIntegrityHash(&m_StarterIntegrityHash, (char)secLevel+clearText);
 
     //encrypt with Responder public key
     packet.append(rsaEncrypt(clearText));
 
     //connect response parse methode
+    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     connect(m_Link, SIGNAL(readyRead()),
-            this, SLOT(parseResponderHello()));
-
-    //compute hash
-    updateIntegrityHash(&m_MyIntegrityHash, (char)secLevel+clearText);
+            this, SLOT(starterParseResponderHello()));
 
     //send the packet
     m_Link->write(packet);
 }
 
-void Handshaker::parseStarterHello(){
+void Handshaker::responderParseStarterHello(){ //R:1.1
     QByteArray clearText;
     QByteArray rawPacket = m_Link->readAll();
+
+    //check error
+    if(rawPacket.size() == 1 && rawPacket.at(0) == (char)UndefinedError){
+        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+        emit error(UndefinedError);
+        return;
+    }
 
     //parse security level TODO: verify with enum
     byte secLevel = rawPacket.at(0);
@@ -109,96 +118,295 @@ void Handshaker::parseStarterHello(){
     //parse Key
     QByteArray key = clearText.mid(2, keyLength); //pos != index
 
-    //parse Version List length
-    byte versionListLenght = clearText.at(2+keyLength);
-
-    //parse Version List
-    QByteArray versionList = clearText.right(versionListLenght);
+    //parse Version
+    byte version = clearText.at(clearText.size()-1);
 
     //check security level
     if(static_cast<SecurityLevel>(secLevel) != PreSharedIdentity){
-        emit error(BadSecurityLevel);
-        sendError();
+        processError(BadSecurityLevel);
         return;
     }
 
     //check identity
     m_Contact = m_ContactDB->findByKey(key);
     if(m_Contact == NULL){
-        emit error(IdentityCheckFailed);
-        sendError();
+        processError(IdentityCheckFailed);
         return;
     }
+    emit newContactId(m_Contact->getId());
 
     //init rsa
     try{
         m_RsaEncryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_Contact->getKey().data(),
                                                               m_Contact->getKey().size(),
                                                               true));
-    }catch(CryptoPP::BERDecodeErr& err){
-        emit error(BadContactKey);
+    }catch(CryptoPP::BERDecodeErr&){
+        processError(BadContactKey);
     }
 
-    //check/choose version
-    //TODO: check all versions
-    byte chosenVersion = 0x01;
+    //check version compatibility (major version only)
+    if((version & 0xF0) != (SUPPORTED_PROTOCOL_VERSION & 0xF0)){
+        processError(IncompatibleProtocolVersions);
+        return;
+    }
 
-    //Compute integrity
-    updateIntegrityHash(&m_PartnerIntegrityHash, (char)secLevel+clearText);
+    //update starter integrity
+    updateIntegrityHash(&m_StarterIntegrityHash, (char)secLevel+clearText);
 
-    respondHello(chosenVersion);
+    responderRespondHello();
 }
 
-void Handshaker::respondHello(byte chosenVersion){
-    //create response packet
-    QByteArray packet;
-    packet.append("Test Answer...");
+void Handshaker::responderRespondHello(){ //R:1.2
+    QByteArray packet, clearText;
+
+    //chosen version
+    clearText.append(SUPPORTED_PROTOCOL_VERSION);
+
+    //half symmetric key + half IV
+    QByteArray firstHalfSymKey = generateRandomBlock(32);
+    m_GcmKey.first.append(firstHalfSymKey.left(16));
+    m_GcmKey.second.append(firstHalfSymKey.right(16));
+    clearText.append(firstHalfSymKey);
+
+    //update responder integrity
+    updateIntegrityHash(&m_ResponderIntegrityHash, clearText);
+
+    //encrypt and add to packet
+    packet.append(rsaEncrypt(clearText));
+
+    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+    connect(m_Link, SIGNAL(readyRead()),
+            this, SLOT(responderParseHalfKeyAndResponderIntegrity()));
+
     m_Link->write(packet);
 }
 
-void Handshaker::parseResponderHello(){
-    qDebug()<<"answer recieved:"<<m_Link->readAll();
+void Handshaker::starterParseResponderHello(){ //S:2.1
+    QByteArray rawPacket = m_Link->readAll();
+
+    //check error
+    if(rawPacket.size() == 1 && rawPacket.at(0) == (char)UndefinedError){
+        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+        emit error(UndefinedError);
+        return;
+    }
+
+    //decrypt packet
+    QByteArray clearText = rsaDecrypt(rawPacket);
+
+    //parse chosen version
+    byte chosenVersion = clearText.at(0);
+
+    //parse first half key + half IV
+    m_GcmKey.first.append(clearText.mid(1, 16));
+    m_GcmKey.second.append(clearText.mid(17));
+
+    //check version
+    //TODO: proper check
+    if(chosenVersion != 0x01){
+        processError(IncompatibleProtocolVersions);
+        return;
+    }
+
+    //check half key + half IV size
+    if(m_GcmKey.first.size()!=16 || m_GcmKey.second.size()!=16){
+        processError(BadSymmetricKey);
+        return;
+    }
+
+    //update responder integrity
+    updateIntegrityHash(&m_ResponderIntegrityHash, clearText);
+
+    starterSendHalfKeyAndResponderIntegrity();
+}
+
+void Handshaker::starterSendHalfKeyAndResponderIntegrity(){ //S:2.2
+    QByteArray packet;
+
+    //generate second half key+IV
+    QByteArray secondHalfSymKey = generateRandomBlock(32);
+    m_GcmKey.first.append(secondHalfSymKey.left(16));    //key
+    m_GcmKey.second.append(secondHalfSymKey.right(16));  //IV
+
+    //rsa encrypt half key+IV
+    QByteArray encryptedHalfKey = rsaEncrypt(secondHalfSymKey);
+    packet.append(static_cast<char>(encryptedHalfKey.size()>>8 & 0xFF));
+    packet.append(static_cast<char>(encryptedHalfKey.size() & 0xFF));
+    packet.append(encryptedHalfKey);
+
+    //init GCM
+    m_GcmDecryptor->SetKeyWithIV((byte*)m_GcmKey.first.data(), m_GcmKey.first.size(),
+                                 (byte*)m_GcmKey.second.data(), m_GcmKey.second.size());
+    m_GcmEncryptor->SetKeyWithIV((byte*)m_GcmKey.first.data(), m_GcmKey.first.size(),
+                                 (byte*)m_GcmKey.second.data(), m_GcmKey.second.size()); 
+
+    //encrypt responder integrity with gcm
+    packet.append(gcmEncrypt(m_ResponderIntegrityHash));
+
+    //update starter integrity
+    updateIntegrityHash(&m_StarterIntegrityHash, secondHalfSymKey+m_ResponderIntegrityHash);
+
+    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+    connect(m_Link, SIGNAL(readyRead()),
+            this, SLOT(starterParseStarterIntegrity()));
+
+    m_Link->write(packet);
+}
+
+void Handshaker::responderParseHalfKeyAndResponderIntegrity(){ //R:2.1
+    QByteArray rawPacket = m_Link->readAll();
+
+    //check error
+    if(rawPacket.size() == 1 && rawPacket.at(0) == (char)UndefinedError){
+        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+        emit error(UndefinedError);
+        return;
+    }
+
+    //parse encrypted key lenght
+    quint16 encryptedKeyLenght = (rawPacket.at(0) << 8) + rawPacket.at(1);
+
+    //parse encrypted key
+    QByteArray encryptedSymKey = rawPacket.mid(2,encryptedKeyLenght);
+
+    //decrypt key
+    QByteArray clearSymKey = rsaDecrypt(encryptedSymKey);
+
+    //check key lenght
+    if(clearSymKey.size()<32){
+        processError(BadSymmetricKey);
+        return;
+    }
+
+    //init gcm
+    m_GcmKey.first.append(clearSymKey.left(16));    //key
+    m_GcmKey.second.append(clearSymKey.right(16));  //IV
+
+    m_GcmDecryptor->SetKeyWithIV((byte*)m_GcmKey.first.data(), m_GcmKey.first.size(),
+                                 (byte*)m_GcmKey.second.data(), m_GcmKey.second.size());
+    m_GcmEncryptor->SetKeyWithIV((byte*)m_GcmKey.first.data(), m_GcmKey.first.size(),
+                                 (byte*)m_GcmKey.second.data(), m_GcmKey.second.size());
+
+
+    //parse responder integrity
+    QByteArray encryptedResponderIntegrity = rawPacket.mid(2+encryptedKeyLenght);
+
+    //decrypt integrity
+    QByteArray responderIntegrity = gcmDecrypt(encryptedResponderIntegrity);
+
+    //check integrity
+    if(responderIntegrity != m_ResponderIntegrityHash){
+        processError(DataCorrupted);
+        return;
+    }
+
+    //update starter integrity
+    updateIntegrityHash(&m_StarterIntegrityHash, clearSymKey+responderIntegrity);
+
+    responderSendStarterIntegrity();
+}
+
+void Handshaker::responderSendStarterIntegrity(){ //R:2.2
+    QByteArray packet;
+
+    //encrypt starter integrity
+    packet.append(gcmEncrypt(m_StarterIntegrityHash));
+
+    //connect incomming data to responderParseHandshakeFinished()
+    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+    connect(m_Link, SIGNAL(readyRead()),
+            this, SLOT(responderParseHandshakeFinished()));
+
+    //send packet
+    m_Link->write(packet);
+}
+
+void Handshaker::starterParseStarterIntegrity(){ //S:3.1
+    QByteArray rawPacket = m_Link->readAll();
+    //check error
+    if(rawPacket.size() == 1 && rawPacket.at(0) == (char)UndefinedError){
+        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+        emit error(UndefinedError);
+        return;
+    }
+
+    //decrypt packet
+    QByteArray starterIntegrity = gcmDecrypt(rawPacket);
+
+    //check integrity
+    if(starterIntegrity != m_StarterIntegrityHash){
+        processError(DataCorrupted);
+        return;
+    }
+
+    starterSendHandshakeFinished();
+}
+
+void Handshaker::starterSendHandshakeFinished(){ //S:3.2
+    QByteArray packet;
+    packet.append((char)HandshakeFinished);
+
+    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+    m_Link->write(packet);
+
     emit handshakeFinished(true);
 }
 
-void Handshaker::sendHalfKeyAndPartnerIntegrity(){
-
+void Handshaker::responderParseHandshakeFinished(){ //R:3
+    QByteArray rawPacket = m_Link->readAll();
+    //check error
+    if(rawPacket.size() == 1 && rawPacket.at(0) == (char)UndefinedError){
+        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+        emit error(UndefinedError);
+        return;
+    }else if(rawPacket.size() == 1 && rawPacket.at(0) == (char)HandshakeFinished){
+        emit handshakeFinished(true);
+    }else{
+        processError(UndefinedError);
+    }
 }
 
-void Handshaker::parseHalfKeyAndPartnerIntegrity(){
-
-}
-
-void Handshaker::sendPartnerIntegrity(){
-
-}
-
-void Handshaker::parsePartnerIntegrity(){
-
-}
-
-void Handshaker::sendHandshakeFinished(){
-
-}
-
-void Handshaker::parseHandshakeFinished(){
-
-}
-
-void Handshaker::sendError(){
+void Handshaker::processError(Error err){
+    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+    emit error(err);
     m_Link->write((uchar)UndefinedError);
+    emit handshakeFinished(false);
 }
 
-QByteArray Handshaker::genHalfSymKey(){
-    const uint blockSize = 32;  //32Bytes = 256 bits
-    byte randomBlock[blockSize];
+QByteArray Handshaker::generateRandomBlock(uint size){
+    QByteArray randomBlock;
+    randomBlock.resize(size);
     CryptoPP::AutoSeededRandomPool rnd;
-    rnd.GenerateBlock(randomBlock, blockSize);
-    return QByteArray((const char*)randomBlock, blockSize);
+    rnd.GenerateBlock((byte*)randomBlock.data(), size);
+    return randomBlock;
 }
 
-bool Handshaker::isError() const{
-    return false;
+QByteArray Handshaker::gcmDecrypt(QByteArray& cipherText){
+    std::string clearText;
+    try{
+        CryptoPP::ArraySource((byte*)cipherText.data(), cipherText.size(), true,
+                              new CryptoPP::AuthenticatedDecryptionFilter(*m_GcmDecryptor,
+                                                                          new CryptoPP::StringSink(clearText)
+                                                                          )
+                              );
+    }catch(CryptoPP::Exception&){
+        emit error(DataCorrupted);
+    }
+    return QByteArray(clearText.data(), (int)clearText.size());
+}
+
+QByteArray Handshaker::gcmEncrypt(QByteArray& clearText){
+    std::string cipherText;
+    try{
+        CryptoPP::ArraySource((byte*)clearText.data(), clearText.size(), true,
+                              new CryptoPP::AuthenticatedEncryptionFilter(*m_GcmEncryptor,
+                                                                          new CryptoPP::StringSink(cipherText)
+                                                                          )
+                              );
+    }catch(CryptoPP::Exception&){
+        emit error(BadSymmetricKey);
+    }
+    return QByteArray(cipherText.data(), (int)cipherText.size());
 }
 
 QByteArray Handshaker::rsaDecrypt(QByteArray& cipherText){
@@ -213,8 +421,7 @@ QByteArray Handshaker::rsaDecrypt(QByteArray& cipherText){
                                                                    )
                                   );
             clearText.append(clearChunk.data(), (int)clearChunk.size());
-        }catch(CryptoPP::Exception& e){
-            qDebug()<<e.what();
+        }catch(CryptoPP::Exception&){
             emit error(DataCorrupted);
             clearText.clear();
             return clearText;
@@ -237,10 +444,8 @@ QByteArray Handshaker::rsaEncrypt(QByteArray& clearText){
                                                                    )
                                   );
             cipherText.append(cipherChunk.data(), (int)cipherChunk.size());
-        }catch(CryptoPP::Exception& e){
-            qDebug()<<e.what();
+        }catch(CryptoPP::Exception&){
             cipherText.clear();
-
         }
     }
     qDeleteAll(clearChunks);

@@ -6,7 +6,8 @@
 #include <QMap>
 
 #include <cryptopp/aes.h>
-#include <cryptopp/modes.h>
+#include <cryptopp/authenc.h>
+#include <cryptopp/gcm.h>
 
 #include "typesenums.h"
 #include "abstractapp.h"
@@ -23,13 +24,10 @@ class NetworkManager : public QObject
 
 public:
     struct Packet{
-        struct EncryptedArea{
-            quint64 timestamp;
-            byte packetNumber;
-            AbstractApp::AppUID appUID;
-            QByteArray payload;
-        };
-        byte hash[32]; //256 bits for sha256 hash
+        quint64 timestamp;
+        byte packetNumber;
+        AbstractApp::AppUID appUID;
+        QByteArray payload;
     };
 
     NetworkManager(Contact *contact,
@@ -55,15 +53,17 @@ public slots :
 
 signals :
     void contactStatusChanged(int id, Contact::Status status);
+    void newContactId(int id);
     void error(QString error);
     void startRootApp(int contactId);
 
 private slots:
-    void doResponderHandshake(TcpLink *link);
+    void doResponderHandshake();
     void doStarterHandshake();
     void onHandshakeFinished(bool successfull);
     void processIncommingData();
     void onDisconnected();
+    void handshakeDebug(Handshaker::Error); //TODO: remove
 
 private :
     Contact::Status m_Status;
@@ -71,7 +71,8 @@ private :
     ContactDB *m_ContactDB;
     Handshaker *m_Handshaker;
     Pinger m_Pinger;
-    QPair<QByteArray*, QByteArray*> m_AesKey;
+    CryptoPP::GCM<CryptoPP::AES>::Decryption *m_GcmDecryptor;
+    CryptoPP::GCM<CryptoPP::AES>::Encryption *m_GcmEncryptor;
     QMap<LinkType, AbstractLink*> m_LinkList;
     QMap<AbstractApp::AppUID, AbstractApp*> m_AppList;
     QMap<AbstractApp::AppUID, LinkType> m_RoutingTable;
