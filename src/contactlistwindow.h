@@ -28,6 +28,7 @@ public:
     };
 
     explicit ContactListWindow(ContactDB *contactDB,
+                               RsaKeyring *keyring,
                                QPair<QByteArray,QByteArray> *fileKey,
                                QWidget *parent = 0);
     ~ContactListWindow();
@@ -50,9 +51,8 @@ signals:
     void settingsUpdated();
     
 private:
-    ContactDB *mContactDB;
-    QPair<QByteArray,QByteArray> *mFileKey;
     Ui::ContactListWindow *ui;
+    ContactDB *mContactDB;
     SettingsWindow mSettingsWindow;
     EditContactWindow mEditContactWindow;
 

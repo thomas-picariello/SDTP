@@ -3,6 +3,7 @@
 SVoIP::SVoIP(QObject *parent):
     QObject(parent),
     mContactDB(NULL),
+    mRsaKeyring(NULL),
     mContactListWindow(NULL),
     mPasswordWindow(NULL)
 {
@@ -13,22 +14,40 @@ SVoIP::SVoIP(QObject *parent):
     if(salt.isEmpty()){
         settings.setValue("encryption/salt", generateSalt());
     }
-    //set IV (AES block size = 128 bits)
+    //set IV (AES block size = 128 bits) TODO: update for GCM (filekey)
     mFileKey.second = salt.left(16);
 
     if(pwdHash.isEmpty()){
-        startProgram();
+        checkParameters();
     }else{
         mPasswordWindow = new PasswordWindow(pwdHash, salt);
         connect(mPasswordWindow, SIGNAL(validate(QByteArray)),
-                this, SLOT(startProgram(QByteArray)));
+                this, SLOT(checkParameters(QByteArray)));
     }
 }
 
-void SVoIP::startProgram(QByteArray key){
+void SVoIP::checkParameters(QByteArray key){
+    QSettings settings("settings.ini", QSettings::IniFormat);
     mFileKey.first = key;
+    mRsaKeyring = new RsaKeyring(&mFileKey);
+    if(!mRsaKeyring->hasPrivateKey() ||
+       settings.value("network/listen_port").isNull()
+      ){
+        displayFirstStartWizard();
+    }else
+        startProgram();
+}
+
+void SVoIP::displayFirstStartWizard(){
+    //TODO: implement a class
+    startProgram();
+}
+
+void SVoIP::startProgram(){
+    disconnect(mRsaKeyring, SIGNAL(privateKeyGenerationFinished(QByteArray)), this, 0);
     mContactDB = new ContactDB(&mFileKey, this);
-    mContactListWindow = new ContactListWindow(mContactDB, &mFileKey);
+    mContactListWindow = new ContactListWindow(mContactDB, mRsaKeyring, &mFileKey);
+
     restartListener();
     connect(&mListener, SIGNAL(newConnection()),
             this, SLOT(onIncommingConnection()));
@@ -42,7 +61,7 @@ void SVoIP::startProgram(QByteArray key){
     //start a NetworkManager for each contact
     QList<Contact*> contactList = mContactDB->getAllContacts();
     foreach(Contact *contact, contactList){
-        NetworkManager* networkManager = new NetworkManager(contact, mContactDB, &mFileKey, this);
+        NetworkManager* networkManager = new NetworkManager(contact, mContactDB, mRsaKeyring, this);
         connectNetworkManagerSignals(networkManager);
         mNetworkManagerList.insert(contact->getId(), networkManager);
     }
@@ -53,14 +72,21 @@ void SVoIP::onIncommingConnection(){
     int id = -1;
     while(mNetworkManagerList.contains(id))
         id--;
-    NetworkManager* networkManager = new NetworkManager(mListener.nextPendingConnection(),mContactDB, &mFileKey, this);
+    NetworkManager* networkManager = new NetworkManager(mListener.nextPendingConnection(),mContactDB, mRsaKeyring, this);
     connectNetworkManagerSignals(networkManager);
     mNetworkManagerList.insert(id, networkManager);
 }
 
-void SVoIP::onNetworkManagerDelete(QObject *object){
-    int id = mNetworkManagerList.key(static_cast<NetworkManager*>(object), 0);
-    mNetworkManagerList.remove(id);
+void SVoIP::deleteFromList(QObject *object){
+    NetworkManager *networkManager = dynamic_cast<NetworkManager*>(object);
+    if(networkManager){
+        int id = mNetworkManagerList.key(dynamic_cast<NetworkManager*>(object), 0);
+        mNetworkManagerList.remove(id);
+    }
+    AbstractApp* app = dynamic_cast<AbstractApp*>(object);
+    if(app){
+        //TODO: find and remove app* from mAppList
+    }
 }
 
 void SVoIP::updateNetworkManagerId(int newId){
@@ -83,7 +109,7 @@ void SVoIP::onContactEvent(int id, Contact::Event event){
     NetworkManager* networkManager;
     switch(event){
     case Contact::Added:
-        networkManager = new NetworkManager(mContactDB->findById(id), mContactDB, &mFileKey, this);
+        networkManager = new NetworkManager(mContactDB->findById(id), mContactDB, mRsaKeyring, this);
         connectNetworkManagerSignals(networkManager);
         mNetworkManagerList.insert(id, networkManager);
         break;
@@ -106,7 +132,7 @@ void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
     connect(networkManager, SIGNAL(contactStatusChanged(int,Contact::Status)),
             this, SLOT(updateContactStatus(int, Contact::Status)));
     connect(networkManager, SIGNAL(destroyed(QObject*)),
-            this, SLOT(onNetworkManagerDelete(QObject*)));
+            this, SLOT(deleteFromList(QObject*)));
     connect(networkManager, SIGNAL(newContactId(int)),
             this, SLOT(updateNetworkManagerId(int)));
 //    connect(networkManager,SIGNAL(startAppRequest(int,AppType)),
@@ -160,4 +186,5 @@ SVoIP::~SVoIP(){
     if(mContactDB) delete mContactDB;
     if(mPasswordWindow) delete mPasswordWindow;
     qDeleteAll(mAppList);
+    qDeleteAll(mNetworkManagerList);
 }

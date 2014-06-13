@@ -25,15 +25,19 @@ public:
     ~SVoIP();
 
 public slots:
-    void startProgram(QByteArray key = QByteArray());
+
     void onIncommingConnection();
     void restartListener();
-    void onNetworkManagerDelete(QObject *object);
+    void deleteFromList(QObject *object);
     void updateNetworkManagerId(int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
     void startApp(int contactId, AppType appType);
     inline void startRootApp(int contactId){ startApp(contactId, Root); }
+
+private slots:
+    void checkParameters(QByteArray key = QByteArray());
+    void startProgram();
 
 signals:
     void error(QString err);
@@ -42,13 +46,15 @@ private :
     ContactDB *mContactDB;
     PasswordWindow *mPasswordWindow;
     ContactListWindow *mContactListWindow;
+    RsaKeyring *mRsaKeyring;
     QPair<QByteArray,QByteArray> mFileKey;
     QTcpServer mListener;
     QMap<int,NetworkManager*> mNetworkManagerList;
     QMap<QPair<int,AbstractApp::AppUID>, AbstractApp*> mAppList;
 
-    QString generateSalt();
+    void displayFirstStartWizard();
     void connectNetworkManagerSignals(NetworkManager *networkManager);
+    QString generateSalt();
 
     Q_DISABLE_COPY(SVoIP)
 };

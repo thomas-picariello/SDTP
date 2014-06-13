@@ -32,11 +32,11 @@ public:
 
     NetworkManager(Contact *contact,
                    ContactDB *contactDB,
-                   QPair<QByteArray, QByteArray> *fileKey,
+                   RsaKeyring *keyring,
                    QObject *parent=0);     //Starter
     NetworkManager(QTcpSocket *socket,
                    ContactDB *contactDB,
-                   QPair<QByteArray, QByteArray> *fileKey,
+                   RsaKeyring *keyring,
                    QObject *parent=0);   //Responder
     ~NetworkManager();
 

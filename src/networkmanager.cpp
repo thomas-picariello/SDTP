@@ -1,7 +1,7 @@
 #include "networkmanager.h"
 
 //Starter
-NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, QPair<QByteArray, QByteArray> *fileKey, QObject *parent):
+NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, RsaKeyring *keyring, QObject *parent):
     QObject(parent),
     m_ContactDB(contactDB),
     m_Contact(contact),
@@ -11,7 +11,7 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, QPair<QBy
 {
     TcpLink *tcpLink = dynamic_cast<TcpLink*>(getLink(TCP));
     m_Contact->setParent(this); //take ownership of the contact
-    m_Handshaker = new Handshaker(tcpLink, fileKey, this);
+    m_Handshaker = new Handshaker(tcpLink, keyring, this);
     m_Pinger.setContact(m_Contact);
     m_Pinger.setLink(tcpLink);
     m_Pinger.start();
@@ -27,7 +27,7 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, QPair<QBy
 }
 
 //Responder
-NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, QPair<QByteArray, QByteArray> *fileKey, QObject *parent):
+NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, RsaKeyring *keyring, QObject *parent):
     QObject(parent),
     m_ContactDB(contactDB),
     m_Contact(NULL),
@@ -37,7 +37,7 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, QPair<Q
 {
     TcpLink *tcpLink = dynamic_cast<TcpLink*>(getLink(TCP));
     tcpLink->setSocket(socket); //give the socket to the TCP link
-    m_Handshaker = new Handshaker(tcpLink, fileKey, this);
+    m_Handshaker = new Handshaker(tcpLink, keyring, this);
 
     connect(m_Handshaker, SIGNAL(handshakeFinished(bool)),
             this, SLOT(onHandshakeFinished(bool)));

@@ -1,13 +1,12 @@
 #include "contactlistwindow.h"
 #include "ui_contactlistwindow.h"
 
-ContactListWindow::ContactListWindow(ContactDB *contactDB, QPair<QByteArray, QByteArray> *fileKey, QWidget *parent):
+ContactListWindow::ContactListWindow(ContactDB *contactDB, RsaKeyring *keyring, QPair<QByteArray, QByteArray> *fileKey, QWidget *parent):
     QWidget(parent),
+    ui(new Ui::ContactListWindow),
     mContactDB(contactDB),
-    mFileKey(fileKey),
-    mSettingsWindow(mFileKey, mContactDB),
-    mEditContactWindow(mContactDB),
-    ui(new Ui::ContactListWindow)
+    mSettingsWindow(fileKey, keyring, mContactDB),
+    mEditContactWindow(mContactDB)
 {
     ui->setupUi(this);
     //scale window
@@ -179,7 +178,7 @@ void ContactListWindow::setContactStatusIcon(int id, Contact::Status status){
 }
 
 QListWidgetItem* ContactListWindow::findItemByContactId(int id){
-    QList<QListWidgetItem*> itemList = ui->list->findItems("*", Qt::MatchWildcard);
+    QList<QListWidgetItem*> itemList = ui->list->findItems("*", Qt::MatchWildcard); //TODO: find exit bug
     foreach(QListWidgetItem *item, itemList){
         if(item->data(IdRole).toInt() == id)
             return item;
