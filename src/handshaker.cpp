@@ -1,44 +1,41 @@
 #include "handshaker.h"
 
-Handshaker::Handshaker(TcpLink *link, QPair<QByteArray,QByteArray> *fileKey, QObject *parent):
+Handshaker::Handshaker(TcpLink *link, RsaKeyring* keyring, QObject *parent):
     QObject(parent),
     m_Link(link),
     m_ContactDB(NULL),
     m_Contact(NULL),
     m_GcmDecryptor(new CryptoPP::GCM<CryptoPP::AES>::Decryption()),
     m_GcmEncryptor(new CryptoPP::GCM<CryptoPP::AES>::Encryption()),
-    m_RsaKeyring(fileKey),
+    m_RsaKeyring(keyring),
     m_StarterIntegrityHash(32, 0),  //256 bits Hash
-    m_ResponderIntegrityHash(32, 0)  //256 bits Hash
+    m_ResponderIntegrityHash(32, 0),  //256 bits Hash
+    m_Mode(UndefinedMode)
 {
-    //init rsa decryptor
-    try{
-        m_RsaDecryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_RsaKeyring.getPrivateKey().data(),
-                                                              m_RsaKeyring.getPrivateKey().size(),
-                                                              true));
-    }catch(CryptoPP::BERDecodeErr&){
-        emit error(BadPrivateKey);
-    }
+    resetHandshake();
 }
 
 void Handshaker::beginResponderHandshake(ContactDB *contactDB){
+    m_Mode = ResponderMode;
     m_ContactDB = contactDB;
-
-    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-    connect(m_Link, SIGNAL(readyRead()),
-            this, SLOT(responderParseStarterHello()));
+    if(m_RsaKeyring->hasPrivateKey()){ //security check
+        resetHandshake();
+    }else{
+        emit error(BadPrivateKey);
+        connect(m_RsaKeyring, SIGNAL(privateKeyValidated()),
+                this, SLOT(resetHandshake()));
+    }
 }
 
 void Handshaker::beginStarterHandshake(Contact *contact){
+    m_Mode = StarterMode;
     m_Contact = contact;
-    //init rsa encryptor
-    try{
-        m_RsaEncryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_Contact->getKey().data(),
-                                                              m_Contact->getKey().size(),
-                                                              true));
-        starterSayHello();
-    }catch(CryptoPP::BERDecodeErr&){
-        emit error(BadContactKey);
+    if(m_RsaKeyring->hasPrivateKey()){ //security check
+        resetHandshake();
+    }else{
+        emit error(BadPrivateKey);
+        connect(m_RsaKeyring, SIGNAL(privateKeyValidated()),
+                this, SLOT(resetHandshake()));
     }
 }
 
@@ -59,6 +56,50 @@ QString Handshaker::getErrorString(Error err) const{
     return QString(errorEnum.valueToKey(static_cast<int>(err)));
 }
 
+Handshaker::Mode Handshaker::getMode() const{
+    return m_Mode;
+}
+
+void Handshaker::resetHandshake(){
+    disconnect(m_RsaKeyring, SIGNAL(privateKeyValidated()), this, 0);
+    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+    m_StarterIntegrityHash.fill(32, 0);
+    m_ResponderIntegrityHash.fill(32, 0);
+
+    switch(m_Mode){
+    case UndefinedMode:
+        try{
+            //init rsa decryptor
+            m_RsaDecryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_RsaKeyring->getStoredPrivateKey().data(),
+                                                                  m_RsaKeyring->getStoredPrivateKey().size(),
+                                                                  true));
+        }catch(CryptoPP::BERDecodeErr& e){
+            qDebug()<< e.what();
+            emit error(BadPrivateKey);
+            connect(m_RsaKeyring, SIGNAL(privateKeyValidated()),
+                    this, SLOT(resetHandshake()));
+        }
+        break;
+    case StarterMode:
+        try{
+            //init rsa encryptor
+            m_RsaEncryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_Contact->getKey().data(),
+                                                                  m_Contact->getKey().size(),
+                                                                  true));
+            starterSayHello();
+        }catch(CryptoPP::BERDecodeErr&){
+            emit error(BadContactKey);
+            connect(m_RsaKeyring, SIGNAL(keyPairValidated()),
+                    this, SLOT(resetHandshake()));
+        }
+        break;
+    case ResponderMode:
+        connect(m_Link, SIGNAL(readyRead()),
+                this, SLOT(responderParseStarterHello()));
+        break;
+    }
+}
+
 void Handshaker::starterSayHello(){ //S:1
     QByteArray packet;
     QByteArray clearText;
@@ -69,12 +110,13 @@ void Handshaker::starterSayHello(){ //S:1
 
     //Key Length
     QByteArray keyLength;
-    keyLength.append((m_RsaKeyring.getPublicKey().size() >> 8) & 0xFF);
-    keyLength.append(m_RsaKeyring.getPublicKey().size() & 0xFF);
+    QByteArray publicKey = m_RsaKeyring->generatePublicKey();
+    keyLength.append((publicKey.size() >> 8) & 0xFF);
+    keyLength.append(publicKey.size() & 0xFF);
     clearText.append(keyLength);
 
     //Public Key
-    clearText.append(m_RsaKeyring.getPublicKey());
+    clearText.append(publicKey);
 
     //Version
     clearText.append(SUPPORTED_PROTOCOL_VERSION);
@@ -114,7 +156,7 @@ void Handshaker::responderParseStarterHello(){ //R:1.1
 
     //parse Key lenght
     quint16 keyLength = qFromBigEndian<quint16>((const uchar*)clearText.left(2).constData());
-
+    qDebug()<<keyLength;
     //parse Key
     QByteArray key = clearText.mid(2, keyLength); //pos != index
 
@@ -421,7 +463,8 @@ QByteArray Handshaker::rsaDecrypt(QByteArray& cipherText){
                                                                    )
                                   );
             clearText.append(clearChunk.data(), (int)clearChunk.size());
-        }catch(CryptoPP::Exception&){
+        }catch(CryptoPP::Exception& e){
+            qDebug()<<e.what();
             emit error(DataCorrupted);
             clearText.clear();
             return clearText;

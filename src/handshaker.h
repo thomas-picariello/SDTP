@@ -25,6 +25,12 @@ class Handshaker : public QObject
 public:
     static const byte SUPPORTED_PROTOCOL_VERSION = 0x01;
 
+    enum Mode{
+        UndefinedMode,
+        StarterMode,
+        ResponderMode
+    };
+
     enum Error: byte{
         UndefinedError = 0x00,
         BadPrivateKey = 0x01,
@@ -50,7 +56,7 @@ public:
     };
     Q_ENUMS(SecurityLevel)
 
-    explicit Handshaker(TcpLink *link, QPair<QByteArray, QByteArray> *fileKey, QObject *parent = 0);
+    explicit Handshaker(TcpLink *link, RsaKeyring *keyring, QObject *parent = 0);
 
     void beginStarterHandshake(Contact *contact);
     void beginResponderHandshake(ContactDB *contactDB);
@@ -58,12 +64,16 @@ public:
     CryptoPP::GCM<CryptoPP::AES>::Decryption* getGcmDecryptor() const;
     Contact* getContact() const;
     QString getErrorString(Error err) const;
+    Mode getMode() const;
 
 signals:
     void error(Handshaker::Error);
     void success();
     void handshakeFinished(bool success);
     void newContactId(int id);
+
+public slots:
+    void resetHandshake();
 
 private slots:
     void responderParseStarterHello();
@@ -77,15 +87,16 @@ private:
     TcpLink *m_Link;
     Contact *m_Contact;
     ContactDB *m_ContactDB;
+    RsaKeyring *m_RsaKeyring;
     CryptoPP::AutoSeededRandomPool m_RandomGenerator;
     CryptoPP::GCM<CryptoPP::AES>::Encryption *m_GcmEncryptor;
     CryptoPP::GCM<CryptoPP::AES>::Decryption *m_GcmDecryptor;
     CryptoPP::RSAES_OAEP_SHA_Encryptor m_RsaEncryptor;
     CryptoPP::RSAES_OAEP_SHA_Decryptor m_RsaDecryptor;
-    RsaKeyring m_RsaKeyring;
     QPair<QByteArray,QByteArray> m_GcmKey;
     QByteArray m_StarterIntegrityHash;
     QByteArray m_ResponderIntegrityHash;
+    Mode m_Mode;
 
     void starterSayHello();
     void responderRespondHello();
@@ -101,7 +112,6 @@ private:
     QByteArray rsaEncrypt(QByteArray& clearText);
     QList<QByteArray*> splitData(QByteArray &data, uint chunkSize);
     void updateIntegrityHash(QByteArray *currentHash, const QByteArray &data);
-
 
     Q_DISABLE_COPY(Handshaker)
 };
