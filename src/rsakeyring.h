@@ -21,33 +21,40 @@ class RsaKeyring : public QObject
 {
     Q_OBJECT
 public:
+    enum Error{
+        PrivatKeyGenerationFailed,
+        PublicKeyGenerationFailed,
+        PrivateKeyValidationFailed,
+        KeystoreLoadingFailed
+    };
+    Q_ENUMS(Error)
+
     explicit RsaKeyring(QPair<QByteArray, QByteArray> *fileKey,
                         QObject *parent=0);
 
-    void updateFileKey(QByteArray *oldKey = NULL);
-    void commitToKeystore();
-    void exportPrivateKey(QString filename);
-    void exportPublicKey(QString filename);
+    void updateFileKey(QByteArray &oldKey);
+    QByteArray generatePublicKey(QByteArray &privateKey = QByteArray());
     void generateKeypair();
-    void generatePublicKey();
-    QByteArray getPrivateKey() const;
-    QByteArray getPublicKey() const;
-    void importPrivateKey(QString filename);
+    QByteArray getStoredPrivateKey() const;
+    bool hasPrivateKey() const;
     bool isGenerating() const;
-    void setPrivateKey(QByteArray privateKey);
     bool validatePrivateKey(QByteArray privateKey, int level = 2);
 
 signals:
-    void keyGenerationFinished();
-    void error(QString err);
+    void publicKeyGenerationFinished(QByteArray publicKey);
+    void privateKeyGenerationFinished(QByteArray privatekey);
+    void privateKeyValidated();
+    void error(Error);
 
 public slots:
+    void commitToKeystore(QByteArray privateKey);
+
+private slots:
     void onPrivateKeyGenJobFinished();
 
 private:
     QPair<QByteArray,QByteArray> *mFileKey;
-    QByteArray mPrivateKey;
-    QByteArray mPublicKey;
+    QByteArray mStoredPrivateKey;
     QFutureWatcher<QByteArray> mGenerateWatcher;
 
     QByteArray generatePrivateKeyRunnable();

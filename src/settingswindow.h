@@ -23,6 +23,7 @@ class SettingsWindow : public QWidget
     
 public:
     explicit SettingsWindow(QPair<QByteArray,QByteArray> *fileKey,
+                            RsaKeyring *keyring,
                             ContactDB *contactDB,
                             QWidget *parent = 0);
     ~SettingsWindow();
@@ -31,7 +32,7 @@ signals:
     void settingsUpdated();
     void error(QString err);
 
-public slots:
+private slots:
     void cancel();
     bool pwdTestMatch();
     void pwdSetVisible(bool visible);
@@ -39,17 +40,18 @@ public slots:
     void rsaExportPrivate();
     void rsaExportPublic();
     void rsaGenerateKeypair();
-    void rsaKeyGenFinished();
+    void rsaPrivateKeyGenFinished(QByteArray privateKey);
+    void rsaPublicKeyGenFinished(QByteArray publicKey);
     void rsaImportPrivate();
-    void rsaGeneratePublic();
+    void rsaGeneratePublicKey();
     void rsaGenerateAnimate();
     void showRsaPubkeyMenu();
     void showRsaPrivkeyMenu();
     void save();
 
 protected:
-    void showEvent(QShowEvent *event);
-    void hideEvent(QHideEvent *event);
+    void showEvent(QShowEvent*);
+    void hideEvent(QHideEvent*);
 
 private:
     Ui::SettingsWindow *ui;
@@ -57,7 +59,7 @@ private:
     QPair<QByteArray,QByteArray> *mFileKey;
     ContactDB *mContactDB;
     QIntValidator mPortValidator;
-    RsaKeyring mKeyring;
+    RsaKeyring *mKeyring;
 
     QMenu *mRsaPubkeyMenu;
     QMenu *mRsaPrivkeyMenu;

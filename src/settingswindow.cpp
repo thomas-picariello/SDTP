@@ -1,12 +1,12 @@
 #include "settingswindow.h"
 #include "ui_settingswindow.h"
 
-SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, ContactDB *contactDB, QWidget *parent):
+SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, RsaKeyring *keyring, ContactDB *contactDB, QWidget *parent):
     QWidget(parent),
     ui(new Ui::SettingsWindow),
-    mFileKey(fileKey),
     mContactDB(contactDB),
-    mKeyring(mFileKey),
+    mFileKey(fileKey),
+    mKeyring(keyring),
     mSettings(new QSettings("settings.ini", QSettings::IniFormat,this))
 {
     ui->setupUi(this);
@@ -37,8 +37,10 @@ SettingsWindow::SettingsWindow(QPair<QByteArray, QByteArray> *fileKey, ContactDB
     connect(ui->pwd_confpwd_input, SIGNAL(textChanged(QString)),
             this, SLOT(pwdTestMatch()));
 
-    connect(&mKeyring, SIGNAL(keyGenerationFinished()),
-            this, SLOT(rsaKeyGenFinished()));
+    connect(mKeyring, SIGNAL(privateKeyGenerationFinished(QByteArray)),
+            this, SLOT(rsaPrivateKeyGenFinished(QByteArray)));
+    connect(mKeyring, SIGNAL(publicKeyGenerationFinished(QByteArray)),
+            this, SLOT(rsaPublicKeyGenFinished(QByteArray)));
     connect(&mGeneratingAnimTimer, SIGNAL(timeout()),
             this, SLOT(rsaGenerateAnimate()));
 }
@@ -100,8 +102,17 @@ void SettingsWindow::rsaExportPrivate(){
                                                     tr("Save Private Key"),
                                                     QDir::home().absoluteFilePath(tr("private_key.key")),
                                                     tr("Key file (*.key)"));
-    if(!filename.isNull())
-        mKeyring.exportPrivateKey(filename);
+    if(!filename.isNull()){
+        QFile file(filename);
+        file.open(QFile::WriteOnly);
+        if(file.isOpen()){
+            QByteArray privateKey = QByteArray::fromBase64(ui->rsa_privkey_input->toPlainText().toUtf8());
+            file.write(privateKey);
+            file.close();
+        }else{
+            emit error("bad filename"); //TODO: enum
+        }
+    }
 }
 
 void SettingsWindow::rsaExportPublic(){
@@ -109,21 +120,33 @@ void SettingsWindow::rsaExportPublic(){
                                                     tr("Save Public Key"),
                                                     QDir::home().absoluteFilePath(tr("public_key.key")),
                                                     tr("Key file")+" (*.key)");
-    if(!filename.isNull())
-        mKeyring.exportPublicKey(filename);
-}
-
-void SettingsWindow::rsaGenerateKeypair(){
-    if(!mKeyring.isGenerating()){
-        mGeneratingAnimTimer.start(100);
-        mKeyring.generateKeypair();
+    if(!filename.isNull()){
+        QFile file(filename);
+        file.open(QFile::WriteOnly);
+        if(file.isOpen()){
+            QByteArray publicKey = QByteArray::fromBase64(ui->rsa_pubkey_input->toPlainText().toUtf8());
+            file.write(publicKey);
+            file.close();
+        }else{
+            emit error("bad filename"); //TODO: enum
+        }
     }
 }
 
-void SettingsWindow::rsaKeyGenFinished(){
+void SettingsWindow::rsaGenerateKeypair(){
+    if(!mKeyring->isGenerating()){
+        mGeneratingAnimTimer.start(100);
+        mKeyring->generateKeypair();
+    }
+}
+
+void SettingsWindow::rsaPrivateKeyGenFinished(QByteArray privateKey){
     mGeneratingAnimTimer.stop();
-    ui->rsa_privkey_input->setText(mKeyring.getPrivateKey().toBase64());
-    ui->rsa_pubkey_input->setText(mKeyring.getPublicKey().toBase64());
+    ui->rsa_privkey_input->setText(privateKey.toBase64());
+}
+
+void SettingsWindow::rsaPublicKeyGenFinished(QByteArray publicKey){
+    ui->rsa_pubkey_input->setText(publicKey.toBase64());
 }
 
 void SettingsWindow::rsaImportPrivate(){
@@ -132,23 +155,33 @@ void SettingsWindow::rsaImportPrivate(){
                                                     QDir::home().absolutePath(),
                                                     tr("Key file")+" (*.key)");
     if(!filename.isNull()){
-        mKeyring.importPrivateKey(filename);
-        ui->rsa_privkey_input->setText(mKeyring.getPrivateKey().toBase64());
+        QFile file(filename);
+        file.open(QFile::ReadOnly);
+        if(file.isOpen()){
+            QByteArray privateKey = file.readAll();
+            if(mKeyring->validatePrivateKey(privateKey)){
+                ui->rsa_privkey_input->setText(privateKey.toBase64());
+                rsaGeneratePublicKey();
+            }else{
+                emit error("bad key"); //TODO: enum
+            }
+        }
     }
 }
 
-void SettingsWindow::rsaGeneratePublic(){
-    mKeyring.setPrivateKey(QByteArray::fromBase64(ui->rsa_privkey_input->toPlainText().toUtf8()));
-    ui->rsa_pubkey_input->setText(mKeyring.getPublicKey().toBase64());
+void SettingsWindow::rsaGeneratePublicKey(){
+    QByteArray privateKey = QByteArray::fromBase64(ui->rsa_privkey_input->toPlainText().toUtf8());
+    mKeyring->generatePublicKey(privateKey);
 }
 
 void SettingsWindow::rsaGenerateAnimate(){
     if(ui->rsa_privkey_input->toPlainText().length() > 3){
         ui->rsa_pubkey_input->clear();
         ui->rsa_privkey_input->clear();
+    }else{
+        ui->rsa_pubkey_input->setText(ui->rsa_pubkey_input->toPlainText()+"|");
+        ui->rsa_privkey_input->setText(ui->rsa_privkey_input->toPlainText()+"|");
     }
-    ui->rsa_pubkey_input->setText(ui->rsa_pubkey_input->toPlainText()+"|");
-    ui->rsa_privkey_input->setText(ui->rsa_privkey_input->toPlainText()+"|");
 }
 
 void SettingsWindow::save(){
@@ -159,6 +192,7 @@ void SettingsWindow::save(){
     {
         if(pwdValidateOld() && pwdTestMatch()){
             QString password = ui->pwd_newpwd_input->text();
+            QByteArray oldKey = mFileKey->first;
             if(password.isEmpty()){
                 //TODO: confirmation
                 mSettings->remove("encryption/password_hash");
@@ -167,7 +201,7 @@ void SettingsWindow::save(){
                 mSettings->setValue("encryption/password_hash", hashPassword(password).toBase64());
                 mFileKey->first = deriveKey(password);
             }
-            mKeyring.updateFileKey();
+            mKeyring->updateFileKey(oldKey);
             mContactDB->updateFileKey();
         }else{
             emit error(tr("Bad password"));
@@ -181,23 +215,24 @@ void SettingsWindow::save(){
     mSettings->setValue("network/listen_port", port);
 
     //save private key
-    QByteArray inputPrivKey = QByteArray::fromBase64(ui->rsa_privkey_input->toPlainText().toUtf8());
-    if(inputPrivKey != mKeyring.getPrivateKey()){
-        mKeyring.setPrivateKey(inputPrivKey);
-        mKeyring.commitToKeystore();
+    QByteArray privateKey = QByteArray::fromBase64(ui->rsa_privkey_input->toPlainText().toUtf8());
+    if(privateKey != mKeyring->getStoredPrivateKey()){
+        if(mKeyring->validatePrivateKey(privateKey))
+            mKeyring->commitToKeystore(privateKey);
+        else
+            emit error("Bad key"); //TODO: enum
     }
-
     emit settingsUpdated();
     hide();
 }
 
-void SettingsWindow::hideEvent(QHideEvent *event){
+void SettingsWindow::hideEvent(QHideEvent *){
     ui->pwd_actualpwd_input->clear();
     ui->pwd_newpwd_input->clear();
     ui->pwd_confpwd_input->clear();
 }
 
-void SettingsWindow::showEvent(QShowEvent *event){
+void SettingsWindow::showEvent(QShowEvent*){
     if(mSettings->value("encryption/password_hash").toByteArray().isEmpty()){
         ui->pwd_actualpwd_input->setDisabled(true);
         ui->pwd_actualpwd_input->setPlaceholderText(tr("No actual password"));
@@ -206,8 +241,8 @@ void SettingsWindow::showEvent(QShowEvent *event){
         ui->pwd_actualpwd_input->setPlaceholderText(tr("Enter your actual password"));
     }
     ui->net_port_input->setText(mSettings->value("network/listen_port").toString());
-    ui->rsa_privkey_input->setText(mKeyring.getPrivateKey().toBase64());
-    ui->rsa_pubkey_input->setText(mKeyring.getPublicKey().toBase64());
+    ui->rsa_privkey_input->setText(mKeyring->getStoredPrivateKey().toBase64());
+    mKeyring->generatePublicKey(mKeyring->getStoredPrivateKey());
 }
 
 QByteArray SettingsWindow::hashPassword(QString &password){
@@ -244,7 +279,7 @@ void SettingsWindow::setupRsaMenus(){
     mRsaPubkeyMenu->addAction(tr("Export public key"),
                               this, SLOT(rsaExportPublic()));
     mRsaPubkeyMenu->addAction(tr("Generate public key from private key"),
-                              this, SLOT(rsaGeneratePublic()));
+                              this, SLOT(rsaGeneratePublicKey()));
 
     mRsaPrivkeyMenu = new QMenu(ui->rsa_privkey_opt_bt);
     mRsaPrivkeyMenu->addAction(tr("Export private key"),
