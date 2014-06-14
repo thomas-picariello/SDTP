@@ -3,6 +3,7 @@
 
 #include <contact.h>
 #include <QList>
+#include <QScrollBar>
 #include "abstractapp.h"
 
 namespace Ui{
@@ -21,7 +22,7 @@ public:
     virtual ~MessengerApp();
 
     void addContact();
-    void updateDisplay(QByteArray msg);
+    void updateDisplay();
 
 public slots :
     virtual void readIncommingData(QByteArray &data);
@@ -31,6 +32,7 @@ private slots:
 
 private:
     Ui::MessengerApp *ui;
+    QStringList *m_MsgList;
 
 };
 
