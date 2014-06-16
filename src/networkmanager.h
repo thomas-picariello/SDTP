@@ -23,6 +23,11 @@ class NetworkManager : public QObject
     Q_OBJECT
 
 public:
+    enum Error{
+
+    };
+    Q_ENUMS(Error)
+
     struct Packet{
         quint64 timestamp;
         byte packetNumber;
@@ -42,6 +47,7 @@ public:
 
     Contact* getContact() const;
     int getContactId() const;
+    QString getErrorString(Error err) const;
     Contact::Status getStatus() const;
     void registerApp(AbstractApp::AppUID uid, AbstractApp *app);
     void setContact(Contact *contact);
@@ -53,8 +59,9 @@ public slots :
 
 signals :
     void contactStatusChanged(int id, Contact::Status status);
+    void destroyed(NetworkManager* networkManager);
+    void error(NetworkManager::Error err);
     void newContactId(int id);
-    void error(QString error);
     void startRootApp(int contactId);
 
 private slots:
@@ -63,7 +70,7 @@ private slots:
     void onHandshakeFinished(bool successfull);
     void processIncommingData();
     void onDisconnected();
-    void handshakeDebug(Handshaker::Error); //TODO: remove
+    void onHandshakeError(Handshaker::Error);
 
 private :
     Contact::Status m_Status;

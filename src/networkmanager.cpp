@@ -23,7 +23,7 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, RsaKeyrin
     connect(m_Handshaker, SIGNAL(newContactId(int)),
             this, SIGNAL(newContactId(int)));
     connect(m_Handshaker, SIGNAL(error(Handshaker::Error)),
-            this, SLOT(handshakeDebug(Handshaker::Error)));
+            this, SLOT(onHandshakeError(Handshaker::Error)));
 }
 
 //Responder
@@ -42,7 +42,7 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, RsaKeyr
     connect(m_Handshaker, SIGNAL(handshakeFinished(bool)),
             this, SLOT(onHandshakeFinished(bool)));
     connect(m_Handshaker, SIGNAL(error(Handshaker::Error)),
-            this, SLOT(handshakeDebug(Handshaker::Error)));
+            this, SLOT(onHandshakeError(Handshaker::Error)));
 
     doResponderHandshake();
 }
@@ -52,6 +52,11 @@ int NetworkManager::getContactId() const{
         return m_Contact->getId();
     else
         return 0;
+}
+
+QString NetworkManager::getErrorString(Error err) const{
+    QMetaEnum errorEnum = metaObject()->enumerator(metaObject()->indexOfEnumerator("Error"));
+    return QString(errorEnum.valueToKey(static_cast<int>(err)));
 }
 
 Contact* NetworkManager::getContact() const{
@@ -110,11 +115,15 @@ void NetworkManager::onHandshakeFinished(bool successfull){
         m_Contact = m_Handshaker->getContact();
         emit contactStatusChanged(getContactId(), Contact::Online);
     }else{
-
+        if(m_Handshaker->getMode() == Handshaker::StarterMode)
+            m_Pinger.start();
+        else if(m_Handshaker->getMode() == Handshaker::ResponderMode)
+            deleteLater();
     }
 }
 
-void NetworkManager::handshakeDebug(Handshaker::Error err){ //TODO: remove
+void NetworkManager::onHandshakeError(Handshaker::Error err){
+     //TODO: remove
     qDebug()<<"Handshake error:"<<m_Handshaker->getErrorString(err);
 }
 
@@ -161,4 +170,5 @@ QByteArray NetworkManager::serializePacket(Packet &packet){
 NetworkManager::~NetworkManager(){
     //Rem: do not delete m_ContactDB and m_AppList pointers
     delete m_Handshaker;
+    emit destroyed(this);
 }
