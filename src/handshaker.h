@@ -108,6 +108,7 @@ private:
     QByteArray generateRandomBlock(uint size);
     QByteArray gcmDecrypt(QByteArray& cipherText);
     QByteArray gcmEncrypt(QByteArray& clearText);
+    bool isError(const QByteArray &data);
     QByteArray rsaDecrypt(QByteArray& cipherText);
     QByteArray rsaEncrypt(QByteArray& clearText);
     QList<QByteArray*> splitData(const QByteArray &data, const uint chunkSize);

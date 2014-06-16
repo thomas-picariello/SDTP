@@ -140,11 +140,7 @@ void Handshaker::responderParseStarterHello(){ //R:1.1
     QByteArray rawPacket = m_Link->readAll();
 
     //check error
-    if(rawPacket.size() == 1 && rawPacket.at(0) == (char)UndefinedError){
-        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-        emit error(UndefinedError);
-        return;
-    }
+    if(isError(rawPacket)) return;
 
     //parse security level TODO: verify with enum
     byte secLevel = rawPacket.at(0);
@@ -229,11 +225,7 @@ void Handshaker::starterParseResponderHello(){ //S:2.1
     QByteArray rawPacket = m_Link->readAll();
 
     //check error
-    if(rawPacket.size() == 1 && rawPacket.at(0) == (char)UndefinedError){
-        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-        emit error(UndefinedError);
-        return;
-    }
+    if(isError(rawPacket)) return;
 
     //decrypt packet
     QByteArray clearText = rsaDecrypt(rawPacket);
@@ -301,11 +293,7 @@ void Handshaker::responderParseHalfKeyAndResponderIntegrity(){ //R:2.1
     QByteArray rawPacket = m_Link->readAll();
 
     //check error
-    if(rawPacket.size() == 1 && rawPacket.at(0) == (char)UndefinedError){
-        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-        emit error(UndefinedError);
-        return;
-    }
+    if(isError(rawPacket)) return;
 
     //parse encrypted key lenght
     quint16 encryptedKeyLenght = (rawPacket.at(0) << 8) + rawPacket.at(1);
@@ -368,11 +356,7 @@ void Handshaker::responderSendStarterIntegrity(){ //R:2.2
 void Handshaker::starterParseStarterIntegrity(){ //S:3.1
     QByteArray rawPacket = m_Link->readAll();
     //check error
-    if(rawPacket.size() == 1 && rawPacket.at(0) == (char)UndefinedError){
-        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-        emit error(UndefinedError);
-        return;
-    }
+    if(isError(rawPacket)) return;
 
     //decrypt packet
     QByteArray starterIntegrity = gcmDecrypt(rawPacket);
@@ -397,13 +381,12 @@ void Handshaker::starterSendHandshakeFinished(){ //S:3.2
 }
 
 void Handshaker::responderParseHandshakeFinished(){ //R:3
+    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     QByteArray rawPacket = m_Link->readAll();
     //check error
-    if(rawPacket.size() == 1 && rawPacket.at(0) == (char)UndefinedError){
-        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-        emit error(UndefinedError);
+    if(isError(rawPacket))
         return;
-    }else if(rawPacket.size() == 1 && rawPacket.at(0) == (char)HandshakeFinished){
+    else if(rawPacket.size() == 1 && rawPacket.at(0) == (char)HandshakeFinished){
         emit handshakeFinished(true);
     }else{
         processError(UndefinedError);
@@ -451,6 +434,15 @@ QByteArray Handshaker::gcmEncrypt(QByteArray& clearText){
         emit error(BadSymmetricKey);
     }
     return QByteArray(cipherText.data(), (int)cipherText.size());
+}
+
+bool Handshaker::isError(const QByteArray &data){
+    if(data.size() == 1 && data.at(0) == (char)UndefinedError){
+        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+        emit error(UndefinedError);
+        return true;
+    }
+    return false;
 }
 
 QByteArray Handshaker::rsaDecrypt(QByteArray& cipherText){
