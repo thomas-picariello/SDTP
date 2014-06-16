@@ -89,7 +89,7 @@ void Handshaker::resetHandshake(){
             starterSayHello();
         }catch(CryptoPP::BERDecodeErr&){
             emit error(BadContactKey);
-            connect(m_RsaKeyring, SIGNAL(keyPairValidated()),
+            connect(m_RsaKeyring, SIGNAL(privateKeyValidated()),
                     this, SLOT(resetHandshake()));
         }
         break;
@@ -153,6 +153,10 @@ void Handshaker::responderParseStarterHello(){ //R:1.1
     //Decrypt rsa
     QByteArray cipherText = rawPacket.mid(1);
     clearText.append(rsaDecrypt(cipherText));
+    if(clearText.size() == 0){
+        processError(DataCorrupted);
+        return;
+    }
 
     //parse Key lenght
     quint16 keyLength = qFromBigEndian<quint16>((const uchar*)clearText.left(2).constData());
@@ -459,9 +463,8 @@ QByteArray Handshaker::rsaDecrypt(QByteArray& cipherText){
         try{
             CryptoPP::ArraySource((byte*)chunk->data(), chunk->size(), true,
                                   new CryptoPP::PK_DecryptorFilter(m_RandomGenerator, m_RsaDecryptor,
-                                                                   new CryptoPP::StringSink(clearChunk)
-                                                                   )
-                                  );
+                                                                   new CryptoPP::StringSink(clearChunk)));
+
             clearText.append(clearChunk.data(), (int)clearChunk.size());
         }catch(CryptoPP::Exception& e){
             qDebug()<<e.what();
@@ -496,7 +499,7 @@ QByteArray Handshaker::rsaEncrypt(QByteArray& clearText){
     return cipherText;
 }
 
-QList<QByteArray*> Handshaker::splitData(QByteArray &data, uint chunkSize){
+QList<QByteArray*> Handshaker::splitData(const QByteArray &data, const uint chunkSize){
     QList<QByteArray*> chunks;
     quint64 offset = 0;
     do{

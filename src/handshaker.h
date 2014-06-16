@@ -110,7 +110,7 @@ private:
     QByteArray gcmEncrypt(QByteArray& clearText);
     QByteArray rsaDecrypt(QByteArray& cipherText);
     QByteArray rsaEncrypt(QByteArray& clearText);
-    QList<QByteArray*> splitData(QByteArray &data, uint chunkSize);
+    QList<QByteArray*> splitData(const QByteArray &data, const uint chunkSize);
     void updateIntegrityHash(QByteArray *currentHash, const QByteArray &data);
 
     Q_DISABLE_COPY(Handshaker)
