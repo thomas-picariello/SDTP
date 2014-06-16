@@ -28,7 +28,7 @@ public slots:
 
     void onIncommingConnection();
     void restartListener();
-    void deleteFromList(QObject *object);
+    void onNetworkManagerDestroy(NetworkManager *networkManager);
     void updateNetworkManagerId(int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);

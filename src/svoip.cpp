@@ -77,16 +77,8 @@ void SVoIP::onIncommingConnection(){
     mNetworkManagerList.insert(id, networkManager);
 }
 
-void SVoIP::deleteFromList(QObject *object){
-    NetworkManager *networkManager = dynamic_cast<NetworkManager*>(object);
-    if(networkManager){
-        int id = mNetworkManagerList.key(dynamic_cast<NetworkManager*>(object), 0);
-        mNetworkManagerList.remove(id);
-    }
-    AbstractApp* app = dynamic_cast<AbstractApp*>(object);
-    if(app){
-        //TODO: find and remove app* from mAppList
-    }
+void SVoIP::onNetworkManagerDestroy(NetworkManager* networkManager){
+        mNetworkManagerList.remove(mNetworkManagerList.key(networkManager));
 }
 
 void SVoIP::updateNetworkManagerId(int newId){
@@ -131,8 +123,8 @@ void SVoIP::restartListener(){
 void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
     connect(networkManager, SIGNAL(contactStatusChanged(int,Contact::Status)),
             this, SLOT(updateContactStatus(int, Contact::Status)));
-    connect(networkManager, SIGNAL(destroyed(QObject*)),
-            this, SLOT(deleteFromList(QObject*)));
+    connect(networkManager, SIGNAL(destroyed(NetworkManager*)),
+            this, SLOT(onNetworkManagerDestroy(NetworkManager*)));
     connect(networkManager, SIGNAL(newContactId(int)),
             this, SLOT(updateNetworkManagerId(int)));
 //    connect(networkManager,SIGNAL(startAppRequest(int,AppType)),
@@ -186,5 +178,5 @@ SVoIP::~SVoIP(){
     if(mContactDB) delete mContactDB;
     if(mPasswordWindow) delete mPasswordWindow;
     qDeleteAll(mAppList);
-    qDeleteAll(mNetworkManagerList);
+    qDeleteAll(QMap<int,NetworkManager*>(mNetworkManagerList)); //copy list
 }
