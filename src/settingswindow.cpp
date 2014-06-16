@@ -178,10 +178,9 @@ void SettingsWindow::rsaGenerateAnimate(){
     if(ui->rsa_privkey_input->toPlainText().length() > 3){
         ui->rsa_pubkey_input->clear();
         ui->rsa_privkey_input->clear();
-    }else{
-        ui->rsa_pubkey_input->setText(ui->rsa_pubkey_input->toPlainText()+"|");
-        ui->rsa_privkey_input->setText(ui->rsa_privkey_input->toPlainText()+"|");
     }
+    ui->rsa_pubkey_input->setText(ui->rsa_pubkey_input->toPlainText()+"|");
+    ui->rsa_privkey_input->setText(ui->rsa_privkey_input->toPlainText()+"|");
 }
 
 void SettingsWindow::save(){
