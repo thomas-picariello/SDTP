@@ -32,15 +32,15 @@ public:
     };
 
     enum Error: byte{
-        UndefinedError = 0x00,
-        BadPrivateKey = 0x01,
-        BadContactKey = 0x02,
-        BadSymmetricKey = 0x03,
-        BadSecurityLevel = 0x04,
-        IncompatibleProtocolVersions = 0x05,
-        IdentityCheckFailed = 0x06,
-        IntegrityCheckFailed = 0x07,
-        DataCorrupted = 0x08
+        UndefinedError = 0x01,  //starts at one because socket does not recieve 0...
+        BadPrivateKey = 0x02,
+        BadContactKey = 0x03,
+        BadSymmetricKey = 0x04,
+        BadSecurityLevel = 0x05,
+        IncompatibleProtocolVersions = 0x06,
+        IdentityCheckFailed = 0x07,
+        IntegrityCheckFailed = 0x08,
+        DataCorrupted = 0x09
     };
     Q_ENUMS(Error)
 

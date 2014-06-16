@@ -73,8 +73,7 @@ void Handshaker::resetHandshake(){
             m_RsaDecryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_RsaKeyring->getStoredPrivateKey().data(),
                                                                   m_RsaKeyring->getStoredPrivateKey().size(),
                                                                   true));
-        }catch(CryptoPP::BERDecodeErr& e){
-            qDebug()<< e.what();
+        }catch(CryptoPP::BERDecodeErr&){
             emit error(BadPrivateKey);
             connect(m_RsaKeyring, SIGNAL(privateKeyValidated()),
                     this, SLOT(resetHandshake()));
@@ -160,7 +159,6 @@ void Handshaker::responderParseStarterHello(){ //R:1.1
 
     //parse Key lenght
     quint16 keyLength = qFromBigEndian<quint16>((const uchar*)clearText.left(2).constData());
-    qDebug()<<keyLength;
     //parse Key
     QByteArray key = clearText.mid(2, keyLength); //pos != index
 
@@ -415,7 +413,7 @@ void Handshaker::responderParseHandshakeFinished(){ //R:3
 void Handshaker::processError(Error err){
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     emit error(err);
-    m_Link->write((uchar)UndefinedError);
+    m_Link->write(QByteArray(1,(char)UndefinedError));
     emit handshakeFinished(false);
 }
 
@@ -466,8 +464,7 @@ QByteArray Handshaker::rsaDecrypt(QByteArray& cipherText){
                                                                    new CryptoPP::StringSink(clearChunk)));
 
             clearText.append(clearChunk.data(), (int)clearChunk.size());
-        }catch(CryptoPP::Exception& e){
-            qDebug()<<e.what();
+        }catch(CryptoPP::Exception&){
             emit error(DataCorrupted);
             clearText.clear();
             return clearText;
