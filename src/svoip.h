@@ -6,6 +6,7 @@
 #include <QSettings>
 #include <QTcpServer>
 #include <QMap>
+#include <QMessageBox>
 #include <QPair>
 #include <cryptopp/base64.h>
 #include <cryptopp/osrng.h>
@@ -15,6 +16,7 @@
 #include "networkmanager.h"
 #include "typesenums.h"
 #include "rootapp.h"
+#include "confwizard.h"
 #include "messengerapp.h"
 
 class SVoIP: public QObject
@@ -43,6 +45,7 @@ signals:
     void error(QString err);
 
 private :
+    ConfWizard *m_wizard;
     ContactDB *mContactDB;
     PasswordWindow *mPasswordWindow;
     ContactListWindow *mContactListWindow;
