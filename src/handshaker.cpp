@@ -14,7 +14,7 @@ Handshaker::Handshaker(TcpLink *link, RsaKeyring* keyring, QObject *parent):
     m_BanTime(0)
 {
     m_Timeout.setSingleShot(true);
-    m_Timeout.setInterval(1000);
+    m_Timeout.setInterval(5000);    //default Timeout 5s
     resetHandshake();
 
     connect(&m_Timeout, SIGNAL(timeout()),
@@ -151,6 +151,7 @@ void Handshaker::starterSayHello(){ //S:1
 
     //send the packet
     m_Link->write(packet);
+    m_Timeout.start();
 }
 
 void Handshaker::responderParseStarterHello(){ //R:1.1
@@ -237,10 +238,12 @@ void Handshaker::responderRespondHello(){ //R:1.2
             this, SLOT(responderParseHalfKeyAndResponderIntegrity()));
 
     m_Link->write(packet);
+    m_Timeout.start();
 }
 
 void Handshaker::starterParseResponderHello(){ //S:2.1
     QByteArray rawPacket = m_Link->readAll();
+    m_Timeout.stop();
 
     //check error
     if(isError(rawPacket)) return;
@@ -309,10 +312,12 @@ void Handshaker::starterSendHalfKeyAndResponderIntegrity(){ //S:2.2
             this, SLOT(starterParseStarterIntegrity()));
 
     m_Link->write(packet);
+    m_Timeout.start();
 }
 
 void Handshaker::responderParseHalfKeyAndResponderIntegrity(){ //R:2.1
     QByteArray rawPacket = m_Link->readAll();
+    m_Timeout.stop();
 
     //check error
     if(isError(rawPacket)) return;
@@ -373,10 +378,13 @@ void Handshaker::responderSendStarterIntegrity(){ //R:2.2
 
     //send packet
     m_Link->write(packet);
+    m_Timeout.start();
 }
 
 void Handshaker::starterParseStarterIntegrity(){ //S:3.1
     QByteArray rawPacket = m_Link->readAll();
+    m_Timeout.stop();
+
     //check error
     if(isError(rawPacket)) return;
 
@@ -403,8 +411,10 @@ void Handshaker::starterSendHandshakeFinished(){ //S:3.2
 }
 
 void Handshaker::responderParseHandshakeFinished(){ //R:3
-    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     QByteArray rawPacket = m_Link->readAll();
+    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+    m_Timeout.stop();
+
     //check error
     if(isError(rawPacket))
         return;
