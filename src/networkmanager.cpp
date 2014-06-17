@@ -116,9 +116,10 @@ void NetworkManager::onHandshakeFinished(bool successfull){
         emit contactStatusChanged(getContactId(), Contact::Online);
     }else{
         if(m_Handshaker->getMode() == Handshaker::StarterMode)
-            m_Pinger.start();
+            m_Pinger.start(m_Handshaker->getBanTime()); //restart pinger after ban time
         else if(m_Handshaker->getMode() == Handshaker::ResponderMode)
-            deleteLater();
+            //TODO: update ban time
+            deleteLater(); //close connection, delete the network manager
     }
 }
 
