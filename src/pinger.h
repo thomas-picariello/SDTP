@@ -17,7 +17,7 @@ public:
     QString getActiveHost() const;
     void setLink(AbstractLink *link);
     void setContact(Contact *contact);
-    bool start();
+    bool start(int delay = 0);
 
 signals:
     void connected();

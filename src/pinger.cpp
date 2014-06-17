@@ -24,10 +24,10 @@ void Pinger::setLink(AbstractLink *link){
             this, SLOT(onConnected()));
 }
 
-bool Pinger::start(){
+bool Pinger::start(int delay){
     bool initialized = (m_Contact != 0 && m_Link != 0);
     if (initialized)
-        m_ConnectTimer.start(0); //immediatly start the first ping
+        m_ConnectTimer.start(delay*1000); //default 0s
     return initialized;
 }
 
