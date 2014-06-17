@@ -32,15 +32,16 @@ public:
     };
 
     enum Error: byte{
-        UndefinedError = 0x01,  //starts at one because socket does not recieve 0...
-        BadPrivateKey = 0x02,
-        BadContactKey = 0x03,
-        BadSymmetricKey = 0x04,
-        BadSecurityLevel = 0x05,
-        IncompatibleProtocolVersions = 0x06,
-        IdentityCheckFailed = 0x07,
-        IntegrityCheckFailed = 0x08,
-        DataCorrupted = 0x09
+        UndefinedError = 0x00,
+        BadPrivateKey = 0x01,
+        BadContactKey = 0x02,
+        BadSymmetricKey = 0x03,
+        BadSecurityLevel = 0x04,
+        IncompatibleProtocolVersions = 0x05,
+        IdentityCheckFailed = 0x06,
+        IntegrityCheckFailed = 0x07,
+        DataCorrupted = 0x08,
+        Timeout = 0x09
     };
     Q_ENUMS(Error)
 
@@ -60,15 +61,18 @@ public:
 
     void beginStarterHandshake(Contact *contact);
     void beginResponderHandshake(ContactDB *contactDB);
-    CryptoPP::GCM<CryptoPP::AES>::Encryption* getGcmEncryptor() const;
-    CryptoPP::GCM<CryptoPP::AES>::Decryption* getGcmDecryptor() const;
+
+    quint16 getBanTime() const;
     Contact* getContact() const;
     QString getErrorString(Error err) const;
+    CryptoPP::GCM<CryptoPP::AES>::Encryption* getGcmEncryptor() const;
+    CryptoPP::GCM<CryptoPP::AES>::Decryption* getGcmDecryptor() const;
     Mode getMode() const;
+    void setBanTime(quint16 banTime);
+    void setTimeout(int timeout);
 
 signals:
     void error(Handshaker::Error);
-    void success();
     void handshakeFinished(bool success);
     void newContactId(int id);
 
@@ -81,8 +85,11 @@ private slots:
     void responderParseHalfKeyAndResponderIntegrity();
     void starterParseStarterIntegrity();
     void responderParseHandshakeFinished();
+    void onTimeout();
 
 private:
+    quint16 m_BanTime;
+    Mode m_Mode;
     QTimer m_Timeout;
     TcpLink *m_Link;
     Contact *m_Contact;
@@ -96,7 +103,7 @@ private:
     QPair<QByteArray,QByteArray> m_GcmKey;
     QByteArray m_StarterIntegrityHash;
     QByteArray m_ResponderIntegrityHash;
-    Mode m_Mode;
+
 
     void starterSayHello();
     void responderRespondHello();

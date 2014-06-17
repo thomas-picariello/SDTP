@@ -10,9 +10,15 @@ Handshaker::Handshaker(TcpLink *link, RsaKeyring* keyring, QObject *parent):
     m_RsaKeyring(keyring),
     m_StarterIntegrityHash(32, 0),  //256 bits Hash
     m_ResponderIntegrityHash(32, 0),  //256 bits Hash
-    m_Mode(UndefinedMode)
+    m_Mode(UndefinedMode),
+    m_BanTime(0)
 {
+    m_Timeout.setSingleShot(true);
+    m_Timeout.setInterval(1000);
     resetHandshake();
+
+    connect(&m_Timeout, SIGNAL(timeout()),
+            this, SLOT(onTimeout()));
 }
 
 void Handshaker::beginResponderHandshake(ContactDB *contactDB){
@@ -39,12 +45,8 @@ void Handshaker::beginStarterHandshake(Contact *contact){
     }
 }
 
-CryptoPP::GCM<CryptoPP::AES>::Encryption* Handshaker::getGcmEncryptor() const{
-    return m_GcmEncryptor;
-}
-
-CryptoPP::GCM<CryptoPP::AES>::Decryption* Handshaker::getGcmDecryptor() const{
-    return m_GcmDecryptor;
+quint16 Handshaker::getBanTime() const{
+    return m_BanTime;
 }
 
 Contact* Handshaker::getContact() const{
@@ -56,8 +58,24 @@ QString Handshaker::getErrorString(Error err) const{
     return QString(errorEnum.valueToKey(static_cast<int>(err)));
 }
 
+CryptoPP::GCM<CryptoPP::AES>::Encryption* Handshaker::getGcmEncryptor() const{
+    return m_GcmEncryptor;
+}
+
+CryptoPP::GCM<CryptoPP::AES>::Decryption* Handshaker::getGcmDecryptor() const{
+    return m_GcmDecryptor;
+}
+
 Handshaker::Mode Handshaker::getMode() const{
     return m_Mode;
+}
+
+void Handshaker::setBanTime(quint16 banTime){
+    m_BanTime = banTime;
+}
+
+void Handshaker::setTimeout(int timeout){
+    m_Timeout.setInterval(timeout);
 }
 
 void Handshaker::resetHandshake(){
@@ -142,7 +160,7 @@ void Handshaker::responderParseStarterHello(){ //R:1.1
     //check error
     if(isError(rawPacket)) return;
 
-    //parse security level TODO: verify with enum
+    //parse security level
     byte secLevel = rawPacket.at(0);
 
     //Decrypt rsa
@@ -229,6 +247,10 @@ void Handshaker::starterParseResponderHello(){ //S:2.1
 
     //decrypt packet
     QByteArray clearText = rsaDecrypt(rawPacket);
+    if(clearText.isEmpty()){
+        processError(DataCorrupted);
+        return;
+    }
 
     //parse chosen version
     byte chosenVersion = clearText.at(0);
@@ -393,10 +415,23 @@ void Handshaker::responderParseHandshakeFinished(){ //R:3
     }
 }
 
+void Handshaker::onTimeout(){
+    processError(Timeout);
+}
+
 void Handshaker::processError(Error err){
+    QByteArray packet;
+    QDataStream packetizer(&packet, QIODevice::ReadWrite);
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+    if(m_BanTime > 0){
+        if(m_BanTime < 65535)
+            m_BanTime *= 2;
+    }else
+        m_BanTime = 1;
+    packetizer << (byte)UndefinedError;
+    packetizer << m_BanTime;
+    m_Link->write(packet);
     emit error(err);
-    m_Link->write(QByteArray(1,(char)UndefinedError));
     emit handshakeFinished(false);
 }
 
@@ -437,8 +472,13 @@ QByteArray Handshaker::gcmEncrypt(QByteArray& clearText){
 }
 
 bool Handshaker::isError(const QByteArray &data){
-    if(data.size() == 1 && data.at(0) == (char)UndefinedError){
+    QDataStream depacketizer(data);
+    byte errorCode;
+    depacketizer >> errorCode;
+    if(data.size() == 3 && errorCode == (byte)UndefinedError){
         disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+        depacketizer >> m_BanTime;
+        handshakeFinished(false);
         emit error(UndefinedError);
         return true;
     }
@@ -457,7 +497,6 @@ QByteArray Handshaker::rsaDecrypt(QByteArray& cipherText){
 
             clearText.append(clearChunk.data(), (int)clearChunk.size());
         }catch(CryptoPP::Exception&){
-            emit error(DataCorrupted);
             clearText.clear();
             return clearText;
         }
@@ -480,6 +519,7 @@ QByteArray Handshaker::rsaEncrypt(QByteArray& clearText){
                                   );
             cipherText.append(cipherChunk.data(), (int)cipherChunk.size());
         }catch(CryptoPP::Exception&){
+            //TODO: process error ?
             cipherText.clear();
         }
     }
