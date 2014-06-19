@@ -4,6 +4,7 @@
 #include <contact.h>
 #include <QList>
 #include <QScrollBar>
+#include "typesenums.h"
 #include "abstractapp.h"
 
 namespace Ui{
@@ -16,7 +17,7 @@ class MessengerApp : public AbstractApp
     Q_OBJECT
 
 public:
-    static const uint APPID = 1;
+    static const AppType APPTYPE = Messenger;
 
     explicit MessengerApp(QList<Contact*> contactList, ContactDB *contactDB, QWidget *parent = 0);
     virtual ~MessengerApp();

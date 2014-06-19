@@ -39,10 +39,10 @@ void SVoIP::checkParameters(QByteArray key){
 }
 
 void SVoIP::displayFirstStartWizard(){
-    //TODO: implement a class
 
-    m_wizard = new ConfWizard();
-    m_wizard->show();
+
+    m_wizard = new ConfWizard(mFileKey);
+
 
     connect(m_wizard,SIGNAL(accepted()),this,SLOT(startProgram()));
     connect(m_wizard,SIGNAL(rejected()),qApp,SLOT(quit()));
