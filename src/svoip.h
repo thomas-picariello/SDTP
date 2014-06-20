@@ -6,7 +6,6 @@
 #include <QSettings>
 #include <QTcpServer>
 #include <QMap>
-#include <QMessageBox>
 #include <QPair>
 #include <cryptopp/base64.h>
 #include <cryptopp/osrng.h>
@@ -18,6 +17,7 @@
 #include "rootapp.h"
 #include "confwizard.h"
 #include "messengerapp.h"
+#include "ipfilter.h"
 
 class SVoIP: public QObject
 {
@@ -27,19 +27,19 @@ public:
     ~SVoIP();
 
 public slots:
-
-    void onIncommingConnection();
     void restartListener();
     void onNetworkManagerDestroy(NetworkManager *networkManager);
     void updateNetworkManagerId(int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
     void startApp(int contactId, AppType appType);
-    inline void startRootApp(int contactId){ startApp(contactId, Root); }
+    void startRootApp(int contactId){ startApp(contactId, Root); }
 
 private slots:
     void checkParameters(QByteArray key = QByteArray());
     void startProgram();
+    void onIpAccepted(QTcpSocket* socket);
+    void onNewConnection();
 
 signals:
     void error(QString err);
@@ -51,6 +51,7 @@ private :
     ContactListWindow *mContactListWindow;
     RsaKeyring *mRsaKeyring;
     QPair<QByteArray,QByteArray> mFileKey;
+    IpFilter mIpFilter;
     QTcpServer mListener;
     QMap<int,NetworkManager*> mNetworkManagerList;
     QMap<QPair<int,AbstractApp::AppUID>, AbstractApp*> mAppList;

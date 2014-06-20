@@ -5,7 +5,7 @@ IpFilter::IpFilter(QObject *parent) :
 {
     connect(&m_cleanTimer, SIGNAL(timeout()),
             this, SLOT(clean()));
-    m_cleanTimer.start(60000); //clean list every minute
+    m_cleanTimer.start(10000); //clean list every 10s
 }
 
 void IpFilter::addBan(const QString &ip, const quint32 banDuration, const quint32 banTimestamp){
@@ -20,7 +20,7 @@ qint32 IpFilter::getRemainingBanTime(QString &ip) const{
     if(m_TimedTable.contains(ip)){
         QPair<qint32,quint32> timePair = m_TimedTable.value(ip);
         uint currentTime = QDateTime::currentDateTime().toTime_t();
-        int remainingTime = currentTime - (timePair.second + timePair.first);
+        int remainingTime = (timePair.second + timePair.first) - currentTime;
         if(remainingTime > 0)
             return remainingTime;
     }
@@ -36,11 +36,10 @@ void IpFilter::filter(QTcpSocket *socket){
 
 void IpFilter::clean(){
     uint currentTime = QDateTime::currentDateTime().toTime_t();
-    QHash<QString,QPair<qint32,quint32>>::iterator i = m_TimedTable.begin();
-    while (i != m_TimedTable.end()) {
-        if((currentTime - (i.value().second + i.value().first)) <= 0){
-            m_TimedTable.remove(i.key());
-        }
-        ++i;
+    foreach(QString ip, m_TimedTable.keys()){
+        QPair<qint32,quint32> timePair = m_TimedTable.value(ip);
+        int diffTime = (timePair.second + timePair.first) - currentTime;
+        if(diffTime <= 0)
+            m_TimedTable.remove(ip);
     }
 }

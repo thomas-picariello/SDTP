@@ -56,7 +56,9 @@ void SVoIP::startProgram(){
 
     restartListener();
     connect(&mListener, SIGNAL(newConnection()),
-            this, SLOT(onIncommingConnection()));
+            this, SLOT(onNewConnection()));
+    connect(&mIpFilter, SIGNAL(accepted(QTcpSocket*)),
+            this, SLOT(onIpAccepted(QTcpSocket*)));
     connect(mContactListWindow, SIGNAL(settingsUpdated()),
             this, SLOT(restartListener()));
     connect(mContactListWindow, SIGNAL(contactEvent(int,Contact::Event)),
@@ -73,14 +75,18 @@ void SVoIP::startProgram(){
     }
 }
 
-void SVoIP::onIncommingConnection(){
+void SVoIP::onIpAccepted(QTcpSocket *socket){
     //negative unique id for hanshaking network managers
     int id = -1;
     while(mNetworkManagerList.contains(id))
         id--;
-    NetworkManager* networkManager = new NetworkManager(mListener.nextPendingConnection(),mContactDB, mRsaKeyring, this);
+    NetworkManager* networkManager = new NetworkManager(socket,mContactDB, mRsaKeyring, this);
     connectNetworkManagerSignals(networkManager);
     mNetworkManagerList.insert(id, networkManager);
+}
+
+void SVoIP::onNewConnection(){
+    mIpFilter.filter(mListener.nextPendingConnection());
 }
 
 void SVoIP::onNetworkManagerDestroy(NetworkManager* networkManager){
@@ -154,6 +160,7 @@ QString SVoIP::generateSalt(){
 }
 
 void SVoIP::startApp(int contactId, AppType appType){
+    //TODO: see if templated factory works here...
     QList<Contact*> contactList;
     QPair<int, AbstractApp::AppUID> key(contactId, AbstractApp::AppUID(appType));
     if(mNetworkManagerList.contains(contactId)){
