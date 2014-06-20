@@ -27,7 +27,7 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, RsaKeyrin
 }
 
 //Responder
-NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, RsaKeyring *keyring, QObject *parent):
+NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, RsaKeyring *keyring, IpFilter *ipFilter, QObject *parent):
     QObject(parent),
     m_ContactDB(contactDB),
     m_Contact(NULL),
@@ -38,13 +38,14 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, RsaKeyr
     TcpLink *tcpLink = dynamic_cast<TcpLink*>(getLink(TCP));
     tcpLink->setSocket(socket); //give the socket to the TCP link
     m_Handshaker = new Handshaker(tcpLink, keyring, this);
+    m_Handshaker->setIpFilter(ipFilter);
 
     connect(m_Handshaker, SIGNAL(handshakeFinished(bool)),
             this, SLOT(onHandshakeFinished(bool)));
     connect(m_Handshaker, SIGNAL(error(Handshaker::Error)),
             this, SLOT(onHandshakeError(Handshaker::Error)));
 
-    doResponderHandshake();
+    waitForHandshake();
 }
 
 int NetworkManager::getContactId() const{
@@ -98,8 +99,8 @@ void NetworkManager::processIncommingData(){
     //emit
 }
 
-void NetworkManager::doResponderHandshake(){
-    m_Handshaker->beginResponderHandshake(m_ContactDB);
+void NetworkManager::waitForHandshake(){
+    m_Handshaker->waitForHandshake(m_ContactDB);
 }
 
 void NetworkManager::doStarterHandshake(){

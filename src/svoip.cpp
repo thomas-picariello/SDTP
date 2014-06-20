@@ -14,8 +14,8 @@ SVoIP::SVoIP(QObject *parent):
     if(salt.isEmpty()){
         settings.setValue("encryption/salt", generateSalt());
     }
-    //set IV (AES block size = 128 bits) TODO: update for GCM (filekey)
-    mFileKey.second = salt.left(16);
+    //256 bits IV for GCM
+    mFileKey.second = salt;
 
     if(pwdHash.isEmpty()){
         checkParameters();
@@ -80,7 +80,7 @@ void SVoIP::onIpAccepted(QTcpSocket *socket){
     int id = -1;
     while(mNetworkManagerList.contains(id))
         id--;
-    NetworkManager* networkManager = new NetworkManager(socket,mContactDB, mRsaKeyring, this);
+    NetworkManager* networkManager = new NetworkManager(socket,mContactDB, mRsaKeyring, &mIpFilter, this);
     connectNetworkManagerSignals(networkManager);
     mNetworkManagerList.insert(id, networkManager);
 }

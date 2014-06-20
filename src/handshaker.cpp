@@ -5,6 +5,7 @@ Handshaker::Handshaker(TcpLink *link, RsaKeyring* keyring, QObject *parent):
     m_Link(link),
     m_ContactDB(NULL),
     m_Contact(NULL),
+    m_IpFilter(NULL),
     m_GcmDecryptor(new CryptoPP::GCM<CryptoPP::AES>::Decryption()),
     m_GcmEncryptor(new CryptoPP::GCM<CryptoPP::AES>::Encryption()),
     m_RsaKeyring(keyring),
@@ -21,7 +22,7 @@ Handshaker::Handshaker(TcpLink *link, RsaKeyring* keyring, QObject *parent):
             this, SLOT(onTimeout()));
 }
 
-void Handshaker::beginResponderHandshake(ContactDB *contactDB){
+void Handshaker::waitForHandshake(ContactDB *contactDB){
     m_Mode = ResponderMode;
     m_ContactDB = contactDB;
     if(m_RsaKeyring->hasPrivateKey()){ //security check
@@ -70,8 +71,9 @@ Handshaker::Mode Handshaker::getMode() const{
     return m_Mode;
 }
 
-void Handshaker::setBanTime(quint16 banTime){
-    m_BanTime = banTime;
+void Handshaker::setIpFilter(IpFilter *ipFilter){
+    m_IpFilter = ipFilter;
+    m_BanTime = m_IpFilter->getLastBanTime(m_Link->getHost().first);
 }
 
 void Handshaker::setTimeout(int timeout){
@@ -441,6 +443,7 @@ void Handshaker::processError(Error err){
     packetizer << (byte)UndefinedError;
     packetizer << m_BanTime;
     m_Link->write(packet);
+    m_IpFilter->addBan(m_Link->getHost().first, m_BanTime);
     emit error(err);
     emit handshakeFinished(false);
 }

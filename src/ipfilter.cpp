@@ -3,16 +3,13 @@
 IpFilter::IpFilter(QObject *parent) :
     QObject(parent)
 {
-    connect(&m_cleanTimer, SIGNAL(timeout()),
-            this, SLOT(clean()));
-    m_cleanTimer.start(10000); //clean list every 10s
 }
 
 void IpFilter::addBan(const QString &ip, const quint32 banDuration, const quint32 banTimestamp){
     m_TimedTable.insert(ip, qMakePair(banDuration, banTimestamp));
 }
 
-qint32 IpFilter::getBanTime(QString &ip) const{
+qint32 IpFilter::getLastBanTime(QString &ip) const{
     return m_TimedTable.value(ip).first;
 }
 
@@ -32,14 +29,4 @@ void IpFilter::filter(QTcpSocket *socket){
         emit accepted(socket);
     else
         delete socket;
-}
-
-void IpFilter::clean(){
-    uint currentTime = QDateTime::currentDateTime().toTime_t();
-    foreach(QString ip, m_TimedTable.keys()){
-        QPair<qint32,quint32> timePair = m_TimedTable.value(ip);
-        int diffTime = (timePair.second + timePair.first) - currentTime;
-        if(diffTime <= 0)
-            m_TimedTable.remove(ip);
-    }
 }

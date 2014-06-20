@@ -16,7 +16,7 @@ class IpFilter : public QObject
 public:
     explicit IpFilter(QObject *parent = 0);
     qint32 getRemainingBanTime(QString &ip) const;
-    qint32 getBanTime(QString &ip) const;
+    qint32 getLastBanTime(QString &ip) const;
 
 signals:
     void accepted(QTcpSocket *socket);
@@ -28,11 +28,9 @@ public slots:
     void filter(QTcpSocket *socket);
 
 private slots:
-    void clean();
 
 private:
     QHash<QString,QPair<qint32,quint32>> m_TimedTable;
-    QTimer m_cleanTimer;
     Q_DISABLE_COPY(IpFilter)
 };
 

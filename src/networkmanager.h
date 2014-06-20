@@ -17,6 +17,7 @@
 #include "contactdb.h"
 #include "pinger.h"
 #include "handshaker.h"
+#include "ipfilter.h"
 
 class NetworkManager : public QObject
 {
@@ -42,6 +43,7 @@ public:
     NetworkManager(QTcpSocket *socket,
                    ContactDB *contactDB,
                    RsaKeyring *keyring,
+                   IpFilter* ipFilter,
                    QObject *parent=0);   //Responder
     ~NetworkManager();
 
@@ -65,7 +67,7 @@ signals :
     void startRootApp(int contactId);
 
 private slots:
-    void doResponderHandshake();
+    void waitForHandshake();
     void doStarterHandshake();
     void onHandshakeFinished(bool successfull);
     void processIncommingData();

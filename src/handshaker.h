@@ -17,6 +17,7 @@
 #include "contact.h"
 #include "contactdb.h"
 #include "rsakeyring.h"
+#include "ipfilter.h"
 
 class Handshaker : public QObject
 {
@@ -57,10 +58,12 @@ public:
     };
     Q_ENUMS(SecurityLevel)
 
-    explicit Handshaker(TcpLink *link, RsaKeyring *keyring, QObject *parent = 0);
+    explicit Handshaker(TcpLink *link,
+                        RsaKeyring *keyring,
+                        QObject *parent = 0);
 
     void beginStarterHandshake(Contact *contact);
-    void beginResponderHandshake(ContactDB *contactDB);
+    void waitForHandshake(ContactDB *contactDB);
 
     quint16 getBanTime() const;
     Contact* getContact() const;
@@ -68,7 +71,7 @@ public:
     CryptoPP::GCM<CryptoPP::AES>::Encryption* getGcmEncryptor() const;
     CryptoPP::GCM<CryptoPP::AES>::Decryption* getGcmDecryptor() const;
     Mode getMode() const;
-    void setBanTime(quint16 banTime);
+    void setIpFilter(IpFilter *ipFilter);
     void setTimeout(int timeout);
 
 signals:
@@ -94,6 +97,7 @@ private:
     TcpLink *m_Link;
     Contact *m_Contact;
     ContactDB *m_ContactDB;
+    IpFilter *m_IpFilter;
     RsaKeyring *m_RsaKeyring;
     CryptoPP::AutoSeededRandomPool m_RandomGenerator;
     CryptoPP::GCM<CryptoPP::AES>::Encryption *m_GcmEncryptor;
