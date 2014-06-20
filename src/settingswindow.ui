@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>SettingsWindow</class>
  <widget class="QWidget" name="SettingsWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>480</width>
+    <height>661</height>
+   </rect>
+  </property>
   <property name="minimumSize">
    <size>
     <width>400</width>
@@ -113,7 +121,7 @@ QMenu::item::pressed{
    <item>
     <widget class="QTabWidget" name="tabs">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="pwd_tab">
       <attribute name="title">

@@ -43,7 +43,7 @@ public:
 signals:
     void publicKeyGenerationFinished(QByteArray publicKey);
     void privateKeyGenerationFinished(QByteArray privatekey);
-    void privateKeyValidated();
+    void privateKeyValidated(); //TODO : signal for validation fail.
     void error(Error);
 
 public slots:
