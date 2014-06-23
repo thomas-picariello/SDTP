@@ -119,44 +119,34 @@ void Handshaker::resetHandshake(){
     }
 }
 
-void Handshaker::starterSayHello(){ //S:1
+void Handshaker::starterSayHello(){ //S:1 forge
     QByteArray packet;
+    QDataStream packetStream(&packet, QIODevice::WriteOnly);
     QByteArray clearText;
+    QDataStream clearTextStream(&clearText, QIODevice::WriteOnly);
 
-    //Security Level
     SecurityLevel secLevel = PreSharedIdentity;
-    packet.append((uchar)secLevel);
+    packetStream << (quint8)secLevel;
 
-    //Key Length
-    QByteArray keyLength;
     QByteArray publicKey = m_RsaKeyring->generatePublicKey();
-    keyLength.append((publicKey.size() >> 8) & 0xFF);
-    keyLength.append(publicKey.size() & 0xFF);
-    clearText.append(keyLength);
+    clearTextStream << (quint16)publicKey.size();
+    clearTextStream.writeRawData(publicKey.data(), publicKey.size());
 
-    //Public Key
-    clearText.append(publicKey);
+    clearTextStream << (quint8)SUPPORTED_PROTOCOL_VERSION;
 
-    //Version
-    clearText.append(SUPPORTED_PROTOCOL_VERSION);
-
-    //compute starter integrity
     updateIntegrityHash(&m_StarterIntegrityHash, (char)secLevel+clearText);
 
-    //encrypt with Responder public key
     packet.append(rsaEncrypt(clearText));
 
-    //connect response parse methode
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     connect(m_Link, SIGNAL(readyRead()),
             this, SLOT(starterParseResponderHello()));
 
-    //send the packet
     m_Link->write(packet);
     m_Timeout.start();
 }
 
-void Handshaker::responderParseStarterHello(){ //R:1.1
+void Handshaker::responderParseStarterHello(){ //R:1 parse
     QByteArray clearText;
     QByteArray rawPacket = m_Link->readAll();
 
@@ -217,7 +207,7 @@ void Handshaker::responderParseStarterHello(){ //R:1.1
     responderRespondHello();
 }
 
-void Handshaker::responderRespondHello(){ //R:1.2
+void Handshaker::responderRespondHello(){ //R:1 forge
     QByteArray packet, clearText;
 
     //chosen version
@@ -243,7 +233,7 @@ void Handshaker::responderRespondHello(){ //R:1.2
     m_Timeout.start();
 }
 
-void Handshaker::starterParseResponderHello(){ //S:2.1
+void Handshaker::starterParseResponderHello(){ //S:2 parse
     QByteArray rawPacket = m_Link->readAll();
     m_Timeout.stop();
 
@@ -283,7 +273,7 @@ void Handshaker::starterParseResponderHello(){ //S:2.1
     starterSendHalfKeyAndResponderIntegrity();
 }
 
-void Handshaker::starterSendHalfKeyAndResponderIntegrity(){ //S:2.2
+void Handshaker::starterSendHalfKeyAndResponderIntegrity(){ //S:2 forge
     QByteArray packet;
 
     //generate second half key+IV
@@ -317,7 +307,7 @@ void Handshaker::starterSendHalfKeyAndResponderIntegrity(){ //S:2.2
     m_Timeout.start();
 }
 
-void Handshaker::responderParseHalfKeyAndResponderIntegrity(){ //R:2.1
+void Handshaker::responderParseHalfKeyAndResponderIntegrity(){ //R:2 parse
     QByteArray rawPacket = m_Link->readAll();
     m_Timeout.stop();
 
@@ -367,7 +357,7 @@ void Handshaker::responderParseHalfKeyAndResponderIntegrity(){ //R:2.1
     responderSendStarterIntegrity();
 }
 
-void Handshaker::responderSendStarterIntegrity(){ //R:2.2
+void Handshaker::responderSendStarterIntegrity(){ //R:2 forge
     QByteArray packet;
 
     //encrypt starter integrity
@@ -383,7 +373,7 @@ void Handshaker::responderSendStarterIntegrity(){ //R:2.2
     m_Timeout.start();
 }
 
-void Handshaker::starterParseStarterIntegrity(){ //S:3.1
+void Handshaker::starterParseStarterIntegrity(){ //S:3 parse
     QByteArray rawPacket = m_Link->readAll();
     m_Timeout.stop();
 
@@ -402,7 +392,7 @@ void Handshaker::starterParseStarterIntegrity(){ //S:3.1
     starterSendHandshakeFinished();
 }
 
-void Handshaker::starterSendHandshakeFinished(){ //S:3.2
+void Handshaker::starterSendHandshakeFinished(){ //S:3 forge
     QByteArray packet;
     packet.append((char)HandshakeFinished);
 
@@ -412,7 +402,7 @@ void Handshaker::starterSendHandshakeFinished(){ //S:3.2
     emit handshakeFinished(true);
 }
 
-void Handshaker::responderParseHandshakeFinished(){ //R:3
+void Handshaker::responderParseHandshakeFinished(){ //R:3 parse
     QByteArray rawPacket = m_Link->readAll();
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     m_Timeout.stop();
@@ -433,15 +423,15 @@ void Handshaker::onTimeout(){
 
 void Handshaker::processError(Error err){
     QByteArray packet;
-    QDataStream packetizer(&packet, QIODevice::ReadWrite);
+    QDataStream packetStream(&packet, QIODevice::WriteOnly);
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     if(m_BanTime > 0){
         if(m_BanTime < 65535)
             m_BanTime *= 2;
     }else
         m_BanTime = 1;
-    packetizer << (byte)UndefinedError;
-    packetizer << m_BanTime;
+    packetStream << (byte)UndefinedError;
+    packetStream << m_BanTime;
     m_Link->write(packet);
     m_IpFilter->addBan(m_Link->getHost().first, m_BanTime);
     emit error(err);
@@ -484,13 +474,13 @@ QByteArray Handshaker::gcmEncrypt(QByteArray& clearText){
     return QByteArray(cipherText.data(), (int)cipherText.size());
 }
 
-bool Handshaker::isError(const QByteArray &data){
-    QDataStream depacketizer(data);
-    byte errorCode;
-    depacketizer >> errorCode;
-    if(data.size() == 3 && errorCode == (byte)UndefinedError){
+bool Handshaker::isError(const QByteArray &packet){
+    QDataStream packetStream(packet);
+    quint8 errorCode;
+    packetStream >> errorCode;
+    if(packet.size() == 3 && errorCode == (quint8)UndefinedError){
         disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-        depacketizer >> m_BanTime;
+        packetStream >> m_BanTime;
         handshakeFinished(false);
         emit error(UndefinedError);
         return true;

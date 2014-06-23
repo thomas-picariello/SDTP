@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QByteArray>
 #include <QTimer>
+#include <QDataStream>
 
 #include <cryptopp/aes.h>
 #include <cryptopp/filters.h>
@@ -24,7 +25,7 @@ class Handshaker : public QObject
     Q_OBJECT
 
 public:
-    static const byte SUPPORTED_PROTOCOL_VERSION = 0x01;
+    static const quint8 SUPPORTED_PROTOCOL_VERSION = 0x01;
 
     enum Mode{
         UndefinedMode,
@@ -32,7 +33,7 @@ public:
         ResponderMode
     };
 
-    enum Error: byte{
+    enum Error: quint8{
         UndefinedError = 0x00,
         BadPrivateKey = 0x01,
         BadContactKey = 0x02,
@@ -46,12 +47,12 @@ public:
     };
     Q_ENUMS(Error)
 
-    enum Success: byte{
+    enum Success: quint8{
         HandshakeFinished = 0x10
     };
     Q_ENUMS(Success)
 
-    enum SecurityLevel: byte{
+    enum SecurityLevel: quint8{
         UnverifiedIdentity = 0x00,
         ThirdPartyVerifiedIdentity = 0x01,
         PreSharedIdentity = 0x02
@@ -119,7 +120,7 @@ private:
     QByteArray generateRandomBlock(uint size);
     QByteArray gcmDecrypt(QByteArray& cipherText);
     QByteArray gcmEncrypt(QByteArray& clearText);
-    bool isError(const QByteArray &data);
+    bool isError(const QByteArray &packet);
     QByteArray rsaDecrypt(QByteArray& cipherText);
     QByteArray rsaEncrypt(QByteArray& clearText);
     QList<QByteArray*> splitData(const QByteArray &data, const uint chunkSize);
