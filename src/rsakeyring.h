@@ -43,8 +43,8 @@ public:
 signals:
     void publicKeyGenerationFinished(QByteArray publicKey);
     void privateKeyGenerationFinished(QByteArray privatekey);
-    void privateKeyValidated(); //TODO : signal for validation fail.
-    void error(Error);
+    void privateKeyValidated();
+    void error(RsaKeyring::Error);
 
 public slots:
     void commitToKeystore(QByteArray privateKey);

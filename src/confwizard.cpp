@@ -112,6 +112,7 @@ void ConfWizard::on_okButton_clicked()
         QByteArray key = QByteArray::fromBase64(ui->keyText->toPlainText().toUtf8());
         connect(m_RsaKeyRing,SIGNAL(privateKeyValidated()),this,SLOT(saveAll()));
         m_RsaKeyRing->validatePrivateKey(key);
+        //TODO: connect(m_RsaKeyring, SIGNAL(error(RsaKeyring::error)), this, ...); for Error::PrivateKeyValidationFailed
     }else m_WarningBox->show();
 }
 
