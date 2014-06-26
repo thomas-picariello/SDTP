@@ -40,13 +40,17 @@ void TcpLink::onConnectionError(QAbstractSocket::SocketError){
     emit error(m_Socket->errorString());
 }
 
-QPair<QString,quint16> TcpLink::getHost() const{
-    return qMakePair(m_Socket->peerAddress().toString(), m_Socket->peerPort());
+QString TcpLink::getHost() const{
+    return m_Socket->peerAddress().toString();
 }
 
-void TcpLink::setHost(QPair<QString, quint16> &host){
+quint16 TcpLink::getPort() const{
+    return m_Socket->peerPort();
+}
+
+void TcpLink::setHost(const QString &host, const quint16 port){
     m_Socket->abort();
-    m_Socket->connectToHost(host.first, host.second);
+    m_Socket->connectToHost(host, port);
 }
 
 void TcpLink::setSocket(QTcpSocket *socket){

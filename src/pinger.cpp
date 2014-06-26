@@ -33,7 +33,7 @@ bool Pinger::start(int delay){
 
 void Pinger::connectToNextHost(){
     m_HostIndex = (m_HostIndex+1) % m_Contact->getHostsList().length();
-    m_Link->setHost(qMakePair(m_Contact->getHostsList().at(m_HostIndex), m_Contact->getPort()));
+    m_Link->setHost(m_Contact->getHostsList().at(m_HostIndex), m_Contact->getPort());
 
     if(m_HostIndex == m_Contact->getHostsList().length())
         m_ConnectTimer.setInterval(10000); //do a 10s pause at the end of the list
@@ -43,6 +43,6 @@ void Pinger::connectToNextHost(){
 
 void Pinger::onConnected(){
     m_ConnectTimer.stop();
-    m_ActiveHost = m_Link->getHost().first;
+    m_ActiveHost = m_Link->getHost();
     emit connected();
 }

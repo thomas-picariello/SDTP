@@ -22,8 +22,9 @@ public:
 
     inline State state(){ return m_State; }
     virtual bool isSequential(){ return true; }
-    virtual QPair<QString,quint16> getHost() const = 0;
-    virtual void setHost(QPair<QString,quint16> &host) = 0;
+    virtual QString getHost() const = 0;
+    virtual quint16 getPort() const = 0;
+    virtual void setHost(const QString &host, const quint16 port) = 0;
 
 signals:
     void stateChanged(AbstractLink::State);

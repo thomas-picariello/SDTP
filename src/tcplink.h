@@ -19,8 +19,9 @@ public:
     explicit TcpLink(QTcpSocket *socket, QIODevice *parent=0);
     ~TcpLink();
 
-    virtual QPair<QString, quint16> getHost() const;
-    virtual void setHost(QPair<QString, quint16> &host);
+    virtual QString getHost() const;
+    virtual quint16 getPort() const;
+    virtual void setHost(const QString &host, const quint16 port);
     void setSocket(QTcpSocket *socket);
 
 public slots:
