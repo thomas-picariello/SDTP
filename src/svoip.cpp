@@ -69,7 +69,7 @@ void SVoIP::startProgram(){
     //start a NetworkManager for each contact
     QList<Contact*> contactList = mContactDB->getAllContacts();
     foreach(Contact *contact, contactList){
-        NetworkManager* networkManager = new NetworkManager(contact, mContactDB, mRsaKeyring, this);
+        NetworkManager* networkManager = new NetworkManager(contact, mContactDB, mRsaKeyring, &mIpFilter, this);
         connectNetworkManagerSignals(networkManager);
         mNetworkManagerList.insert(contact->getId(), networkManager);
     }
@@ -113,7 +113,7 @@ void SVoIP::onContactEvent(int id, Contact::Event event){
     NetworkManager* networkManager;
     switch(event){
     case Contact::Added:
-        networkManager = new NetworkManager(mContactDB->findById(id), mContactDB, mRsaKeyring, this);
+        networkManager = new NetworkManager(mContactDB->findById(id), mContactDB, mRsaKeyring, &mIpFilter, this);
         connectNetworkManagerSignals(networkManager);
         mNetworkManagerList.insert(id, networkManager);
         break;

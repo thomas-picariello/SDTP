@@ -39,11 +39,12 @@ public:
     NetworkManager(Contact *contact,
                    ContactDB *contactDB,
                    RsaKeyring *keyring,
+                   IpFilter *ipFilter,
                    QObject *parent=0);     //Starter
     NetworkManager(QTcpSocket *socket,
                    ContactDB *contactDB,
                    RsaKeyring *keyring,
-                   IpFilter* ipFilter,
+                   IpFilter *ipFilter,
                    QObject *parent=0);   //Responder
     ~NetworkManager();
 

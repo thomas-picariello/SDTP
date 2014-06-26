@@ -1,7 +1,7 @@
 #include "networkmanager.h"
 
 //Starter
-NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, RsaKeyring *keyring, QObject *parent):
+NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, RsaKeyring *keyring, IpFilter *ipFilter, QObject *parent):
     QObject(parent),
     m_ContactDB(contactDB),
     m_Contact(contact),
@@ -12,6 +12,7 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, RsaKeyrin
     TcpLink *tcpLink = dynamic_cast<TcpLink*>(getLink(TCP));
     m_Contact->setParent(this); //take ownership of the contact
     m_Handshaker = new Handshaker(tcpLink, keyring, this);
+    m_Handshaker->setIpFilter(ipFilter);
     m_Pinger.setContact(m_Contact);
     m_Pinger.setLink(tcpLink);
     m_Pinger.start();
