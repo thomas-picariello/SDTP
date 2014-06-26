@@ -5,7 +5,7 @@ IpFilter::IpFilter(QObject *parent) :
 {
 }
 
-void IpFilter::addBan(const QString &ip, const quint32 banDuration, const quint32 banTimestamp){
+void IpFilter::addBan(const QString &ip, const qint32 banDuration, const quint32 banTimestamp){
     m_TimedTable.insert(ip, qMakePair(banDuration, banTimestamp));
 }
 
@@ -29,4 +29,8 @@ void IpFilter::filter(QTcpSocket *socket){
         emit accepted(socket);
     else
         delete socket;
+}
+
+void IpFilter::removeBan(const QString &ip){
+    m_TimedTable.remove(ip);
 }

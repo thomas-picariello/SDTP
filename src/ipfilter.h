@@ -23,8 +23,9 @@ signals:
 
 public slots:
     void addBan(const QString &ip,
-                const quint32 banDuration,
+                const qint32 banDuration,
                 const quint32 banTimestamp = QDateTime::currentDateTime().toTime_t());
+    void removeBan(const QString &ip);
     void filter(QTcpSocket *socket);
 
 private slots:
