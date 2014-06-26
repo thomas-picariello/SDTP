@@ -73,7 +73,7 @@ Handshaker::Mode Handshaker::getMode() const{
 
 void Handshaker::setIpFilter(IpFilter *ipFilter){
     m_IpFilter = ipFilter;
-    m_BanTime = m_IpFilter->getLastBanTime(m_Link->getHost().first);
+    m_BanTime = m_IpFilter->getLastBanTime(m_Link->getHost());
 }
 
 void Handshaker::setTimeout(int timeout){
@@ -89,7 +89,6 @@ void Handshaker::resetHandshake(){
     switch(m_Mode){
     case UndefinedMode:
         try{
-            //init rsa decryptor
             m_RsaDecryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_RsaKeyring->getStoredPrivateKey().data(),
                                                                   m_RsaKeyring->getStoredPrivateKey().size(),
                                                                   true));
@@ -101,7 +100,6 @@ void Handshaker::resetHandshake(){
         break;
     case StarterMode:
         try{
-            //init rsa encryptor
             m_RsaEncryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_Contact->getKey().data(),
                                                                   m_Contact->getKey().size(),
                                                                   true));
@@ -147,46 +145,29 @@ void Handshaker::starterSayHello(){ //S:1 forge
 }
 
 void Handshaker::responderParseStarterHello(){ //R:1 parse
-    QByteArray clearText;
-    QByteArray rawPacket = m_Link->readAll();
+    QByteArray packet = m_Link->readAll();
 
-    //check error
-    if(isError(rawPacket)) return;
+    if(isError(packet)) return;
 
-    //parse security level
-    byte secLevel = rawPacket.at(0);
-
-    //Decrypt rsa
-    QByteArray cipherText = rawPacket.mid(1);
-    clearText.append(rsaDecrypt(cipherText));
-    if(clearText.size() == 0){
-        processError(DataCorrupted);
-        return;
-    }
-
-    //parse Key lenght
-    quint16 keyLength = qFromBigEndian<quint16>((const uchar*)clearText.left(2).constData());
-    //parse Key
-    QByteArray key = clearText.mid(2, keyLength); //pos != index
-
-    //parse Version
-    byte version = clearText.at(clearText.size()-1);
-
-    //check security level
+    quint8 secLevel = packet.at(0);
     if(static_cast<SecurityLevel>(secLevel) != PreSharedIdentity){
         processError(BadSecurityLevel);
         return;
     }
 
-    //check identity
+    QByteArray clearText = rsaDecrypt(packet.mid(1));
+    if(clearText.isEmpty()){
+        processError(DataCorrupted);
+        return;
+    }
+    quint16 keyLength = qFromBigEndian<quint16>((const uchar*)clearText.left(2).constData());
+    QByteArray key = clearText.mid(2, keyLength);
     m_Contact = m_ContactDB->findByKey(key);
     if(m_Contact == NULL){
         processError(IdentityCheckFailed);
         return;
     }
     emit newContactId(m_Contact->getId());
-
-    //init rsa
     try{
         m_RsaEncryptor.AccessKey().Load(CryptoPP::ArraySource((byte*)m_Contact->getKey().data(),
                                                               m_Contact->getKey().size(),
@@ -195,108 +176,84 @@ void Handshaker::responderParseStarterHello(){ //R:1 parse
         processError(BadContactKey);
     }
 
-    //check version compatibility (major version only)
+    byte version = clearText.right(1).at(0);
     if((version & 0xF0) != (SUPPORTED_PROTOCOL_VERSION & 0xF0)){
         processError(IncompatibleProtocolVersions);
         return;
     }
 
-    //update starter integrity
     updateIntegrityHash(&m_StarterIntegrityHash, (char)secLevel+clearText);
-
     responderRespondHello();
 }
 
 void Handshaker::responderRespondHello(){ //R:1 forge
     QByteArray packet, clearText;
 
-    //chosen version
     clearText.append(SUPPORTED_PROTOCOL_VERSION);
 
-    //half symmetric key + half IV
     QByteArray firstHalfSymKey = generateRandomBlock(32);
-    m_GcmKey.first.append(firstHalfSymKey.left(16));
-    m_GcmKey.second.append(firstHalfSymKey.right(16));
+    m_GcmKey.first.swap(firstHalfSymKey.left(16));  //first half key
+    m_GcmKey.second.swap(firstHalfSymKey.right(16));//first half IV
     clearText.append(firstHalfSymKey);
 
-    //update responder integrity
     updateIntegrityHash(&m_ResponderIntegrityHash, clearText);
 
-    //encrypt and add to packet
     packet.append(rsaEncrypt(clearText));
 
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     connect(m_Link, SIGNAL(readyRead()),
             this, SLOT(responderParseHalfKeyAndResponderIntegrity()));
-
     m_Link->write(packet);
     m_Timeout.start();
 }
 
 void Handshaker::starterParseResponderHello(){ //S:2 parse
-    QByteArray rawPacket = m_Link->readAll();
     m_Timeout.stop();
+    QByteArray packet = m_Link->readAll();
 
-    //check error
-    if(isError(rawPacket)) return;
+    if(isError(packet)) return;
 
-    //decrypt packet
-    QByteArray clearText = rsaDecrypt(rawPacket);
+    QByteArray clearText = rsaDecrypt(packet);
     if(clearText.isEmpty()){
         processError(DataCorrupted);
         return;
     }
 
-    //parse chosen version
     byte chosenVersion = clearText.at(0);
-
-    //parse first half key + half IV
-    m_GcmKey.first.append(clearText.mid(1, 16));
-    m_GcmKey.second.append(clearText.mid(17));
-
-    //check version
-    //TODO: proper check
-    if(chosenVersion != 0x01){
+    if((chosenVersion & 0xF0) != (SUPPORTED_PROTOCOL_VERSION & 0xF0)){
         processError(IncompatibleProtocolVersions);
         return;
     }
 
-    //check half key + half IV size
+    m_GcmKey.first.append(clearText.mid(1, 16));//first half key
+    m_GcmKey.second.append(clearText.mid(17));  //first half IV
     if(m_GcmKey.first.size()!=16 || m_GcmKey.second.size()!=16){
         processError(BadSymmetricKey);
         return;
     }
 
-    //update responder integrity
     updateIntegrityHash(&m_ResponderIntegrityHash, clearText);
-
     starterSendHalfKeyAndResponderIntegrity();
 }
 
 void Handshaker::starterSendHalfKeyAndResponderIntegrity(){ //S:2 forge
     QByteArray packet;
 
-    //generate second half key+IV
     QByteArray secondHalfSymKey = generateRandomBlock(32);
-    m_GcmKey.first.append(secondHalfSymKey.left(16));    //key
-    m_GcmKey.second.append(secondHalfSymKey.right(16));  //IV
+    m_GcmKey.first.append(secondHalfSymKey.left(16));    //second half key
+    m_GcmKey.second.append(secondHalfSymKey.right(16));  //second half IV
 
-    //rsa encrypt half key+IV
     QByteArray encryptedHalfKey = rsaEncrypt(secondHalfSymKey);
-    packet.append(static_cast<char>(encryptedHalfKey.size()>>8 & 0xFF));
-    packet.append(static_cast<char>(encryptedHalfKey.size() & 0xFF));
+    QDataStream(&packet, QIODevice::WriteOnly) << (quint16)encryptedHalfKey.size();
     packet.append(encryptedHalfKey);
 
-    //init GCM
     m_GcmDecryptor->SetKeyWithIV((byte*)m_GcmKey.first.data(), m_GcmKey.first.size(),
                                  (byte*)m_GcmKey.second.data(), m_GcmKey.second.size());
     m_GcmEncryptor->SetKeyWithIV((byte*)m_GcmKey.first.data(), m_GcmKey.first.size(),
                                  (byte*)m_GcmKey.second.data(), m_GcmKey.second.size()); 
 
-    //encrypt responder integrity with gcm
     packet.append(gcmEncrypt(m_ResponderIntegrityHash));
 
-    //update starter integrity
     updateIntegrityHash(&m_StarterIntegrityHash, secondHalfSymKey+m_ResponderIntegrityHash);
 
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
@@ -308,82 +265,55 @@ void Handshaker::starterSendHalfKeyAndResponderIntegrity(){ //S:2 forge
 }
 
 void Handshaker::responderParseHalfKeyAndResponderIntegrity(){ //R:2 parse
-    QByteArray rawPacket = m_Link->readAll();
     m_Timeout.stop();
+    QByteArray packet = m_Link->readAll();
 
-    //check error
-    if(isError(rawPacket)) return;
+    if(isError(packet)) return;
+    quint16 encryptedKeyLenght = qFromBigEndian<quint16>((const uchar*)packet.left(2).constData());
 
-    //parse encrypted key lenght
-    quint16 encryptedKeyLenght = (rawPacket.at(0) << 8) + rawPacket.at(1);
-
-    //parse encrypted key
-    QByteArray encryptedSymKey = rawPacket.mid(2,encryptedKeyLenght);
-
-    //decrypt key
-    QByteArray clearSymKey = rsaDecrypt(encryptedSymKey);
-
-    //check key lenght
+    QByteArray clearSymKey = rsaDecrypt(packet.mid(2,encryptedKeyLenght));
     if(clearSymKey.size()<32){
         processError(BadSymmetricKey);
         return;
     }
 
-    //init gcm
-    m_GcmKey.first.append(clearSymKey.left(16));    //key
-    m_GcmKey.second.append(clearSymKey.right(16));  //IV
+    m_GcmKey.first.append(clearSymKey.left(16));    //second half key
+    m_GcmKey.second.append(clearSymKey.right(16));  //second half IV
 
     m_GcmDecryptor->SetKeyWithIV((byte*)m_GcmKey.first.data(), m_GcmKey.first.size(),
                                  (byte*)m_GcmKey.second.data(), m_GcmKey.second.size());
     m_GcmEncryptor->SetKeyWithIV((byte*)m_GcmKey.first.data(), m_GcmKey.first.size(),
                                  (byte*)m_GcmKey.second.data(), m_GcmKey.second.size());
 
-
-    //parse responder integrity
-    QByteArray encryptedResponderIntegrity = rawPacket.mid(2+encryptedKeyLenght);
-
-    //decrypt integrity
-    QByteArray responderIntegrity = gcmDecrypt(encryptedResponderIntegrity);
-
-    //check integrity
+    QByteArray responderIntegrity = gcmDecrypt(packet.mid(2+encryptedKeyLenght));
     if(responderIntegrity != m_ResponderIntegrityHash){
         processError(DataCorrupted);
         return;
     }
 
-    //update starter integrity
     updateIntegrityHash(&m_StarterIntegrityHash, clearSymKey+responderIntegrity);
-
     responderSendStarterIntegrity();
 }
 
 void Handshaker::responderSendStarterIntegrity(){ //R:2 forge
     QByteArray packet;
-
-    //encrypt starter integrity
     packet.append(gcmEncrypt(m_StarterIntegrityHash));
 
-    //connect incomming data to responderParseHandshakeFinished()
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     connect(m_Link, SIGNAL(readyRead()),
             this, SLOT(responderParseHandshakeFinished()));
 
-    //send packet
     m_Link->write(packet);
     m_Timeout.start();
 }
 
 void Handshaker::starterParseStarterIntegrity(){ //S:3 parse
-    QByteArray rawPacket = m_Link->readAll();
     m_Timeout.stop();
+    QByteArray rawPacket = m_Link->readAll();
 
-    //check error
     if(isError(rawPacket)) return;
 
-    //decrypt packet
     QByteArray starterIntegrity = gcmDecrypt(rawPacket);
-
-    //check integrity
     if(starterIntegrity != m_StarterIntegrityHash){
         processError(DataCorrupted);
         return;
@@ -399,18 +329,19 @@ void Handshaker::starterSendHandshakeFinished(){ //S:3 forge
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     m_Link->write(packet);
 
+    m_IpFilter->removeBan(m_Link->getHost());
     emit handshakeFinished(true);
 }
 
 void Handshaker::responderParseHandshakeFinished(){ //R:3 parse
+    m_Timeout.stop();
     QByteArray rawPacket = m_Link->readAll();
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-    m_Timeout.stop();
 
-    //check error
     if(isError(rawPacket))
         return;
     else if(rawPacket.size() == 1 && rawPacket.at(0) == (char)HandshakeFinished){
+        m_IpFilter->removeBan(m_Link->getHost());
         emit handshakeFinished(true);
     }else{
         processError(UndefinedError);
@@ -426,14 +357,14 @@ void Handshaker::processError(Error err){
     QDataStream packetStream(&packet, QIODevice::WriteOnly);
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
     if(m_BanTime > 0){
-        if(m_BanTime < 65535)
+        if(m_BanTime <= 32767)
             m_BanTime *= 2;
     }else
         m_BanTime = 1;
-    packetStream << (byte)UndefinedError;
+    packetStream << (quint8)UndefinedError;
     packetStream << m_BanTime;
     m_Link->write(packet);
-    m_IpFilter->addBan(m_Link->getHost().first, m_BanTime);
+    m_IpFilter->addBan(m_Link->getHost(), m_BanTime);
     emit error(err);
     emit handshakeFinished(false);
 }
