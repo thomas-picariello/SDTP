@@ -17,9 +17,9 @@ public:
 
     struct AppUID{
         AppType type;
-        uint instanceID;
+        quint16 instanceID;
         AppUID();
-        AppUID(AppType typeId, uint instanceId = 0);
+        AppUID(AppType typeId, quint16 instanceId = 0);
         bool operator<(const AppUID &second) const;
     };
 
@@ -41,5 +41,8 @@ protected:
     QList<Contact*> m_ContactList;
     ContactDB *m_ContactDB;
 };
+
+QDataStream &operator<<(QDataStream &out, const AbstractApp::AppUID& appUID);
+QDataStream &operator>>(QDataStream &in, AbstractApp::AppUID& appUID);
 
 #endif // ABSTRACTAPP_H
