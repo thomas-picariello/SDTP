@@ -66,7 +66,7 @@ public:
     void beginStarterHandshake(Contact *contact);
     void waitForHandshake(ContactDB *contactDB);
 
-    quint16 getBanTime() const;
+    qint32 getBanTime() const;
     Contact* getContact() const;
     QString getErrorString(Error err) const;
     CryptoPP::GCM<CryptoPP::AES>::Encryption* getGcmEncryptor() const;
@@ -92,7 +92,6 @@ private slots:
     void onTimeout();
 
 private:
-    quint16 m_BanTime;
     Mode m_Mode;
     QTimer m_Timeout;
     TcpLink *m_Link;

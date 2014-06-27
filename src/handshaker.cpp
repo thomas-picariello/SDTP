@@ -11,8 +11,7 @@ Handshaker::Handshaker(TcpLink *link, RsaKeyring* keyring, QObject *parent):
     m_RsaKeyring(keyring),
     m_StarterIntegrityHash(32, 0),  //256 bits Hash
     m_ResponderIntegrityHash(32, 0),  //256 bits Hash
-    m_Mode(UndefinedMode),
-    m_BanTime(0)
+    m_Mode(UndefinedMode)
 {
     m_Timeout.setSingleShot(true);
     m_Timeout.setInterval(5000);    //default Timeout 5s
@@ -46,8 +45,8 @@ void Handshaker::beginStarterHandshake(Contact *contact){
     }
 }
 
-quint16 Handshaker::getBanTime() const{
-    return m_BanTime;
+qint32 Handshaker::getBanTime() const{
+    return m_IpFilter->getLastBanTime(m_Link->getHost());
 }
 
 Contact* Handshaker::getContact() const{
@@ -73,7 +72,6 @@ Handshaker::Mode Handshaker::getMode() const{
 
 void Handshaker::setIpFilter(IpFilter *ipFilter){
     m_IpFilter = ipFilter;
-    m_BanTime = m_IpFilter->getLastBanTime(m_Link->getHost());
 }
 
 void Handshaker::setTimeout(int timeout){
@@ -353,18 +351,19 @@ void Handshaker::onTimeout(){
 }
 
 void Handshaker::processError(Error err){
+    quint16 banTime = getBanTime(); //implicite cast
     QByteArray packet;
     QDataStream packetStream(&packet, QIODevice::WriteOnly);
     disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-    if(m_BanTime > 0){
-        if(m_BanTime <= 32767)
-            m_BanTime *= 2;
+    if(banTime > 0){
+        if(banTime <= 32767)
+            banTime *= 2;
     }else
-        m_BanTime = 1;
+        banTime = 1;
     packetStream << (quint8)UndefinedError;
-    packetStream << m_BanTime;
+    packetStream << banTime;
     m_Link->write(packet);
-    m_IpFilter->addBan(m_Link->getHost(), m_BanTime);
+    m_IpFilter->addBan(m_Link->getHost(), banTime);
     emit error(err);
     emit handshakeFinished(false);
 }
@@ -411,7 +410,8 @@ bool Handshaker::isError(const QByteArray &packet){
     packetStream >> errorCode;
     if(packet.size() == 3 && errorCode == (quint8)UndefinedError){
         disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-        packetStream >> m_BanTime;
+        quint16 banTime = getBanTime();
+        packetStream >> banTime;
         handshakeFinished(false);
         emit error(UndefinedError);
         return true;
