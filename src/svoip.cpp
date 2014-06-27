@@ -159,31 +159,34 @@ QString SVoIP::generateSalt(){
     return QString::fromStdString(encodedBlock);
 }
 
-void SVoIP::startApp(int contactId, AppType appType){
+void SVoIP::startApp(QList<Contact*> &contactList, AppType appType){
     //TODO: see if templated factory works here...
-    QList<Contact*> contactList;
-    QPair<int, AbstractApp::AppUID> key(contactId, AbstractApp::AppUID(appType));
-    if(mNetworkManagerList.contains(contactId)){
-        if(mAppList.contains(key)){
-            mAppList.value(key)->show();
+    AbstractApp::AppUID key(appType);
+    if(mAppList.contains(key)){
+        mAppList.value(key)->show();
+    }else{
+        AbstractApp *app = NULL;
+        if(appType == Root){
+            //app = new RootApp(); //TODO: revise RootApp constructor
+        }else if(appType == Messenger){
+            app = new MessengerApp(contactList);
         }else{
-            AbstractApp *app = 0;
-            contactList.append(mContactDB->findById(contactId));
-            if(appType == Root){
-                //app = new RootApp(); //TODO: revise RootApp constructor
-            }else if(appType == Messenger){
-                app = new MessengerApp(contactList, mContactDB);
-            }else{
-                emit error(tr("Invalid appId"));
-            }
-            if(app != 0){
-                key.second.instanceID = 0; //TODO: generate instance id
-                mNetworkManagerList.value(contactId)->registerApp(key.second, app);
-                mAppList.insert(key, app);
-            }
+            emit error(tr("Invalid appId"));
         }
-    }else
-        emit error(tr("Invalid contactId"));
+        if(app){
+            key.instanceID = 0; //TODO: generate instance id
+            foreach(Contact* contact, contactList){
+                mNetworkManagerList.value(contact->getId())->registerApp(key, app);
+            }
+            mAppList.insert(key, app);
+        }
+    }
+}
+
+void SVoIP::startRootApp(int contactId){
+    QList<Contact*> contactList;
+    contactList.append(mContactDB->findById(contactId));
+    startApp(contactList, Root);
 }
 
 SVoIP::~SVoIP(){

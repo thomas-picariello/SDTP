@@ -32,8 +32,8 @@ public slots:
     void updateNetworkManagerId(int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
-    void startApp(int contactId, AppType appType);
-    void startRootApp(int contactId){ startApp(contactId, Root); }
+    void startApp(QList<Contact*> &contactList, AppType appType);
+    void startRootApp(int contactId);
 
 private slots:
     void checkParameters(QByteArray key = QByteArray());
@@ -54,7 +54,7 @@ private :
     IpFilter mIpFilter;
     QTcpServer mListener;
     QMap<int,NetworkManager*> mNetworkManagerList;
-    QMap<QPair<int,AbstractApp::AppUID>, AbstractApp*> mAppList;
+    QMap<AbstractApp::AppUID, AbstractApp*> mAppList; //TODO switch to QHash for unique key
 
     void displayFirstStartWizard();
     void connectNetworkManagerSignals(NetworkManager *networkManager);
