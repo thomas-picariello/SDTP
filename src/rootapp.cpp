@@ -1,18 +1,18 @@
 #include "rootapp.h"
 
-RootApp::RootApp(ContactDB *contactDB, QWidget *parent):
-    AbstractApp(contactDB, parent)
+RootApp::RootApp(QWidget *parent):
+    AbstractApp(parent)
 {
 
 }
 
-RootApp::RootApp(QList<Contact*> contactList, ContactDB *contactDB, QWidget *parent):
-    AbstractApp(contactList, contactDB, parent)
+RootApp::RootApp(QList<Contact*> contactList, QWidget *parent):
+    AbstractApp(contactList, parent)
 {
 
 }
 
-void RootApp::dataToRead(QByteArray data){
+void RootApp::readIncommingData(QByteArray &data){
 
 }
 

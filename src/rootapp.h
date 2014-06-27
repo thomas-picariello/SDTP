@@ -12,12 +12,12 @@ class RootApp : public AbstractApp
 public:
     static const AppType APPTYPE = Root;
 
-    explicit RootApp(ContactDB *contactDB, QWidget *parent = 0);
-    explicit RootApp(QList<Contact*> contactList, ContactDB *contactDB, QWidget *parent = 0);
+    explicit RootApp(QWidget *parent = 0);
+    explicit RootApp(QList<Contact*> contactList, QWidget *parent = 0);
     virtual ~RootApp();
 
 public slots:
-    virtual void dataToRead(QByteArray data);
+    void readIncommingData(QByteArray &data);
 
 };
 

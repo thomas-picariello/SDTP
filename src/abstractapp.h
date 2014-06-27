@@ -11,6 +11,7 @@ class AbstractApp : public QWidget
 {
     Q_OBJECT
 public:
+    //Q_ENUMS(AppType)
     enum Error{
         IncompatibleVersion //TODO: add more generic errors
     };
@@ -23,8 +24,8 @@ public:
         bool operator<(const AppUID &second) const;
     };
 
-    AbstractApp(ContactDB *contactDB, QWidget *parent=0);
-    AbstractApp(QList<Contact*> contactList, ContactDB *contactDB, QWidget *parent=0);
+    AbstractApp(QWidget *parent=0);
+    AbstractApp(QList<Contact*> contactList, QWidget *parent=0);
     virtual ~AbstractApp();
 
     inline QList<Contact*> getContactList(){ return m_ContactList; }
@@ -39,7 +40,6 @@ signals :
 
 protected:
     QList<Contact*> m_ContactList;
-    ContactDB *m_ContactDB;
 };
 
 QDataStream &operator<<(QDataStream &out, const AbstractApp::AppUID& appUID);
