@@ -65,7 +65,7 @@ public:
      * @brief Returns the unique ID of the contact.
      * @return the ID of the contact
      */
-    int getId() const;
+    uint getId() const;
 
     /**
      * @brief Returns the unique public key of the contact.
@@ -101,7 +101,7 @@ public:
      * @brief Defines the unique ID of the contact.
      * @param id the unique id of the contact
      */
-    void setId(int id);
+    void setId(uint id);
 
     /**
      * @brief Defines the unique public key of the contact.
@@ -123,7 +123,7 @@ public:
 
 private :
     QStringList mHostsList;
-    int mId;
+    uint mId;
     QByteArray mKey;
     quint16 mPort;
     QString mName;

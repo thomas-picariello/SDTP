@@ -19,7 +19,7 @@ QStringList Contact::getHostsList() const{
     return mHostsList;
 }
 
-int Contact::getId() const{
+uint Contact::getId() const{
     return mId;
 }
 
@@ -43,7 +43,7 @@ void Contact::setHostsList(QStringList hostsList){
     mHostsList = hostsList;
 }
 
-void Contact::setId(int id){
+void Contact::setId(uint id){
     mId = id;
 }
 
