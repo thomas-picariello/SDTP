@@ -33,9 +33,6 @@ public slots:
     void cancel();
     void removeHost();
     void save();
-    
-protected:
-    void hideEvent(QHideEvent* hideEvent);
 
 private:
     ContactDB *mContactDB;

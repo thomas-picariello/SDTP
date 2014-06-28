@@ -24,7 +24,6 @@ EditContactWindow::EditContactWindow(ContactDB *contactDB, QWidget *parent):
 
 void EditContactWindow::open(Contact *contact){
     mContact = contact;
-    mContact->setParent(this);
     ui->name->setText(mContact->getName());
     ui->hostslist->clear();
     foreach(QString host, mContact->getHostsList()){
@@ -62,18 +61,14 @@ void EditContactWindow::save(){
         mContact->setPort(port);
         mContact->setHostsList(hostsList);
         mContact->setKey(QByteArray::fromBase64(key.toUtf8()));
-        int id = mContactDB->write(mContact);
-        if(mContact->getId() == 0)
-            emit contactEvent(id, Contact::Added);
-        else
-            emit contactEvent(id, Contact::Updated);
+        if(mContact->getId() == 0){
+            mContactDB->add(mContact);
+            emit contactEvent(mContact->getId(), Contact::Added);
+        }else
+            emit contactEvent(mContact->getId(), Contact::Updated);
+        mContactDB->commitToDatabase();
         close();
     }
-}
-
-void EditContactWindow::hideEvent(QHideEvent *hideEvent){
-    delete mContact;
-    mContact = NULL;
 }
 
 void EditContactWindow::removeHost(){

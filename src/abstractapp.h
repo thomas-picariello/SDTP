@@ -22,11 +22,11 @@ public:
         AppUID();
         AppUID(AppType typeId, quint16 instanceId = 0);
         bool operator<(const AppUID &second) const;
+        bool operator==(const AppUID &second) const;
     };
 
     AbstractApp(QWidget *parent=0);
     AbstractApp(QList<Contact*> contactList, QWidget *parent=0);
-    virtual ~AbstractApp();
 
     inline QList<Contact*> getContactList(){ return m_ContactList; }
 
