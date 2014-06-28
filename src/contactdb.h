@@ -19,25 +19,27 @@ public:
     ~ContactDB();
     void updateFileKey();
     bool erase(int id);
-    Contact* findById(int id);
-    Contact* findByKey(QByteArray key);
-    QList<Contact*> getAllContacts();
-    int write(Contact *contact);
+    Contact* const findById(int id);
+    Contact* const findByKey(QByteArray key);
+    QList<Contact*> getAllContacts() const;
+    uint add(Contact *contact);
+    void commitToDatabase();
+    void importDatabase();
 
 signals:
     void error(QString err);
 
-private :
-    QSqlDatabase mMemoryDb;
-    QSqlDatabase mDiskDb;
+private:
+    QMap<uint,Contact*> mContactList;
+    QSqlDatabase mDatabase;
     QPair<QByteArray, QByteArray> *mFileKey;
 
-    QByteArray hashMemoryDb();
-    void commitToDiskDb();
-    void importDiskDb();
-    void initTables();
+    QByteArray generateHash();
+    void initDbTables();
+    uint getNextAvailableId();
     QByteArray serializeStringList(QStringList list);
     QStringList deserializeStringList(QByteArray byteArray);
+    void openDB();
 
     Q_DISABLE_COPY(ContactDB)
 };
