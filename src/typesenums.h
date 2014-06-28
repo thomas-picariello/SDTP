@@ -1,18 +1,18 @@
 #ifndef IDSENUMS_H
 #define IDSENUMS_H
 
-enum AppType{
-    Root = 0,
-    Messenger = 1,
-    VoIP = 2,
-    VideoStreamer = 3,
-    DataTransfer = 4
+enum AppType: quint8{
+    Root = 0x00,
+    Messenger = 0x01,
+    VoIP = 0x02,
+    VideoStreamer = 0x03,
+    DataTransfer = 0x04
 };
 
-enum LinkType{
-    TCP = 0,
-    UDP = 1,
-    RTP = 2
+enum LinkType: quint8{
+    TCP = 0x00,
+    UDP = 0x01,
+    RTP = 0x02
 };
 
 #endif // IDSENUMS_H
