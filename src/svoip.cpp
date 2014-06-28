@@ -63,8 +63,8 @@ void SVoIP::startProgram(){
             this, SLOT(restartListener()));
     connect(mContactListWindow, SIGNAL(contactEvent(int,Contact::Event)),
             this, SLOT(onContactEvent(int,Contact::Event)));
-    connect(mContactListWindow, SIGNAL(startApp(int,AppType)),
-            this,SLOT(startApp(int,AppType)));
+    connect(mContactListWindow, SIGNAL(startApp(QList<Contact*>,AppType)),
+            this,SLOT(startApp(QList<Contact*>,AppType)));
 
     //start a NetworkManager for each contact
     QList<Contact*> contactList = mContactDB->getAllContacts();
@@ -139,9 +139,8 @@ void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
             this, SLOT(onNetworkManagerDestroy(NetworkManager*)));
     connect(networkManager, SIGNAL(newContactId(int)),
             this, SLOT(updateNetworkManagerId(int)));
-//    connect(networkManager,SIGNAL(startAppRequest(int,AppType)),
-//            this,SLOT(startApp(int,AppType)));
-    //TODO:root app emit this
+    connect(networkManager,SIGNAL(startRootApp(Contact*)),
+            this,SLOT(startRootApp(Contact*)));
 }
 
 QString SVoIP::generateSalt(){
@@ -159,33 +158,36 @@ QString SVoIP::generateSalt(){
     return QString::fromStdString(encodedBlock);
 }
 
-void SVoIP::startApp(QList<Contact*> &contactList, AppType appType){
-    //TODO: see if templated factory works here...
-    AbstractApp::AppUID key(appType);
-    if(mAppList.contains(key)){
-        mAppList.value(key)->show();
+void SVoIP::startApp(QList<Contact*> contactList, AppType appType){
+    //TODO: see if templated factory may works here...
+    //TODO: retrieve the right app for the right contact group
+    AbstractApp::AppUID appUID(appType);
+    if(mAppList.contains(appUID) && appType != Root){
+        mAppList.value(appUID)->show();
     }else{
         AbstractApp *app = NULL;
         if(appType == Root){
-            //app = new RootApp(); //TODO: revise RootApp constructor
+            app = new RootApp(contactList);
         }else if(appType == Messenger){
             app = new MessengerApp(contactList);
         }else{
-            emit error(tr("Invalid appId"));
+            emit error(InvalidAppID);
         }
         if(app){
-            key.instanceID = 0; //TODO: generate instance id
-            foreach(Contact* contact, contactList){
-                mNetworkManagerList.value(contact->getId())->registerApp(key, app);
+            foreach(AbstractApp::AppUID existingAppUID, mAppList.keys()){
+                if(existingAppUID == appUID)
+                    appUID.instanceID++;
             }
-            mAppList.insert(key, app);
+            foreach(Contact* contact, contactList)
+                mNetworkManagerList.value(contact->getId())->registerApp(appUID, app);
+            mAppList.insert(appUID, app);
         }
     }
 }
 
-void SVoIP::startRootApp(int contactId){
+void SVoIP::startRootApp(Contact *contact){
     QList<Contact*> contactList;
-    contactList.append(mContactDB->findById(contactId));
+    contactList.append(contact);
     startApp(contactList, Root);
 }
 
@@ -194,5 +196,5 @@ SVoIP::~SVoIP(){
     if(mContactDB) delete mContactDB;
     if(mPasswordWindow) delete mPasswordWindow;
     qDeleteAll(mAppList);
-    qDeleteAll(QMap<int,NetworkManager*>(mNetworkManagerList)); //copy list
+    qDeleteAll(QMap<int,NetworkManager*>(mNetworkManagerList)); //copy list to avoid networkManager self remove
 }

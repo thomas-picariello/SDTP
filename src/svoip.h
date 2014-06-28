@@ -23,6 +23,10 @@ class SVoIP: public QObject
 {
     Q_OBJECT
 public: 
+    enum Error{
+        InvalidAppID
+    };
+
 	SVoIP(QObject *parent = 0);
     ~SVoIP();
 
@@ -32,8 +36,8 @@ public slots:
     void updateNetworkManagerId(int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
-    void startApp(QList<Contact*> &contactList, AppType appType);
-    void startRootApp(int contactId);
+    void startApp(QList<Contact *> contactList, AppType appType);
+    void startRootApp(Contact *contact);
 
 private slots:
     void checkParameters(QByteArray key = QByteArray());
@@ -42,7 +46,7 @@ private slots:
     void onNewConnection();
 
 signals:
-    void error(QString err);
+    void error(Error err);
 
 private :
     ConfWizard *m_wizard;
@@ -54,7 +58,7 @@ private :
     IpFilter mIpFilter;
     QTcpServer mListener;
     QMap<int,NetworkManager*> mNetworkManagerList;
-    QMap<AbstractApp::AppUID, AbstractApp*> mAppList; //TODO switch to QHash for unique key
+    QMap<AbstractApp::AppUID,AbstractApp*> mAppList; //TODO switch to QHash for unique key
 
     void displayFirstStartWizard();
     void connectNetworkManagerSignals(NetworkManager *networkManager);

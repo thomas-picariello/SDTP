@@ -60,12 +60,14 @@ void ContactListWindow::openSettingsWindow(){
 }
 
 void ContactListWindow::onListItemAction(int contactId, ContactItemWidget::Action action){
+    QList<Contact*> contactList;
+    contactList.append(mContactDB->findById(contactId));
     switch(action){
     case ContactItemWidget::CallAction:
-        emit startApp(contactId, VoIP);
+        emit startApp(contactList, VoIP);
         break;
     case ContactItemWidget::MessengerAction:
-        emit startApp(contactId, Messenger);
+        emit startApp(contactList, Messenger);
         break;
     case ContactItemWidget::EditAction:
         editContact();
@@ -77,6 +79,7 @@ void ContactListWindow::onListItemAction(int contactId, ContactItemWidget::Actio
     //TODO: put AppTypeId in ContactItemWidget and separate signal
 }
 
+//TODO: split in addContact(Contact* contact), updateContactName(Contact* contact), deleteContact(int id)
 void ContactListWindow::refreshList(){
     QList<Contact*> contactList = mContactDB->getAllContacts();
 
@@ -118,8 +121,6 @@ void ContactListWindow::refreshList(){
     //clear selection and focus
     ui->list->clearSelection();
     ui->list->clearFocus();
-
-    qDeleteAll(contactList);
 }
 
 void ContactListWindow::deleteContact(){
