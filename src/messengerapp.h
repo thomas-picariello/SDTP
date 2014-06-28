@@ -33,7 +33,7 @@ private slots:
 
 private:
     Ui::MessengerApp *ui;
-    QStringList *m_MsgList;
+    QStringList m_MsgList;
 
 };
 

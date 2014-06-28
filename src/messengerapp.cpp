@@ -9,10 +9,7 @@ MessengerApp::MessengerApp(QList<Contact *> contactList, QWidget* parent) :
     ui->setupUi(this);
     show();
 
-
-    m_MsgList = new QStringList();
-
-    m_MsgList->append("<div align='center' style='color:grey; margin: 10px;'>Welcome to the Messenger App</div>");
+    m_MsgList.append("<div align='center' style='color:grey; margin: 10px;'>Welcome to the Messenger App</div>");
     updateDisplay();
 
     connect(ui->text_input, SIGNAL(returnPressed()),
@@ -31,7 +28,7 @@ void MessengerApp::updateDisplay(){
 
     QString html = header;
 
-    for(int i=0;i<=m_MsgList->length();i++)html.append(m_MsgList->value(i));
+    for(int i=0;i<=m_MsgList.length();i++)html.append(m_MsgList.value(i));
 
     html.append(footer);
 
@@ -41,7 +38,7 @@ void MessengerApp::updateDisplay(){
 }
 
 void MessengerApp::readIncommingData(QByteArray &data){
-    m_MsgList->append("<div align='left' style='color:green; margin: 10px;'>"+data+"</div>");
+    m_MsgList.append("<div align='left' style='color:green; margin: 10px;'>"+data+"</div>");
 
     updateDisplay();
 }
@@ -51,12 +48,12 @@ void MessengerApp::sendMessage(){
     int contactID = m_ContactList.first()->getId(); //TODO: improve for multiple contacts
     emit sendData(contactID, TCP, msg);
 
-    m_MsgList->append("<div align='right' style='color:blue; margin: 10px;'>"+msg+"</div>");
+    m_MsgList.append("<div align='right' style='color:blue; margin: 10px;'>"+msg+"</div>");
 
     updateDisplay();
     ui->text_input->clear();
 }
 
 MessengerApp::~MessengerApp(){
-    //AbstractApp::~AbstractApp();
+    delete ui;
 }
