@@ -25,13 +25,19 @@ class NetworkManager : public QObject
 
 public:
     enum Error{
-
+        PacketCorrupted,
+        BadTimestamp,
+        BadPacketNumber,
+        BadSymmetricKey,
+        AppNotStarted,
+        NoPayload,
+        UnregisteredApp
     };
     Q_ENUMS(Error)
 
     struct Packet{
         quint64 timestamp;
-        byte packetNumber;
+        quint8 packetNumber;
         AbstractApp::AppUID appUID;
         QByteArray payload;
     };
@@ -65,7 +71,7 @@ signals :
     void destroyed(NetworkManager* networkManager);
     void error(NetworkManager::Error err);
     void newContactId(int id);
-    void startRootApp(int contactId);
+    void startRootApp(Contact* contact);
 
 private slots:
     void waitForHandshake();
@@ -76,6 +82,8 @@ private slots:
     void onHandshakeError(Handshaker::Error);
 
 private :
+    quint64 m_LastTimeStamp;
+    quint8 m_LastPacketNumber;
     Contact::Status m_Status;
     Contact *m_Contact;
     ContactDB *m_ContactDB;
@@ -85,16 +93,16 @@ private :
     CryptoPP::GCM<CryptoPP::AES>::Encryption *m_GcmEncryptor;
     QMap<LinkType, AbstractLink*> m_LinkList;
     QMap<AbstractApp::AppUID, AbstractApp*> m_AppList;
-    QMap<AbstractApp::AppUID, LinkType> m_RoutingTable;
 
-    Packet createPacket(QByteArray &payload);
     void cleanLinks();
     AbstractLink *getLink(LinkType linkType);
-    void connectSignals();
-    Packet parsePacket(QByteArray &packet);
-    QByteArray serializePacket(Packet &packet);
+    QByteArray gcmDecrypt(QByteArray& cipherText);
+    QByteArray gcmEncrypt(QByteArray& clearText);
 
     Q_DISABLE_COPY(NetworkManager)
 };
+
+QDataStream& operator<<(QDataStream &out, const NetworkManager::Packet &packet);
+QDataStream& operator>>(QDataStream &in, NetworkManager::Packet &packet);
 
 #endif // NETWORKMANAGER_H
