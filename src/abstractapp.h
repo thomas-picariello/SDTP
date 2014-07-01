@@ -34,7 +34,7 @@ public slots :
     virtual void readIncommingData(QByteArray &data) = 0;
 
 signals :
-    void sendData(int contactID, LinkType linkType, QByteArray &data);
+    void sendData(LinkType linkType, QByteArray &data);
     void requestStartApp(AppType type, int contactID);
     void error(AbstractApp::Error);
 

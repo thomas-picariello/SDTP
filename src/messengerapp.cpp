@@ -45,8 +45,7 @@ void MessengerApp::readIncommingData(QByteArray &data){
 
 void MessengerApp::sendMessage(){
     QByteArray msg = ui->text_input->text().toUtf8();
-    int contactID = m_ContactList.first()->getId(); //TODO: improve for multiple contacts
-    emit sendData(contactID, TCP, msg);
+    emit sendData(TCP, msg);
 
     m_MsgList.append("<div align='right' style='color:blue; margin: 10px;'>"+msg+"</div>");
 
