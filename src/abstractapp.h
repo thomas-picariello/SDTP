@@ -27,7 +27,6 @@ public slots :
 
 signals :
     void sendData(LinkType linkType, QByteArray &data);
-    void requestStartApp(AppType type, int contactID);
     void error(AbstractApp::Error);
 
 protected:
