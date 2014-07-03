@@ -1,7 +1,7 @@
 #include "appuid.h"
 
 AppUID::AppUID():
-    m_Type(Root),
+    m_Type(Undefined),
     m_InstanceID(0)
 {}
 
