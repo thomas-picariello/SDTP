@@ -39,14 +39,14 @@ void SVoIP::checkParameters(QByteArray key){
 }
 
 void SVoIP::displayFirstStartWizard(){
-
-
     m_wizard = new ConfWizard(mFileKey);
-
 
     connect(m_wizard,SIGNAL(accepted()),this,SLOT(startProgram()));
     connect(m_wizard,SIGNAL(rejected()),qApp,SLOT(quit()));
+}
 
+void SVoIP::registerAppToNetworkManager(AppUID uid, AbstractApp *app, Contact *contact){
+    mNetworkManagerList.value(contact->getId())->registerApp(uid, app);
 }
 
 void SVoIP::startProgram(){
@@ -90,7 +90,7 @@ void SVoIP::onNewConnection(){
 }
 
 void SVoIP::onNetworkManagerDestroy(NetworkManager* networkManager){
-        mNetworkManagerList.remove(mNetworkManagerList.key(networkManager));
+    mNetworkManagerList.remove(mNetworkManagerList.key(networkManager));
 }
 
 void SVoIP::updateNetworkManagerId(int newId){
@@ -133,14 +133,14 @@ void SVoIP::restartListener(){
 }
 
 void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
-    connect(networkManager, SIGNAL(contactStatusChanged(int,Contact::Status)),
-            this, SLOT(updateContactStatus(int, Contact::Status)));
-    connect(networkManager, SIGNAL(destroyed(NetworkManager*)),
-            this, SLOT(onNetworkManagerDestroy(NetworkManager*)));
-    connect(networkManager, SIGNAL(newContactId(int)),
-            this, SLOT(updateNetworkManagerId(int)));
-    connect(networkManager,SIGNAL(startRootApp(Contact*)),
-            this,SLOT(startRootApp(Contact*)));
+    connect(networkManager, &NetworkManager::contactStatusChanged,
+            this, &SVoIP::updateContactStatus);
+    connect(networkManager, &NetworkManager::destroyed,
+            this, &SVoIP::onNetworkManagerDestroy);
+    connect(networkManager, &NetworkManager::newContactId,
+            this, &SVoIP::updateNetworkManagerId);
+    connect(networkManager, &NetworkManager::requestRootAppStart,
+            this, &SVoIP::startRootApp);
 }
 
 QString SVoIP::generateSalt(){
@@ -158,37 +158,36 @@ QString SVoIP::generateSalt(){
     return QString::fromStdString(encodedBlock);
 }
 
-void SVoIP::startApp(QList<Contact*> contactList, AppType appType){
+void SVoIP::startApp(Contact* contact, AppType appType){
     //TODO: see if templated factory may works here...
     //TODO: retrieve the right app for the right contact group
-    AbstractApp::AppUID appUID(appType);
+    AppUID appUID(appType);
     if(mAppList.contains(appUID) && appType != Root){
         mAppList.value(appUID)->show();
     }else{
+        //generate instance id
+        foreach(AppUID existingAppUID, mAppList.keys()){
+            if(existingAppUID == appUID)
+                appUID.setInstanceID(appUID.instanceID() + 1);
+        }
         AbstractApp *app = NULL;
         if(appType == Root){
-            app = new RootApp(contactList);
+            app = new RootApp(contact);
         }else if(appType == Messenger){
-            app = new MessengerApp(contactList);
+            app = new MessengerApp(contact);
         }else{
             emit error(InvalidAppID);
         }
         if(app){
-            foreach(AbstractApp::AppUID existingAppUID, mAppList.keys()){
-                if(existingAppUID == appUID)
-                    appUID.instanceID++;
-            }
-            foreach(Contact* contact, contactList)
-                mNetworkManagerList.value(contact->getId())->registerApp(appUID, app);
+            //register
+            mNetworkManagerList.value(contact->getId())->registerApp(appUID, app);
             mAppList.insert(appUID, app);
         }
     }
 }
 
 void SVoIP::startRootApp(Contact *contact){
-    QList<Contact*> contactList;
-    contactList.append(contact);
-    startApp(contactList, Root);
+    startApp(contact, Root);
 }
 
 SVoIP::~SVoIP(){

@@ -19,7 +19,7 @@ class MessengerApp : public AbstractApp
 public:
     static const AppType APPTYPE = Messenger;
 
-    explicit MessengerApp(QList<Contact*> contactList, QWidget *parent = 0);
+    explicit MessengerApp(Contact *contact, QWidget *parent = 0);
     virtual ~MessengerApp();
 
     void addContact();

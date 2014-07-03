@@ -12,7 +12,7 @@ class RootApp : public AbstractApp
 public:
     static const AppType APPTYPE = Root;
 
-    explicit RootApp(QList<Contact*> contactList, QWidget *parent = 0);
+    explicit RootApp(Contact *contact, QWidget *parent = 0);
     ~RootApp();
 
 public slots:

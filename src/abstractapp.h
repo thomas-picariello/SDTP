@@ -2,6 +2,7 @@
 #define ABSTRACTAPP_H
 
 #include <QWidget>
+#include <QHash>
 
 #include "typesenums.h"
 #include "contact.h"
@@ -11,24 +12,15 @@ class AbstractApp : public QWidget
 {
     Q_OBJECT
 public:
-    //Q_ENUMS(AppType)
     enum Error{
-        IncompatibleVersion //TODO: add more generic errors
+        IncompatibleVersion //TODO: add more errors
     };
 
-    struct AppUID{
-        AppType type;
-        quint16 instanceID;
-        AppUID();
-        AppUID(AppType typeId, quint16 instanceId = 0);
-        bool operator<(const AppUID &second) const;
-        bool operator==(const AppUID &second) const;
-    };
+    explicit AbstractApp(Contact* contact, QWidget *parent=0): QWidget(parent){ m_ContactList.append(contact); }
 
-    AbstractApp(QWidget *parent=0);
-    AbstractApp(QList<Contact*> contactList, QWidget *parent=0);
-
-    inline QList<Contact*> getContactList(){ return m_ContactList; }
+    QList<Contact*> getContactList(){ return m_ContactList; }
+    void addContact(Contact* contact){ m_ContactList.append(contact); }
+    void removeContact(Contact* contact){ m_ContactList.removeOne(contact); }
 
 public slots :
     virtual void readIncommingData(QByteArray &data) = 0;
@@ -42,7 +34,6 @@ protected:
     QList<Contact*> m_ContactList;
 };
 
-QDataStream &operator<<(QDataStream &out, const AbstractApp::AppUID& appUID);
-QDataStream &operator>>(QDataStream &in, AbstractApp::AppUID& appUID);
+
 
 #endif // ABSTRACTAPP_H

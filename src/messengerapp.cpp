@@ -2,8 +2,8 @@
 #include "ui_messengerapp.h"
 
 
-MessengerApp::MessengerApp(QList<Contact *> contactList, QWidget* parent) :
-    AbstractApp(contactList, parent),
+MessengerApp::MessengerApp(Contact * contact, QWidget* parent) :
+    AbstractApp(contact, parent),
     ui(new Ui::MessengerApp)
 {
     ui->setupUi(this);

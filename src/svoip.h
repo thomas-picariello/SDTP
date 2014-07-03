@@ -18,6 +18,7 @@
 #include "confwizard.h"
 #include "messengerapp.h"
 #include "ipfilter.h"
+#include "appuid.h"
 
 class SVoIP: public QObject
 {
@@ -36,14 +37,15 @@ public slots:
     void updateNetworkManagerId(int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
-    void startApp(QList<Contact *> contactList, AppType appType);
+    void startApp(Contact *contact, AppType appType);
     void startRootApp(Contact *contact);
 
 private slots:
     void checkParameters(QByteArray key = QByteArray());
-    void startProgram();
     void onIpAccepted(QTcpSocket* socket);
     void onNewConnection();
+    void registerAppToNetworkManager(AppUID uid, AbstractApp* app, Contact* contact);
+    void startProgram();
 
 signals:
     void error(Error err);
@@ -58,7 +60,7 @@ private :
     IpFilter mIpFilter;
     QTcpServer mListener;
     QMap<int,NetworkManager*> mNetworkManagerList;
-    QMap<AbstractApp::AppUID,AbstractApp*> mAppList; //TODO switch to QHash for unique key
+    QMap<AppUID,AbstractApp*> mAppList;
 
     void displayFirstStartWizard();
     void connectNetworkManagerSignals(NetworkManager *networkManager);
