@@ -18,6 +18,8 @@
 #include "pinger.h"
 #include "handshaker.h"
 #include "ipfilter.h"
+#include "appuid.h"
+#include "appmanager.h"
 
 class NetworkManager : public QObject
 {
@@ -38,7 +40,7 @@ public:
     struct Packet{
         quint64 timestamp;
         quint8 packetNumber;
-        AbstractApp::AppUID appUID;
+        AppUID destAppUID;
         QByteArray payload;
     };
 
@@ -57,21 +59,19 @@ public:
     Contact* getContact() const;
     int getContactId() const;
     QString getErrorString(Error err) const;
-    Contact::Status getStatus() const;
-    void registerApp(AbstractApp::AppUID uid, AbstractApp *app);
+    //inline Contact::Status getStatus() const{ return m_Contact->getStatus(); } //TODO: implement Contact status
+    inline AppManager* getAppManager(){ return &m_AppManager; }
     void setContact(Contact *contact);
-    void unregisterApp(AbstractApp::AppUID uid);
 
 public slots :
     void onContactEvent(Contact::Event event);
-    void sendData(QByteArray &data, LinkType linkType);
+    void sendData(LinkType linkType, QByteArray &data);
 
 signals :
     void contactStatusChanged(int id, Contact::Status status);
     void destroyed(NetworkManager* networkManager);
     void error(NetworkManager::Error err);
     void newContactId(int id);
-    void startRootApp(Contact* contact);
 
 private slots:
     void waitForHandshake();
@@ -88,11 +88,12 @@ private :
     Contact *m_Contact;
     ContactDB *m_ContactDB;
     Handshaker *m_Handshaker;
+    AppManager m_AppManager;
     Pinger m_Pinger;
     CryptoPP::GCM<CryptoPP::AES>::Decryption *m_GcmDecryptor;
     CryptoPP::GCM<CryptoPP::AES>::Encryption *m_GcmEncryptor;
     QMap<LinkType, AbstractLink*> m_LinkList;
-    QMap<AbstractApp::AppUID, AbstractApp*> m_AppList;
+    QMap<AppUID, AbstractApp*> m_AppList;
 
     void cleanLinks();
     AbstractLink *getLink(LinkType linkType);

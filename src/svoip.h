@@ -14,7 +14,6 @@
 #include "passwordwindow.h"
 #include "networkmanager.h"
 #include "typesenums.h"
-#include "rootapp.h"
 #include "confwizard.h"
 #include "messengerapp.h"
 #include "ipfilter.h"
@@ -38,13 +37,11 @@ public slots:
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
     void startApp(Contact *contact, AppType appType);
-    void startRootApp(Contact *contact);
 
 private slots:
     void checkParameters(QByteArray key = QByteArray());
     void onIpAccepted(QTcpSocket* socket);
     void onNewConnection();
-    void registerAppToNetworkManager(AppUID uid, AbstractApp* app, Contact* contact);
     void startProgram();
 
 signals:

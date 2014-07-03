@@ -68,16 +68,6 @@ Contact* NetworkManager::getContact() const{
     return m_Contact;
 }
 
-void NetworkManager::registerApp(AbstractApp::AppUID uid, AbstractApp *app){
-    if(!m_AppList.contains(uid))
-        m_AppList.insert(uid, app);
-}
-
-void NetworkManager::unregisterApp(AbstractApp::AppUID uid){
-    if(m_AppList.contains(uid))
-        m_AppList.remove(uid);
-}
-
 void NetworkManager::onDisconnected(){
     m_Status = Contact::Offline;
     emit contactStatusChanged(getContactId(), m_Status);
@@ -91,7 +81,7 @@ void NetworkManager::onContactEvent(Contact::Event event){
     }
 }
 
-void NetworkManager::sendData(QByteArray &data, LinkType linkType){
+void NetworkManager::sendData(LinkType linkType, QByteArray &data){
     AbstractApp *senderApp = dynamic_cast<AbstractApp*>(sender());
     if(senderApp){
         foreach(AbstractApp* registeredApp, m_AppList){
@@ -99,7 +89,7 @@ void NetworkManager::sendData(QByteArray &data, LinkType linkType){
                 Packet packet;
                 packet.timestamp;
                 packet.packetNumber;
-                packet.appUID = m_AppList.key(senderApp);
+                packet.destAppUID = m_AppList.key(senderApp); //TODO: change for partner UID
                 packet.payload = data;
 
                 QByteArray serializedPacket;
@@ -125,12 +115,12 @@ void NetworkManager::processIncommingData(){
             emit error(BadTimestamp);
         else if((packet.packetNumber - m_LastPacketNumber) % sizeof(packet.packetNumber) != 1)
             emit error(BadPacketNumber);
-        else if(m_AppList.find(packet.appUID) == m_AppList.end())
+        else if(m_AppList.find(packet.destAppUID) == m_AppList.end())
             emit error(AppNotStarted);
         else if(packet.payload.isEmpty())
             emit error(NoPayload);
         else
-            m_AppList.value(packet.appUID)->readIncommingData(packet.payload);
+            m_AppList.value(packet.destAppUID)->readIncommingData(packet.payload);
     }
 }
 
@@ -152,7 +142,7 @@ void NetworkManager::onHandshakeFinished(bool successfull){
         emit contactStatusChanged(getContactId(), Contact::Online);
         connect(getLink(TCP), SIGNAL(readyRead()),
                 this, SLOT(processIncommingData()));
-        startRootApp(m_Contact);
+        //TODO: start AppManager
     }else{
         if(m_Handshaker->getMode() == Handshaker::StarterMode)
             m_Pinger.start(m_Handshaker->getBanTime()); //restart pinger after ban time
@@ -234,7 +224,7 @@ NetworkManager::~NetworkManager(){
 QDataStream& operator <<(QDataStream &out, const NetworkManager::Packet &packet){
     out << packet.timestamp
         << packet.packetNumber
-        << packet.appUID
+        << packet.destAppUID
         << packet.payload;
     return out;
 }
@@ -242,7 +232,7 @@ QDataStream& operator <<(QDataStream &out, const NetworkManager::Packet &packet)
 QDataStream& operator >>(QDataStream &in, NetworkManager::Packet &packet){
     in >> packet.timestamp;
     in >> packet.packetNumber;
-    in >> packet.appUID;
+    in >> packet.destAppUID;
     in >> packet.payload;
     return in;
 }

@@ -45,10 +45,6 @@ void SVoIP::displayFirstStartWizard(){
     connect(m_wizard,SIGNAL(rejected()),qApp,SLOT(quit()));
 }
 
-void SVoIP::registerAppToNetworkManager(AppUID uid, AbstractApp *app, Contact *contact){
-    mNetworkManagerList.value(contact->getId())->registerApp(uid, app);
-}
-
 void SVoIP::startProgram(){
     disconnect(mRsaKeyring, SIGNAL(privateKeyGenerationFinished(QByteArray)), this, 0);
     mContactDB = new ContactDB(&mFileKey, this);
@@ -139,8 +135,6 @@ void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
             this, &SVoIP::onNetworkManagerDestroy);
     connect(networkManager, &NetworkManager::newContactId,
             this, &SVoIP::updateNetworkManagerId);
-    connect(networkManager, &NetworkManager::requestRootAppStart,
-            this, &SVoIP::startRootApp);
 }
 
 QString SVoIP::generateSalt(){
@@ -162,7 +156,7 @@ void SVoIP::startApp(Contact* contact, AppType appType){
     //TODO: see if templated factory may works here...
     //TODO: retrieve the right app for the right contact group
     AppUID appUID(appType);
-    if(mAppList.contains(appUID) && appType != Root){
+    if(mAppList.contains(appUID)){
         mAppList.value(appUID)->show();
     }else{
         //generate instance id
@@ -171,23 +165,17 @@ void SVoIP::startApp(Contact* contact, AppType appType){
                 appUID.setInstanceID(appUID.instanceID() + 1);
         }
         AbstractApp *app = NULL;
-        if(appType == Root){
-            app = new RootApp(contact);
-        }else if(appType == Messenger){
+        if(appType == Messenger){
             app = new MessengerApp(contact);
         }else{
             emit error(InvalidAppID);
         }
         if(app){
             //register
-            mNetworkManagerList.value(contact->getId())->registerApp(appUID, app);
+            mNetworkManagerList.value(contact->getId())->getAppManager()->registerApp(appUID, app);
             mAppList.insert(appUID, app);
         }
     }
-}
-
-void SVoIP::startRootApp(Contact *contact){
-    startApp(contact, Root);
 }
 
 SVoIP::~SVoIP(){
