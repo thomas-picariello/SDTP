@@ -51,16 +51,16 @@ void SVoIP::startProgram(){
     mContactListWindow = new ContactListWindow(mContactDB, mRsaKeyring, &mFileKey);
 
     restartListener();
-    connect(&mListener, SIGNAL(newConnection()),
-            this, SLOT(onNewConnection()));
-    connect(&mIpFilter, SIGNAL(accepted(QTcpSocket*)),
-            this, SLOT(onIpAccepted(QTcpSocket*)));
-    connect(mContactListWindow, SIGNAL(settingsUpdated()),
-            this, SLOT(restartListener()));
-    connect(mContactListWindow, SIGNAL(contactEvent(int,Contact::Event)),
-            this, SLOT(onContactEvent(int,Contact::Event)));
-    connect(mContactListWindow, SIGNAL(startApp(QList<Contact*>,AppType)),
-            this,SLOT(startApp(QList<Contact*>,AppType)));
+    connect(&mListener, &QTcpServer::newConnection,
+            this, &SVoIP::onNewConnection);
+    connect(&mIpFilter, &IpFilter::accepted,
+            this, &SVoIP::onIpAccepted);
+    connect(mContactListWindow, &ContactListWindow::settingsUpdated,
+            this, &SVoIP::restartListener);
+    connect(mContactListWindow, &ContactListWindow::contactEvent,
+            this, &SVoIP::onContactEvent);
+    connect(mContactListWindow, &ContactListWindow::startApp,
+            this, &SVoIP::startApp);
 
     //start a NetworkManager for each contact
     QList<Contact*> contactList = mContactDB->getAllContacts();
@@ -130,11 +130,13 @@ void SVoIP::restartListener(){
 
 void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
     connect(networkManager, &NetworkManager::contactStatusChanged,
-            this, &SVoIP::updateContactStatus);
+            this, &SVoIP::updateContactStatus); //TODO contact self signal
     connect(networkManager, &NetworkManager::destroyed,
             this, &SVoIP::onNetworkManagerDestroy);
     connect(networkManager, &NetworkManager::newContactId,
             this, &SVoIP::updateNetworkManagerId);
+    connect(networkManager, &NetworkManager::startApp,
+            this, &SVoIP::startApp);
 }
 
 QString SVoIP::generateSalt(){
@@ -172,7 +174,7 @@ void SVoIP::startApp(Contact* contact, AppType appType){
         }
         if(app){
             //register
-            mNetworkManagerList.value(contact->getId())->getAppManager()->registerApp(appUID, app);
+            mNetworkManagerList.value(contact->getId())->registerApp(appUID, app);
             mAppList.insert(appUID, app);
         }
     }
