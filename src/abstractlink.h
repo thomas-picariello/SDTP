@@ -17,15 +17,13 @@ public:
 
     AbstractLink(QObject *parent=0):
         QIODevice(parent),
-        m_State(Offline),
-        m_RecievedPacketCount(0),
-        m_SentPacketCount(0)
+        m_State(Offline)
     {}
 
-    inline State state(){ return m_State; }
-    inline quint8 getRecievedPacketCount() const{ return m_RecievedPacketCount; }
-    inline quint8 getSentPacketCount() const{ return m_SentPacketCount; }
+    State state(){ return m_State; }
 
+    virtual qint64 bytesAvailable() const = 0;
+    virtual bool flush(){ return false; }   //return false if not reimplemented
     virtual bool isSequential(){ return true; }
     virtual QString getHost() const = 0;
     virtual quint16 getPort() const = 0;
@@ -33,18 +31,22 @@ public:
 
 signals:
     void stateChanged(AbstractLink::State);
+    void openModeChanged(OpenMode);
     void error(QString);
 
-
-public slots:
-    void incrementRecievedPacketCount(){ m_RecievedPacketCount++; }
-    virtual void onConnected(){ setOpenMode(ReadWrite); emit stateChanged(Online); }
+private slots:
+    virtual void onConnected(){}
     virtual void onConnectionError(QAbstractSocket::SocketError) = 0;
+
+    void privateOnConnected(){
+        setOpenMode(ReadWrite);
+        emit openModeChanged(ReadWrite);
+        emit stateChanged(Online);
+        onConnected();
+    }
 
 protected :
     State m_State;
-    quint8 m_RecievedPacketCount;
-    quint8 m_SentPacketCount;
 
     virtual qint64 readData(char * data, qint64 maxSize) = 0;
     virtual qint64 writeData(const char * data, qint64 size) = 0;
