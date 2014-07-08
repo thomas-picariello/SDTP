@@ -4,7 +4,7 @@
 #include <QtGlobal>
 
 enum AppType: quint8{
-    //0x00 is reseved for AppManager routing
+    Manager = 0x00,     //0x00 is reseved for AppManager routing
     Messenger = 0x01,
     VoIP = 0x02,
     VideoStreamer = 0x03,
