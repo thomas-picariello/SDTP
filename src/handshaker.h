@@ -6,13 +6,34 @@
 #include <QTimer>
 #include <QDataStream>
 
+#include <cryptopp/cryptlib.h>
+
 #include <cryptopp/aes.h>
+using CryptoPP::AES;
+
 #include <cryptopp/filters.h>
+using CryptoPP::ArraySink;
+using CryptoPP::ArraySource;
+using CryptoPP::StringSink;
+using CryptoPP::StringSource;
+using CryptoPP::AuthenticatedEncryptionFilter;
+using CryptoPP::AuthenticatedDecryptionFilter;
+using CryptoPP::PK_DecryptorFilter;
+using CryptoPP::PK_EncryptorFilter;
+using CryptoPP::HashFilter;
+
 #include <cryptopp/osrng.h>
-#include <cryptopp/sha.h>
-#include <cryptopp/authenc.h>
+using CryptoPP::AutoSeededRandomPool;
+
 #include <cryptopp/gcm.h>
+using CryptoPP::GCM;
+
 #include <cryptopp/rsa.h>
+using CryptoPP::RSAES_OAEP_SHA_Encryptor;
+using CryptoPP::RSAES_OAEP_SHA_Decryptor;
+
+#include <cryptopp/sha.h>
+using CryptoPP::SHA256;
 
 #include "tcplink.h"
 #include "contact.h"
@@ -66,11 +87,11 @@ public:
     void beginStarterHandshake(Contact *contact);
     void waitForHandshake(ContactDB *contactDB);
 
-    qint32 getBanTime() const;
+    quint16 getRecievedBanTime() const;
+    QByteArray getGcmBaseIV() const{ return m_GcmBaseIV; }
     Contact* getContact() const;
     QString getErrorString(Error err) const;
-    CryptoPP::GCM<CryptoPP::AES>::Encryption* getGcmEncryptor() const;
-    CryptoPP::GCM<CryptoPP::AES>::Decryption* getGcmDecryptor() const;
+    QByteArray getGcmKey() const{ return m_GcmKey; }
     Mode getMode() const;
     void setIpFilter(IpFilter *ipFilter);
     void setTimeout(int timeout);
@@ -92,19 +113,21 @@ private slots:
     void onTimeout();
 
 private:
+    byte m_IvOffset;
+    quint16 m_RecievedBanTime;
     Mode m_Mode;
     QTimer m_Timeout;
     TcpLink *m_Link;
+    QDataStream m_LinkStream;
     Contact *m_Contact;
     ContactDB *m_ContactDB;
     IpFilter *m_IpFilter;
     RsaKeyring *m_RsaKeyring;
-    CryptoPP::AutoSeededRandomPool m_RandomGenerator;
-    CryptoPP::GCM<CryptoPP::AES>::Encryption *m_GcmEncryptor;
-    CryptoPP::GCM<CryptoPP::AES>::Decryption *m_GcmDecryptor;
-    CryptoPP::RSAES_OAEP_SHA_Encryptor m_RsaEncryptor;
-    CryptoPP::RSAES_OAEP_SHA_Decryptor m_RsaDecryptor;
-    QPair<QByteArray,QByteArray> m_GcmKey;
+    AutoSeededRandomPool m_RandomGenerator;
+    RSAES_OAEP_SHA_Encryptor m_RsaEncryptor;
+    RSAES_OAEP_SHA_Decryptor m_RsaDecryptor;
+    QByteArray m_GcmKey;
+    QByteArray m_GcmBaseIV;
     QByteArray m_StarterIntegrityHash;
     QByteArray m_ResponderIntegrityHash;
 
