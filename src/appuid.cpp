@@ -21,16 +21,18 @@ bool AppUID::operator ==(const AppUID &second) const{
 }
 
 QDataStream &operator<<(QDataStream &out, const AppUID& appUID){
-    out << (quint8)appUID.type()
-        << appUID.instanceID();
+    out << (quint8)appUID.type();
+    if(appUID.type() != Manager)
+        out << appUID.instanceID();
     return out;
 }
 
 QDataStream &operator>>(QDataStream &in, AppUID& appUID){
     quint8 _type;
-    quint16 _instanceID;
+    quint16 _instanceID = 0;
     in >> _type;
-    in >> _instanceID;
+    if(static_cast<AppType>(_type) != Manager)
+        in >> _instanceID;
     appUID = AppUID(static_cast<AppType>(_type), _instanceID); //TODO: improve with moc (if possible)
     return in;
 }
