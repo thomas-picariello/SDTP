@@ -19,15 +19,17 @@ public:
     explicit TcpLink(QTcpSocket *socket, QIODevice *parent=0);
     ~TcpLink();
 
+    virtual qint64 bytesAvailable() const;
+    virtual bool flush();
     virtual QString getHost() const;
     virtual quint16 getPort() const;
     virtual void setHost(const QString &host, const quint16 port);
+
+
     void setSocket(QTcpSocket *socket);
 
-public slots:
-    virtual void onConnectionError(QAbstractSocket::SocketError);
-
 private slots:
+    virtual void onConnectionError(QAbstractSocket::SocketError);
     void internalStateChanged(QAbstractSocket::SocketState state);
 
 signals:
@@ -39,6 +41,7 @@ private:
 
     virtual qint64 readData(char *data, qint64 maxSize);
     virtual qint64 writeData(const char *data, qint64 size);
+
     void connectSocketSignals();
 };
 

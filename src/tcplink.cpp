@@ -35,9 +35,12 @@ void TcpLink::connectSocketSignals(){
             this, SLOT(onConnectionError(QAbstractSocket::SocketError)));
 }
 
-void TcpLink::onConnectionError(QAbstractSocket::SocketError){
-    emit disconnected(); //TODO: check if meaningfull
-    emit error(m_Socket->errorString());
+qint64 TcpLink::bytesAvailable() const{
+    return m_Socket->bytesAvailable();
+}
+
+bool TcpLink::flush(){
+    return m_Socket->flush();
 }
 
 QString TcpLink::getHost() const{
@@ -68,16 +71,23 @@ void TcpLink::internalStateChanged(QAbstractSocket::SocketState state){
     case QAbstractSocket::ConnectedState:
         m_State = Online;
         setOpenMode(ReadWrite);
+        emit openModeChanged(ReadWrite);
         emit stateChanged(m_State);
         emit connected();
         break;
     default:
         m_State = Offline;
         setOpenMode(NotOpen);
+        emit openModeChanged(NotOpen);
         emit stateChanged(m_State);
         emit disconnected();
         break;
     }
+}
+
+void TcpLink::onConnectionError(QAbstractSocket::SocketError){
+    emit disconnected(); //TODO: check if meaningfull
+    emit error(m_Socket->errorString());
 }
 
 qint64 TcpLink::readData(char *data, qint64 maxSize){
@@ -85,7 +95,6 @@ qint64 TcpLink::readData(char *data, qint64 maxSize){
 }
 
 qint64 TcpLink::writeData(const char *data, qint64 size){
-    m_SentPacketCount++;
     return m_Socket->write(data, size);
 }
 
