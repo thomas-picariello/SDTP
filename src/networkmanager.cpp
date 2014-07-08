@@ -6,26 +6,24 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, RsaKeyrin
     m_ContactDB(contactDB),
     m_Contact(contact),
     m_Status(Contact::Offline),
-    m_GcmDecryptor(NULL),
-    m_GcmEncryptor(NULL),
     m_LastTimeStamp(0),
     m_LastPacketNumber(0)
 {
-    TcpLink *tcpLink = dynamic_cast<TcpLink*>(getLink(TCP));
+    TcpLink *tcpLink = dynamic_cast<TcpLink*>(getGcmDevice(TCP)->getLink());
     m_Handshaker = new Handshaker(tcpLink, keyring, this);
     m_Handshaker->setIpFilter(ipFilter);
     m_Pinger.setContact(m_Contact);
     m_Pinger.setLink(tcpLink);
     m_Pinger.start();
 
-    connect(&m_Pinger, SIGNAL(connected()),
-            this, SLOT(doStarterHandshake()));
-    connect(m_Handshaker, SIGNAL(handshakeFinished(bool)),
-            this, SLOT(onHandshakeFinished(bool)));
-    connect(m_Handshaker, SIGNAL(newContactId(int)),
-            this, SIGNAL(newContactId(int)));
-    connect(m_Handshaker, SIGNAL(error(Handshaker::Error)),
-            this, SLOT(onHandshakeError(Handshaker::Error)));
+    connect(&m_Pinger, &Pinger::connected,
+            this, &NetworkManager::doStarterHandshake);
+    connect(m_Handshaker, &Handshaker::handshakeFinished,
+            this, &NetworkManager::onHandshakeFinished);
+    connect(m_Handshaker, &Handshaker::error,
+            this, &NetworkManager::onHandshakeError);
+    connect(m_Handshaker, &Handshaker::newContactId,
+            this, &NetworkManager::newContactId);
 }
 
 //Responder
@@ -34,20 +32,18 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, RsaKeyr
     m_ContactDB(contactDB),
     m_Contact(NULL),
     m_Status(Contact::Offline),
-    m_GcmDecryptor(NULL),
-    m_GcmEncryptor(NULL),
     m_LastTimeStamp(0),
     m_LastPacketNumber(0)
 {
-    TcpLink *tcpLink = dynamic_cast<TcpLink*>(getLink(TCP));
+    TcpLink *tcpLink = dynamic_cast<TcpLink*>(getGcmDevice(TCP)->getLink());
     tcpLink->setSocket(socket); //give the socket to the TCP link
     m_Handshaker = new Handshaker(tcpLink, keyring, this);
     m_Handshaker->setIpFilter(ipFilter);
 
-    connect(m_Handshaker, SIGNAL(handshakeFinished(bool)),
-            this, SLOT(onHandshakeFinished(bool)));
-    connect(m_Handshaker, SIGNAL(error(Handshaker::Error)),
-            this, SLOT(onHandshakeError(Handshaker::Error)));
+    connect(m_Handshaker, &Handshaker::handshakeFinished,
+            this, &NetworkManager::onHandshakeFinished);
+    connect(m_Handshaker, &Handshaker::error,
+            this, &NetworkManager::onHandshakeError);
 
     waitForHandshake();
 }
@@ -64,11 +60,19 @@ QString NetworkManager::getErrorString(Error err) const{
     return QString(errorEnum.valueToKey(static_cast<int>(err)));
 }
 
-Contact* NetworkManager::getContact() const{
-    return m_Contact;
+void NetworkManager::registerApp(AppUID uid, AbstractApp *app){
+    connect(app, &AbstractApp::sendData,
+            this, &NetworkManager::sendData);
+    m_AppManager.registerApp(uid, app);
 }
 
-void NetworkManager::onDisconnected(){
+void NetworkManager::unregisterApp(AppUID uid){
+    disconnect(m_AppManager.getApp(uid), &AbstractApp::sendData,
+            this, &NetworkManager::sendData);
+    m_AppManager.unregisterApp(uid);
+}
+
+void NetworkManager::onTcpDisconnect(){
     m_Status = Contact::Offline;
     emit contactStatusChanged(getContactId(), m_Status);
 }
@@ -82,45 +86,41 @@ void NetworkManager::onContactEvent(Contact::Event event){
 }
 
 void NetworkManager::sendData(LinkType linkType, QByteArray &data){
-    AbstractApp *senderApp = dynamic_cast<AbstractApp*>(sender());
-    if(senderApp){
-        foreach(AbstractApp* registeredApp, m_AppList){
-            if(senderApp == registeredApp){
-                Packet packet;
-                packet.timestamp;
-                packet.packetNumber;
-                packet.destAppUID = m_AppList.key(senderApp); //TODO: change for partner UID
-                packet.payload = data;
+    AppManager* manager = dynamic_cast<AppManager*>(sender());
+    AbstractApp* app = dynamic_cast<AbstractApp*>(sender());
+    if(manager || app){
+        if(manager || m_AppManager.isAppRegistered(app)){
+            Packet packet;
+            if(manager)
+                packet.destAppUID = AppUID(Manager); //instanceID always equal 0
+            else
+                packet.destAppUID = m_AppManager.getDistantAppUID(app);
+            packet.payload = data;
 
+            if(packet.destAppUID.type() != AppType::Undefined){
                 QByteArray serializedPacket;
                 QDataStream(&serializedPacket, QIODevice::WriteOnly) << packet;
-                QByteArray cypherPacket = gcmEncrypt(serializedPacket);
-                getLink(linkType)->write(cypherPacket);
-                return;
-            }
-        }
-        emit error(UnregisteredApp);
+                getGcmDevice(linkType)->write(serializedPacket);
+            }else
+                emit error(UnconnectedApp);
+        }else
+            emit error(UnregisteredApp);
     }
 }
 
-void NetworkManager::processIncommingData(){
-    AbstractLink *link = dynamic_cast<AbstractLink*>(sender());
-    if(link){
-        QByteArray clearText = gcmDecrypt(link->readAll());
-        QDataStream packetStream(&clearText, QIODevice::ReadOnly);
+void NetworkManager::routeIncommingData(){
+    GcmDevice *gcmDevice = dynamic_cast<GcmDevice*>(sender());
+    if(gcmDevice){
         Packet packet;
-        packetStream >> packet;
-
-        if(packet.timestamp < m_LastTimeStamp)
-            emit error(BadTimestamp);
-        else if((packet.packetNumber - m_LastPacketNumber) % sizeof(packet.packetNumber) != 1)
-            emit error(BadPacketNumber);
-        else if(m_AppList.find(packet.destAppUID) == m_AppList.end())
-            emit error(AppNotStarted);
+        QDataStream (gcmDevice) >> packet;
+        if(packet.destAppUID.type() == Manager)
+            m_AppManager.readIncommingData(packet.payload);
+        else if(m_AppManager.isAppConnected(packet.destAppUID))
+            emit error(UnconnectedApp);
         else if(packet.payload.isEmpty())
             emit error(NoPayload);
         else
-            m_AppList.value(packet.destAppUID)->readIncommingData(packet.payload);
+            m_AppManager.getApp(packet.destAppUID)->readIncommingData(packet.payload);
     }
 }
 
@@ -134,39 +134,52 @@ void NetworkManager::doStarterHandshake(){
 
 void NetworkManager::onHandshakeFinished(bool successfull){
     if(successfull){
-        if(m_GcmDecryptor) delete m_GcmDecryptor;
-        if(m_GcmEncryptor) delete m_GcmEncryptor;
-        m_GcmDecryptor = m_Handshaker->getGcmDecryptor();
-        m_GcmEncryptor = m_Handshaker->getGcmEncryptor();
+        m_GcmKey = m_Handshaker->getGcmKey();
+        m_GcmBaseIv = m_Handshaker->getGcmBaseIV();
+        getGcmDevice(TCP)->setKeyAndBaseIV(m_GcmKey, m_GcmBaseIv);
         m_Contact = m_Handshaker->getContact();
-        emit contactStatusChanged(getContactId(), Contact::Online);
-        connect(getLink(TCP), SIGNAL(readyRead()),
-                this, SLOT(processIncommingData()));
-        //TODO: start AppManager
-    }else{
+        emit contactStatusChanged(getContactId(), Contact::Online); //TODO: Contact self-signal on internal status change
+        connect(getGcmDevice(TCP), &QIODevice::readyRead,
+                this, &NetworkManager::routeIncommingData);
+        connect(&m_AppManager, &AppManager::sendData,
+                this, &NetworkManager::sendData);
+        connect(&m_AppManager, &AppManager::startApp,
+                this, &NetworkManager::onStartApp);
         if(m_Handshaker->getMode() == Handshaker::StarterMode)
-            m_Pinger.start(m_Handshaker->getBanTime()); //restart pinger after ban time
-        else if(m_Handshaker->getMode() == Handshaker::ResponderMode)
+            m_AppManager.requestPartnerApp(AppUID(Manager));
+
+    }else{
+        if(m_Handshaker->getMode() == Handshaker::StarterMode){
+            disconnect(getGcmDevice(TCP), &QIODevice::readyRead,
+                    this, &NetworkManager::routeIncommingData);
+            disconnect(&m_AppManager, &AppManager::sendData,
+                    this, &NetworkManager::sendData);
+            disconnect(&m_AppManager, &AppManager::startApp,
+                    this, &NetworkManager::onStartApp);
+            m_GcmKey.clear();
+            m_GcmBaseIv.clear();
+            m_Pinger.start(m_Handshaker->getRecievedBanTime()); //restart pinger after ban time
+        }else if(m_Handshaker->getMode() == Handshaker::ResponderMode)
             deleteLater(); //close connection, delete the network manager
     }
 }
 
 void NetworkManager::onHandshakeError(Handshaker::Error err){
-     //TODO: remove
+     //TODO: report error in a proper way
     qDebug()<<"Handshake error:"<<m_Handshaker->getErrorString(err);
 }
 
-AbstractLink* NetworkManager::getLink(LinkType linkType){
-    AbstractLink* link = NULL;
-    if(m_LinkList.contains(linkType)){
-        link = m_LinkList.value(linkType);
+GcmDevice* NetworkManager::getGcmDevice(LinkType linkType){
+    GcmDevice* gcmDevice = NULL;
+    if(m_GcmDevicesList.contains(linkType)){
+        gcmDevice = m_GcmDevicesList.value(linkType);
     }else{
         switch(linkType){
         case TCP:
-            link = new TcpLink();
-            m_LinkList.insert(linkType, link);
-            connect(dynamic_cast<TcpLink*>(link), SIGNAL(disconnected()),
-                    this, SLOT(onDisconnected()));
+            gcmDevice = new GcmDevice(new TcpLink(), this);
+            m_GcmDevicesList.insert(linkType, gcmDevice);
+            connect(dynamic_cast<TcpLink*>(gcmDevice->getLink()), &TcpLink::disconnected,
+                    this, &NetworkManager::onTcpDisconnect);
             break;
         case UDP:
             //TODO: impl
@@ -176,62 +189,26 @@ AbstractLink* NetworkManager::getLink(LinkType linkType){
             break;
         }
     }
-    return link;
+    return gcmDevice;
 }
 
 void NetworkManager::cleanLinks(){
 
 }
 
-QByteArray NetworkManager::gcmDecrypt(QByteArray& cipherText){
-    std::string clearText;
-    try{
-        CryptoPP::ArraySource((byte*)cipherText.data(), cipherText.size(), true,
-                              new CryptoPP::AuthenticatedDecryptionFilter(*m_GcmDecryptor,
-                                                                          new CryptoPP::StringSink(clearText)
-                                                                          )
-                              );
-    }catch(CryptoPP::Exception&){
-        emit error(PacketCorrupted);
-    }
-    return QByteArray(clearText.data(), (int)clearText.size());
-}
-
-QByteArray NetworkManager::gcmEncrypt(QByteArray& clearText){
-    std::string cipherText;
-    try{
-        CryptoPP::ArraySource((byte*)clearText.data(), clearText.size(), true,
-                              new CryptoPP::AuthenticatedEncryptionFilter(*m_GcmEncryptor,
-                                                                          new CryptoPP::StringSink(cipherText)
-                                                                          )
-                              );
-    }catch(CryptoPP::Exception&){
-        emit error(BadSymmetricKey);
-    }
-    return QByteArray(cipherText.data(), (int)cipherText.size());
-}
-
 NetworkManager::~NetworkManager(){
     //Rem: do not delete m_ContactDB and m_AppList pointers
     delete m_Handshaker;
-    if(m_GcmDecryptor)
-        delete m_GcmDecryptor;
-    if(m_GcmEncryptor)
-        delete m_GcmEncryptor;
     emit destroyed(this);
 }
 
 QDataStream& operator <<(QDataStream &out, const NetworkManager::Packet &packet){
-    out << packet.timestamp
-        << packet.packetNumber
-        << packet.destAppUID
+    out << packet.destAppUID
         << packet.payload;
     return out;
 }
 
 QDataStream& operator >>(QDataStream &in, NetworkManager::Packet &packet){
-    in >> packet.timestamp;
-    in >> packet.packetNumber;
     in >> packet.destAppUID;
     in >> packet.payload;
     return in;

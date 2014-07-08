@@ -20,6 +20,7 @@
 #include "ipfilter.h"
 #include "appuid.h"
 #include "appmanager.h"
+#include "gcmdevice.h"
 
 class NetworkManager : public QObject
 {
@@ -27,19 +28,17 @@ class NetworkManager : public QObject
 
 public:
     enum Error{
-        PacketCorrupted,
         BadTimestamp,
         BadPacketNumber,
         BadSymmetricKey,
-        AppNotStarted,
         NoPayload,
+        PacketCorrupted,
+        UnconnectedApp,
         UnregisteredApp
     };
     Q_ENUMS(Error)
 
     struct Packet{
-        quint64 timestamp;
-        quint8 packetNumber;
         AppUID destAppUID;
         QByteArray payload;
     };
@@ -56,12 +55,13 @@ public:
                    QObject *parent=0);   //Responder
     ~NetworkManager();
 
-    Contact* getContact() const;
+    Contact* getContact() const{ return m_Contact; }
     int getContactId() const;
     QString getErrorString(Error err) const;
     //inline Contact::Status getStatus() const{ return m_Contact->getStatus(); } //TODO: implement Contact status
-    inline AppManager* getAppManager(){ return &m_AppManager; }
-    void setContact(Contact *contact);
+    void registerApp(AppUID uid, AbstractApp *app);
+    void setContact(Contact *contact){ m_Contact = contact; }
+    void unregisterApp(AppUID uid);
 
 public slots :
     void onContactEvent(Contact::Event event);
@@ -72,13 +72,15 @@ signals :
     void destroyed(NetworkManager* networkManager);
     void error(NetworkManager::Error err);
     void newContactId(int id);
+    void startApp(Contact* contact, AppType type);
 
 private slots:
     void waitForHandshake();
     void doStarterHandshake();
     void onHandshakeFinished(bool successfull);
-    void processIncommingData();
-    void onDisconnected();
+    void onStartApp(AppType type){ if(m_Contact) emit startApp(m_Contact, type); }
+    void routeIncommingData();
+    void onTcpDisconnect();
     void onHandshakeError(Handshaker::Error);
 
 private :
@@ -90,13 +92,12 @@ private :
     Handshaker *m_Handshaker;
     AppManager m_AppManager;
     Pinger m_Pinger;
-    CryptoPP::GCM<CryptoPP::AES>::Decryption *m_GcmDecryptor;
-    CryptoPP::GCM<CryptoPP::AES>::Encryption *m_GcmEncryptor;
-    QMap<LinkType, AbstractLink*> m_LinkList;
-    QMap<AppUID, AbstractApp*> m_AppList;
+    QMap<LinkType, GcmDevice*> m_GcmDevicesList;
+    QByteArray m_GcmKey;
+    QByteArray m_GcmBaseIv;
 
     void cleanLinks();
-    AbstractLink *getLink(LinkType linkType);
+    GcmDevice* getGcmDevice(LinkType linkType);
     QByteArray gcmDecrypt(QByteArray& cipherText);
     QByteArray gcmEncrypt(QByteArray& clearText);
 
