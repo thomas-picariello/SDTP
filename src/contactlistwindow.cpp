@@ -60,14 +60,12 @@ void ContactListWindow::openSettingsWindow(){
 }
 
 void ContactListWindow::onListItemAction(int contactId, ContactItemWidget::Action action){
-    QList<Contact*> contactList;
-    contactList.append(mContactDB->findById(contactId));
     switch(action){
     case ContactItemWidget::CallAction:
-        emit startApp(contactList, VoIP);
+        emit startApp(mContactDB->findById(contactId), VoIP);
         break;
     case ContactItemWidget::MessengerAction:
-        emit startApp(contactList, Messenger);
+        emit startApp(mContactDB->findById(contactId), Messenger);
         break;
     case ContactItemWidget::EditAction:
         editContact();

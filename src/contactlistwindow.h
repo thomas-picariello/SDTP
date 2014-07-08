@@ -46,7 +46,7 @@ public slots:
     void deleteContact();
 
 signals:
-    void startApp(QList<Contact*>, AppType appTypeId);
+    void startApp(Contact* contact, AppType appTypeId);
     void contactEvent(int contactId, Contact::Event);
     void settingsUpdated();
     
