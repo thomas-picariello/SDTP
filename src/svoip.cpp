@@ -6,10 +6,12 @@ SVoIP::SVoIP(QObject *parent):
     mRsaKeyring(NULL),
     mContactListWindow(NULL),
     mPasswordWindow(NULL)
+
 {
     QSettings settings("settings.ini", QSettings::IniFormat);
     QByteArray salt = QByteArray::fromBase64(settings.value("encryption/salt").toByteArray());
     QByteArray pwdHash = QByteArray::fromBase64(settings.value("encryption/password_hash").toByteArray());
+
 
     if(salt.isEmpty()){
         settings.setValue("encryption/salt", generateSalt());
@@ -49,6 +51,8 @@ void SVoIP::startProgram(){
     disconnect(mRsaKeyring, SIGNAL(privateKeyGenerationFinished(QByteArray)), this, 0);
     mContactDB = new ContactDB(&mFileKey, this);
     mContactListWindow = new ContactListWindow(mContactDB, mRsaKeyring, &mFileKey);
+
+    //registerNAT(100,0);
 
     restartListener();
     connect(&mListener, &QTcpServer::newConnection,
@@ -177,6 +181,29 @@ void SVoIP::startApp(Contact* contact, AppType appType){
             mNetworkManagerList.value(contact->getId())->registerApp(appUID, app);
             mAppList.insert(appUID, app);
         }
+    }
+}
+void SVoIP::registerNAT(quint16 port,bool connexionType){
+
+    UPNPNAT nat;
+    QString error;
+    nat.init(15,20);
+
+    QString type = "TCP";
+    if(connexionType)type = "UDP";
+
+    if(!nat.discovery()){
+        error = nat.get_last_error();
+        qDebug()<<"discovery error is : "+error;
+    }
+
+    if(!nat.add_port_mapping("svoip","10.207.3.65",port,port,"TCP")){
+        error = nat.get_last_error();
+        qDebug()<<"add_port_mapping error is : "+error;
+    }
+    else {
+        error = nat.get_last_error();
+        qDebug()<<"add port mapping succ.";
     }
 }
 
