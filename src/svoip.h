@@ -9,6 +9,7 @@
 #include <QPair>
 #include <cryptopp/base64.h>
 #include <cryptopp/osrng.h>
+#include <HUpnpCore/HControlPoint>
 #include "contactdb.h"
 #include "contactlistwindow.h"
 #include "passwordwindow.h"
@@ -18,6 +19,7 @@
 #include "messengerapp.h"
 #include "ipfilter.h"
 #include "appuid.h"
+#include "upnpnat.h"
 
 class SVoIP: public QObject
 {
@@ -37,6 +39,7 @@ public slots:
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
     void startApp(Contact *contact, AppType appType);
+    void registerNAT(quint16 port,bool connexionType);
 
 private slots:
     void checkParameters(QByteArray key = QByteArray());
@@ -48,6 +51,7 @@ signals:
     void error(Error err);
 
 private :
+
     ConfWizard *m_wizard;
     ContactDB *mContactDB;
     PasswordWindow *mPasswordWindow;
