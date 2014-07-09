@@ -7,7 +7,6 @@
 #include <QtEndian>
 
 #include <cryptopp/cryptlib.h>
-using CryptoPP::g_nullNameValuePairs;
 
 #include <cryptopp/aes.h>
 using CryptoPP::AES;
@@ -41,6 +40,7 @@ public:
 
     explicit GcmDevice(AbstractLink* link, QObject *parent = 0);
 
+    void setBypassMode(bool bypass);
     AbstractLink* getLink();
     void setLink(AbstractLink* link, bool destroyOld = true);
     QByteArray getKey() const;
@@ -52,16 +52,23 @@ public:
 
 private slots:
     void onLinkOpenModeChanged(OpenMode openMode);
+    void readFromLink();
 
 private:
+    static const int GCM_TAG_SIZE = 16;
+    QByteArray m_BaseIV;
+    QByteArray m_DataBuffer;
+    QByteArray m_Key;
     quint64 m_LastSequenceNumber;
     AbstractLink* m_Link;
-    QByteArray m_Key;
-    QByteArray m_BaseIV;
+    QDataStream m_LinkStream;
+    QList<QPair<quint64,QByteArray>> m_PacketList;
 
+    QByteArray generateIV(quint64 sequenceNumber);
+    QByteArray decrypt(quint64 seqNum, QByteArray& gcmPacket);
+    QByteArray encrypt(quint64 seqNum, QByteArray& clearText);
     virtual qint64 readData(char *data, qint64 maxlen);
     virtual qint64 writeData(const char *data, qint64 len);
-    QByteArray generateIV(quint64 sequenceNumber);
 
     Q_DISABLE_COPY(GcmDevice)
 };

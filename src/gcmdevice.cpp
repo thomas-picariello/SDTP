@@ -3,15 +3,31 @@
 GcmDevice::GcmDevice(AbstractLink *link, QObject *parent) :
     QIODevice(parent),
     m_Link(link),
+    m_LinkStream(m_Link),
     m_LastSequenceNumber(0)
 {
     m_Link->setParent(this); //take ownership of the link
-    setOpenMode(m_Link->openMode());
-
     connect(m_Link, &AbstractLink::openModeChanged,
             this, &GcmDevice::onLinkOpenModeChanged);
     connect(m_Link, &AbstractLink::readyRead,
-            this, &GcmDevice::readyRead);
+            this, &GcmDevice::readFromLink);
+    setOpenMode(m_Link->openMode());
+}
+
+void GcmDevice::setBypassMode(bool bypass){
+    if(bypass){
+        disconnect(m_Link, &AbstractLink::openModeChanged,
+                this, &GcmDevice::onLinkOpenModeChanged);
+        disconnect(m_Link, &AbstractLink::readyRead,
+                this, &GcmDevice::readFromLink);
+        setOpenMode(NotOpen);
+    }else{
+        connect(m_Link, &AbstractLink::openModeChanged,
+                this, &GcmDevice::onLinkOpenModeChanged);
+        connect(m_Link, &AbstractLink::readyRead,
+                this, &GcmDevice::readFromLink);
+        setOpenMode(m_Link->openMode());
+    }
 }
 
 AbstractLink* GcmDevice::getLink(){
@@ -49,35 +65,102 @@ void GcmDevice::onLinkOpenModeChanged(OpenMode openMode){
     setOpenMode(openMode);
 }
 
+void GcmDevice::readFromLink(){
+    m_DataBuffer.append(m_Link->readAll());
+    const quint32 cypherPayloadSize = qFromBigEndian<quint32>((uchar*)m_DataBuffer.mid(sizeof(quint64), sizeof(quint32)).data());
+    const quint32 packetSize = sizeof(quint64) + sizeof(quint32) + cypherPayloadSize;
+    if(m_DataBuffer.size() >= (int)packetSize){
+        QByteArray packet = m_DataBuffer.left(packetSize);
+        QDataStream packetStream(&packet, QIODevice::ReadOnly);
+        quint64 seqNum;
+        QByteArray cypherPayload;
+        packetStream >> seqNum;
+        packetStream >> cypherPayload;
+        m_PacketList.append(qMakePair(seqNum, cypherPayload));
+        m_DataBuffer.remove(0, packetSize);
+        emit readyRead();
+    }
+}
+
+QByteArray GcmDevice::decrypt(quint64 seqNum, QByteArray& gcmPacket){
+    QByteArray clearText;
+    std::string clearTextStr;
+
+    QByteArray seqNumBytes(sizeof(seqNum), 0x00);
+    qToBigEndian<quint64>(seqNum, (uchar*)seqNumBytes.data());
+    QByteArray packetSizeBytes(sizeof(quint32), 0x00);
+    qToBigEndian<quint32>(gcmPacket.size(), (uchar*)packetSizeBytes.data());
+    QByteArray iv = generateIV(seqNum);
+    qDebug()<<seqNumBytes.toHex();
+
+    QByteArray mac = gcmPacket.right(GCM_TAG_SIZE);
+    QByteArray cypherData = gcmPacket.left(gcmPacket.size()-GCM_TAG_SIZE);
+
+    GCM<AES>::Decryption dec;
+    try{
+        dec.SetKeyWithIV((byte*)m_Key.data(), m_Key.size(),
+                         (byte*)iv.data(), iv.size());
+        AuthenticatedDecryptionFilter decFilter(dec,
+                                                new StringSink(clearTextStr),
+                                                AuthenticatedDecryptionFilter::MAC_AT_BEGIN,
+                                                GCM_TAG_SIZE);
+
+        decFilter.ChannelPut(DEFAULT_CHANNEL, (byte*)mac.data(), mac.size());
+        decFilter.ChannelPut(AAD_CHANNEL, (byte*)seqNumBytes.data(), seqNumBytes.size());
+        //decFilter.ChannelPut(AAD_CHANNEL, (byte*)packetSizeBytes.data(), packetSizeBytes.size());
+        decFilter.ChannelPut(DEFAULT_CHANNEL, (byte*)cypherData.data(), cypherData.size());
+
+        decFilter.ChannelMessageEnd(AAD_CHANNEL);
+        decFilter.ChannelMessageEnd(DEFAULT_CHANNEL);
+
+        clearText.append(clearTextStr.data(), (int)clearTextStr.size());
+    }catch(CryptoPP::Exception& e){
+        qDebug()<<e.what();
+    }
+    return clearText;
+}
+
+QByteArray GcmDevice::encrypt(quint64 seqNum, QByteArray& clearText){
+    QByteArray cypherText;
+    std::string cypherTextStr;
+
+    QByteArray seqNumBytes(sizeof(seqNum), 0x00);
+    qToBigEndian<quint64>(seqNum, (uchar*)seqNumBytes.data());
+    QByteArray iv = generateIV(seqNum);
+    qDebug()<<seqNumBytes.toHex();
+
+    GCM<AES>::Encryption enc;
+    try{
+        enc.SetKeyWithIV((byte*)m_Key.data(), m_Key.size(),
+                         (byte*)iv.data(), iv.size());
+
+        AuthenticatedEncryptionFilter encFilter (enc, new StringSink(cypherTextStr), false, GCM_TAG_SIZE);
+
+        encFilter.ChannelPut(AAD_CHANNEL, (byte*)seqNumBytes.data(), seqNum);
+        //TODO: find encrypted packet size
+        encFilter.ChannelMessageEnd(AAD_CHANNEL);
+
+        encFilter.ChannelPut(DEFAULT_CHANNEL, (byte*)clearText.data(), clearText.size());
+        encFilter.ChannelMessageEnd(DEFAULT_CHANNEL);
+        cypherText.append(cypherTextStr.data(), (int)cypherTextStr.size());
+    }catch(CryptoPP::Exception& e){
+        qDebug()<<e.what();
+    }
+    return cypherText;
+}
+
 qint64 GcmDevice::readData(char *data, qint64 maxlen){
-    std::string clearData;
-    QByteArray rawData = m_Link->readAll();
-    //check packet size
-    if(rawData.size() < 24) //seqNum size (8 bytes) + gcm default tag size (16 bytes)
-        return 0;
-    QByteArray seqNumBytes = rawData.left(8);
-    QByteArray cypherData = rawData.mid(8);
-    quint64 seqNum = qFromBigEndian<quint64>((uchar*)seqNumBytes.data());
-
-    if(seqNum > m_LastSequenceNumber){  //TODO: what on overflow ?
-        QByteArray iv = generateIV(seqNum);
-        GCM<AES>::Decryption dec;
-        try{
-            dec.SetKeyWithIV((byte*)m_Key.data(), m_Key.size(),
-                             (byte*)iv.data(), iv.size());
-            AuthenticatedDecryptionFilter decFilter(dec, new StringSink(clearData));
-            decFilter.ChannelPut(AAD_CHANNEL, (byte*)seqNumBytes.data(), seqNumBytes.size());
-            decFilter.ChannelMessageEnd(AAD_CHANNEL);
-            decFilter.ChannelPut(DEFAULT_CHANNEL, (byte*)cypherData.data(), cypherData.size());
-            decFilter.ChannelMessageEnd(DEFAULT_CHANNEL);
-
-            if((int)clearData.size() <= maxlen){
-                memcpy(data, clearData.data(), clearData.size());
+    QPair<int,QByteArray> packet;
+    if(!m_PacketList.isEmpty()){
+        packet = m_PacketList.takeFirst();
+        const quint64 seqNum = packet.first;
+        if(seqNum > m_LastSequenceNumber){  //TODO: what on overflow ?
+            QByteArray clearText = decrypt(seqNum, packet.second);
+            if(clearText.size() <= maxlen){
+                memcpy(data, clearText.data(), clearText.size());
                 m_LastSequenceNumber = seqNum;
-                return clearData.size();
+                return clearText.size();
             }
-        }catch(CryptoPP::Exception& e){
-            qDebug()<<e.what();
         }
     }
     return 0;
@@ -85,31 +168,12 @@ qint64 GcmDevice::readData(char *data, qint64 maxlen){
 
 qint64 GcmDevice::writeData(const char *data, qint64 len){
     QByteArray clearData(data, len);
-    std::string cypherData;
     quint64 seqNum = m_LastSequenceNumber + 1;
-    QByteArray seqNumBytes(sizeof(seqNum), 0x00);
-    qToBigEndian<quint64>(seqNum, (uchar*)seqNumBytes.data());
-    QByteArray iv = generateIV(seqNum);
-
-    GCM<AES>::Encryption enc;
-    try{
-        enc.SetKeyWithIV((byte*)m_Key.data(), m_Key.size(),
-                         (byte*)iv.data(), iv.size());
-
-        AuthenticatedEncryptionFilter encFilter (enc, new StringSink(cypherData));
-        encFilter.ChannelPut(AAD_CHANNEL, (byte*)seqNumBytes.data(), seqNum);
-        encFilter.ChannelMessageEnd(AAD_CHANNEL);
-        encFilter.ChannelPut(DEFAULT_CHANNEL, (byte*)clearData.data(), clearData.size());
-        encFilter.ChannelMessageEnd(DEFAULT_CHANNEL);
-
-        if(m_Link->write(cypherData.data(), cypherData.size())){
-            m_LastSequenceNumber++;
-            return len;
-        }
-    }catch(CryptoPP::Exception& e){
-        qDebug()<<e.what();
-    }
-    return 0;
+    QByteArray cypherText = encrypt(seqNum, clearData);
+    m_LinkStream << seqNum
+                 << cypherText;
+    m_LastSequenceNumber++;
+    return sizeof(seqNum) + sizeof(quint32) + cypherText.size();
 }
 
 QByteArray GcmDevice::generateIV(quint64 sequenceNumber){

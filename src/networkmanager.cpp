@@ -9,6 +9,7 @@ NetworkManager::NetworkManager(Contact *contact, ContactDB *contactDB, RsaKeyrin
     m_LastTimeStamp(0),
     m_LastPacketNumber(0)
 {
+    getGcmDevice(TCP)->setBypassMode(true); //disable gcm for handshake
     TcpLink *tcpLink = dynamic_cast<TcpLink*>(getGcmDevice(TCP)->getLink());
     m_Handshaker = new Handshaker(tcpLink, keyring, this);
     m_Handshaker->setIpFilter(ipFilter);
@@ -35,6 +36,7 @@ NetworkManager::NetworkManager(QTcpSocket *socket, ContactDB *contactDB, RsaKeyr
     m_LastTimeStamp(0),
     m_LastPacketNumber(0)
 {
+    getGcmDevice(TCP)->setBypassMode(true); //disable gcm for handshake
     TcpLink *tcpLink = dynamic_cast<TcpLink*>(getGcmDevice(TCP)->getLink());
     tcpLink->setSocket(socket); //give the socket to the TCP link
     m_Handshaker = new Handshaker(tcpLink, keyring, this);
@@ -92,7 +94,7 @@ void NetworkManager::sendData(LinkType linkType, QByteArray &data){
         if(manager || m_AppManager.isAppRegistered(app)){
             Packet packet;
             if(manager)
-                packet.destAppUID = AppUID(Manager); //instanceID always equal 0
+                packet.destAppUID = AppUID(Manager);
             else
                 packet.destAppUID = m_AppManager.getDistantAppUID(app);
             packet.payload = data;
@@ -137,6 +139,7 @@ void NetworkManager::onHandshakeFinished(bool successfull){
         m_GcmKey = m_Handshaker->getGcmKey();
         m_GcmBaseIv = m_Handshaker->getGcmBaseIV();
         getGcmDevice(TCP)->setKeyAndBaseIV(m_GcmKey, m_GcmBaseIv);
+        getGcmDevice(TCP)->setBypassMode(false);
         m_Contact = m_Handshaker->getContact();
         emit contactStatusChanged(getContactId(), Contact::Online); //TODO: Contact self-signal on internal status change
         connect(getGcmDevice(TCP), &QIODevice::readyRead,
@@ -145,8 +148,6 @@ void NetworkManager::onHandshakeFinished(bool successfull){
                 this, &NetworkManager::sendData);
         connect(&m_AppManager, &AppManager::startApp,
                 this, &NetworkManager::onStartApp);
-        if(m_Handshaker->getMode() == Handshaker::StarterMode)
-            m_AppManager.requestPartnerApp(AppUID(Manager));
 
     }else{
         if(m_Handshaker->getMode() == Handshaker::StarterMode){
