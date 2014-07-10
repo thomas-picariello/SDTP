@@ -9,7 +9,6 @@
 #include <QPair>
 #include <cryptopp/base64.h>
 #include <cryptopp/osrng.h>
-#include <HUpnpCore/HControlPoint>
 #include "contactdb.h"
 #include "contactlistwindow.h"
 #include "passwordwindow.h"
