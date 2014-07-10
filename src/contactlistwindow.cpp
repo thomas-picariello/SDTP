@@ -91,8 +91,9 @@ void ContactListWindow::refreshList(){
             //new contact
             QListWidgetItem *item = new QListWidgetItem(contact->getName());
             item->setData(IdRole, contact->getId());
-            setContactStatusIcon(item, Contact::Offline);
-
+            setContactStatusIcon(item, contact->getStatus());
+            connect(contact, &Contact::statusChanged,
+                    this, &ContactListWindow::updateContactStatusIcon);
             ui->list->addItem(item);
             ContactItemWidget *itemWidget = new ContactItemWidget(contact->getId());
             ui->list->setItemWidget(item, itemWidget);
@@ -135,6 +136,12 @@ void ContactListWindow::deleteContact(){
             emit contactEvent(currentId, Contact::Deleted);
         }
     }
+}
+
+void ContactListWindow::updateContactStatusIcon(){
+    Contact* contact = dynamic_cast<Contact*>(sender());
+    if(contact)
+        setContactStatusIcon(contact->getId(), contact->getStatus());
 }
 
 Contact* ContactListWindow::getSelectedContact(){
