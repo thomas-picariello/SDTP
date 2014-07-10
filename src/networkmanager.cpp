@@ -62,10 +62,14 @@ QString NetworkManager::getErrorString(Error err) const{
     return QString(errorEnum.valueToKey(static_cast<int>(err)));
 }
 
-void NetworkManager::registerApp(AppUID uid, AbstractApp *app){
+void NetworkManager::registerApp(AppUID localUID, AbstractApp *app){
     connect(app, &AbstractApp::sendData,
             this, &NetworkManager::sendData);
-    m_AppManager.registerApp(uid, app);
+    m_AppManager.registerApp(localUID, app);
+}
+
+void NetworkManager::registerAppConnection(AppUID localUID, AppUID distantUID){
+    m_AppManager.registerConnection(localUID, distantUID);
 }
 
 void NetworkManager::unregisterApp(AppUID uid){
@@ -121,8 +125,10 @@ void NetworkManager::routeIncommingData(){
             emit error(UnconnectedApp);
         else if(packet.payload.isEmpty())
             emit error(NoPayload);
-        else
-            m_AppManager.getApp(packet.destAppUID)->readIncommingData(packet.payload);
+        else{
+            if(m_AppManager.isAppConnected(packet.destAppUID))
+                m_AppManager.getApp(packet.destAppUID)->readIncommingData(packet.payload);
+        }
     }
 }
 
@@ -147,7 +153,9 @@ void NetworkManager::onHandshakeFinished(bool successfull){
         connect(&m_AppManager, &AppManager::sendData,
                 this, &NetworkManager::sendData);
         connect(&m_AppManager, &AppManager::startApp,
-                this, &NetworkManager::onStartApp);
+                this, &NetworkManager::onStartAppRequest);
+        connect(&m_AppManager, &AppManager::startAppFor,
+                this, &NetworkManager::onStartAppForRequest);
 
     }else{
         if(m_Handshaker->getMode() == Handshaker::StarterMode){
@@ -156,13 +164,29 @@ void NetworkManager::onHandshakeFinished(bool successfull){
             disconnect(&m_AppManager, &AppManager::sendData,
                     this, &NetworkManager::sendData);
             disconnect(&m_AppManager, &AppManager::startApp,
-                    this, &NetworkManager::onStartApp);
+                    this, &NetworkManager::onStartAppRequest);
+            disconnect(&m_AppManager, &AppManager::startAppFor,
+                    this, &NetworkManager::onStartAppForRequest);
             m_GcmKey.clear();
             m_GcmBaseIv.clear();
             m_Pinger.start(m_Handshaker->getRecievedBanTime()); //restart pinger after ban time
         }else if(m_Handshaker->getMode() == Handshaker::ResponderMode)
             deleteLater(); //close connection, delete the network manager
     }
+}
+
+void NetworkManager::onStartAppRequest(AppType type){
+    if(m_Contact)
+        emit startApp(m_Contact, type);
+}
+
+void NetworkManager::onStartAppForRequest(AppUID distantUID){
+    if(m_Contact)
+        emit startAppFor(m_Contact, distantUID);
+}
+
+void NetworkManager::onRouteReady(AbstractApp *app){
+    //connect app signals
 }
 
 void NetworkManager::onHandshakeError(Handshaker::Error err){

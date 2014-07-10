@@ -11,7 +11,6 @@ VideoApp::VideoApp(Contact * contact, QWidget* parent) :
 
     if(!cameras.isEmpty()){
         m_Camera = new QCamera(cameras.first());
-        m_Camera->setCaptureMode(QCamera::CaptureStillImage);
 
 
         m_videoWidget = new QVideoWidget();

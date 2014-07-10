@@ -59,7 +59,8 @@ public:
     int getContactId() const;
     QString getErrorString(Error err) const;
     //inline Contact::Status getStatus() const{ return m_Contact->getStatus(); } //TODO: implement Contact status
-    void registerApp(AppUID uid, AbstractApp *app);
+    void registerApp(AppUID localUID, AbstractApp *app);
+    void registerAppConnection(AppUID localUID, AppUID distantUID);
     void setContact(Contact *contact){ m_Contact = contact; }
     void unregisterApp(AppUID uid);
 
@@ -73,12 +74,15 @@ signals :
     void error(NetworkManager::Error err);
     void newContactId(int id);
     void startApp(Contact* contact, AppType type);
+    void startAppFor(Contact *contact, AppUID distantAppUID);
 
 private slots:
     void waitForHandshake();
     void doStarterHandshake();
     void onHandshakeFinished(bool successfull);
-    void onStartApp(AppType type){ if(m_Contact) emit startApp(m_Contact, type); }
+    void onStartAppRequest(AppType type);
+    void onStartAppForRequest(AppUID distantUID);
+    void onRouteReady(AbstractApp* app);
     void routeIncommingData();
     void onTcpDisconnect();
     void onHandshakeError(Handshaker::Error);
