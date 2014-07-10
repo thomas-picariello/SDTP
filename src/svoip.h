@@ -19,7 +19,6 @@
 #include "ipfilter.h"
 #include "appuid.h"
 #include "upnpnat.h"
-#include "videoapp.h"
 
 class SVoIP: public QObject
 {
@@ -38,7 +37,8 @@ public slots:
     void updateNetworkManagerId(int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
-    void startApp(Contact *contact, AppType appType);
+    AbstractApp* startApp(Contact *contact, AppType appType);
+    AbstractApp* startAppFor(Contact *contact, AppUID distantUID);
     void registerNAT(quint16 port,bool connexionType);
 
 private slots:
