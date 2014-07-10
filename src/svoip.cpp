@@ -85,11 +85,6 @@ void SVoIP::onNetworkManagerDestroy(NetworkManager* networkManager){
     m_networkManagerList.remove(m_networkManagerList.key(networkManager));
 }
 
-void SVoIP::updateContactStatus(int id, Contact::Status status){
-    if(id)
-        m_contactListWindow->setContactStatusIcon(id, status);
-}
-
 void SVoIP::onContactEvent(int id, Contact::Event event){
 //    NetworkManager* networkManager;
     switch(event){
@@ -110,6 +105,7 @@ void SVoIP::onContactEvent(int id, Contact::Event event){
 void SVoIP::onHandshakeSuccess(){
     Handshaker* handshaker = dynamic_cast<Handshaker*>(sender());
     if(handshaker){
+        handshaker->getContact()->setStatus(Contact::Online);
         QString host = handshaker->getHost();
         m_ipFilter.removeBan(host);
         NetworkManager* netMgr = new NetworkManager(handshaker->getContact(),
@@ -118,8 +114,6 @@ void SVoIP::onHandshakeSuccess(){
                                                     handshaker->getGcmBaseIV(),
                                                     this);
         m_networkManagerList.insert(handshaker->getContact()->getId(), netMgr);
-        connect(netMgr, &NetworkManager::contactStatusChanged,
-                this, &SVoIP::updateContactStatus); //TODO contact self signal
         connect(netMgr, &NetworkManager::destroyed,
                 this, &SVoIP::onNetworkManagerDestroy);
         connect(netMgr, &NetworkManager::startApp,
@@ -133,8 +127,8 @@ void SVoIP::onHandshakeSuccess(){
 
 void SVoIP::onHandshakeError(Handshaker::Error error){
     Handshaker* handshaker = dynamic_cast<Handshaker*>(sender());
-    qDebug()<< handshaker->getErrorString(error);
     if(handshaker){
+        qDebug()<< handshaker->getErrorString(error);
         QString host = handshaker->getHost();
         if(handshaker->getRecievedBanTime() != 0)
             m_ipFilter.addBan(host, handshaker->getRecievedBanTime());

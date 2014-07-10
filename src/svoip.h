@@ -51,7 +51,6 @@ public slots:
     AbstractApp* startApp(Contact *contact, AppType appType);
     AbstractApp* startAppFor(Contact *contact, AppUID distantUID);
     void startHandshaker(QTcpSocket *socket);
-    void updateContactStatus(int id, Contact::Status status);
 
 private slots:
     void checkParameters(QByteArray key = QByteArray());
