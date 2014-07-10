@@ -91,7 +91,6 @@ QByteArray GcmDevice::decrypt(quint64 seqNum, QByteArray& gcmPacket){
     QByteArray packetSizeBytes(sizeof(quint32), 0x00);
     qToBigEndian<quint32>(gcmPacket.size(), (uchar*)packetSizeBytes.data());
     QByteArray iv = generateIV(seqNum);
-    qDebug()<<seqNumBytes.toHex();
 
     QByteArray mac = gcmPacket.right(GCM_TAG_SIZE);
     QByteArray cypherData = gcmPacket.left(gcmPacket.size()-GCM_TAG_SIZE);
@@ -127,7 +126,6 @@ QByteArray GcmDevice::encrypt(quint64 seqNum, QByteArray& clearText){
     QByteArray seqNumBytes(sizeof(seqNum), 0x00);
     qToBigEndian<quint64>(seqNum, (uchar*)seqNumBytes.data());
     QByteArray iv = generateIV(seqNum);
-    qDebug()<<seqNumBytes.toHex();
 
     GCM<AES>::Encryption enc;
     try{
