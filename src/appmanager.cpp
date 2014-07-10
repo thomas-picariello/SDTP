@@ -6,8 +6,6 @@ void AppManager::readIncommingData(QByteArray &data){
     switch(packet.command){
     case StartAppCommand:
         emit startAppFor(packet.distantUID);
-        qDebug()<< m_AppConnectionsTable.key(packet.distantUID).type();
-        //sendPacket(AppStartedSignal, packet.localUID, get);
         break;
     case AppStartedSignal:
         registerConnection(packet.localUID, packet.distantUID);
@@ -76,6 +74,11 @@ bool AppManager::registerConnection(AppUID localAppUID, AppUID distantAppUID){
     if(appRegistered)
         m_AppConnectionsTable.insert(localAppUID, distantAppUID);
     return appRegistered;
+}
+
+void AppManager::sendAppStartedSignal(AppUID localUID){
+    registerConnection(localUID, getDistantAppUID(localUID));
+    sendPacket(AppStartedSignal, localUID, getDistantAppUID(localUID));
 }
 
 void AppManager::sendPacket(Command cmd, AppUID localUID, AppUID distantUID){

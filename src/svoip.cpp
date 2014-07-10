@@ -196,8 +196,11 @@ AbstractApp* SVoIP::startApp(Contact* contact, AppType appType){
 AbstractApp* SVoIP::startAppFor(Contact* contact, AppUID distantUID){
     AbstractApp *app = startApp(contact, distantUID.type());
     AppUID localUID = m_appList.key(app);
-    if(localUID.type() != Undefined)
-        m_networkManagerList.value(contact->getId())->registerAppConnection(localUID, distantUID);
+    if(localUID.type() != Undefined){
+        NetworkManager* netMgr = m_networkManagerList.value(contact->getId());
+        netMgr->registerAppConnection(localUID, distantUID);
+        netMgr->onAppStarted(localUID);
+    }
     return app;
 }
 

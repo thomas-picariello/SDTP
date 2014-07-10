@@ -49,6 +49,7 @@ public:
     bool isAppRegistered(AbstractApp* app) const;
     bool isAppConnected(AppUID appUID) const;
     bool registerConnection(AppUID localAppUID, AppUID distantAppUID);
+    void sendAppStartedSignal(AppUID localUID);
 
 public slots:
     void readIncommingData(QByteArray &data);
