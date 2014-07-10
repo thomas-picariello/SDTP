@@ -2,59 +2,70 @@
 
 Contact::Contact(QObject *parent):
     QObject(parent),
-    mId(0),
-    mPort(0)
+    m_id(0),
+    m_port(0),
+    m_status(Offline)
 {}
 
 Contact::Contact(int id, QString name, QStringList hostsList, quint16 port, QByteArray key, QObject *parent):
     QObject(parent),
-    mId(id),
-    mName(name),
-    mHostsList(hostsList),
-    mPort(port),
-    mKey(key)
+    m_id(id),
+    m_name(name),
+    m_hostsList(hostsList),
+    m_port(port),
+    m_key(key),
+    m_status(Offline)
 {}
 
 QStringList Contact::getHostsList() const{
-    return mHostsList;
+    return m_hostsList;
 }
 
 uint Contact::getId() const{
-    return mId;
+    return m_id;
 }
 
 QByteArray Contact::getKey() const{
-    return mKey;
+    return m_key;
 }
 
 QString Contact::getName() const{
-    return mName;
+    return m_name;
 }
 
 quint16 Contact::getPort() const{
-    return mPort;
+    return m_port;
+}
+
+Contact::Status Contact::getStatus() const{
+    return m_status;
 }
 
 QStringList* Contact::hostsList(){
-    return &mHostsList;
+    return &m_hostsList;
 }
 
 void Contact::setHostsList(QStringList hostsList){
-    mHostsList = hostsList;
+    m_hostsList = hostsList;
 }
 
 void Contact::setId(uint id){
-    mId = id;
+    m_id = id;
 }
 
 void Contact::setKey(QByteArray key){
-    mKey = key;
+    m_key = key;
 }
 
 void Contact::setName(QString name){
-    mName = name;
+    m_name = name;
 }
 
 void Contact::setPort(quint16 port){
-    mPort = port;
+    m_port = port;
+}
+
+void Contact::setStatus(Contact::Status status){
+    m_status = status;
+    emit statusChanged();
 }

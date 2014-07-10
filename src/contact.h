@@ -85,6 +85,8 @@ public:
      */
     quint16 getPort() const;
 
+    Status getStatus() const;
+
     /**
      * @brief Returns a pointer to the internal hosts list of the contact.
      * @return a pointer to the internal hosts list of the contact
@@ -121,12 +123,18 @@ public:
      */
     void setPort(quint16 port);
 
+    void setStatus(Status status);
+
+signals:
+    void statusChanged();
+
 private :
-    QStringList mHostsList;
-    uint mId;
-    QByteArray mKey;
-    quint16 mPort;
-    QString mName;
+    QStringList m_hostsList;
+    uint m_id;
+    QByteArray m_key;
+    QString m_name;
+    quint16 m_port;
+    Status m_status;
 
     Q_DISABLE_COPY(Contact)
 };
