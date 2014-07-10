@@ -9,7 +9,6 @@
 #include <QPair>
 #include <cryptopp/base64.h>
 #include <cryptopp/osrng.h>
-#include <HUpnpCore/HControlPoint>
 #include "contactdb.h"
 #include "contactlistwindow.h"
 #include "passwordwindow.h"
@@ -38,7 +37,8 @@ public slots:
     void updateNetworkManagerId(int newId);
     void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
-    void startApp(Contact *contact, AppType appType);
+    AbstractApp* startApp(Contact *contact, AppType appType);
+    AbstractApp* startAppFor(Contact *contact, AppUID distantUID);
     void registerNAT(quint16 port,bool connexionType);
 
 private slots:

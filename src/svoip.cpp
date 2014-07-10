@@ -141,6 +141,8 @@ void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
             this, &SVoIP::updateNetworkManagerId);
     connect(networkManager, &NetworkManager::startApp,
             this, &SVoIP::startApp);
+    connect(networkManager, &NetworkManager::startAppFor,
+            this, &SVoIP::startAppFor);
 }
 
 QString SVoIP::generateSalt(){
@@ -158,19 +160,21 @@ QString SVoIP::generateSalt(){
     return QString::fromStdString(encodedBlock);
 }
 
-void SVoIP::startApp(Contact* contact, AppType appType){
+AbstractApp* SVoIP::startApp(Contact* contact, AppType appType){
     //TODO: see if templated factory may works here...
     //TODO: retrieve the right app for the right contact group
+    AbstractApp* app = NULL;
     AppUID appUID(appType);
     if(mAppList.contains(appUID)){
-        mAppList.value(appUID)->show();
+        app = mAppList.value(appUID);
+        app->show();
     }else{
         //generate instance id
         foreach(AppUID existingAppUID, mAppList.keys()){
             if(existingAppUID == appUID)
                 appUID.setInstanceID(appUID.instanceID() + 1);
         }
-        AbstractApp *app = NULL;
+
         if(appType == Messenger){
             app = new MessengerApp(contact);
         }else{
@@ -178,13 +182,22 @@ void SVoIP::startApp(Contact* contact, AppType appType){
         }
         if(app){
             //register
-            mNetworkManagerList.value(contact->getId())->registerApp(appUID, app);
             mAppList.insert(appUID, app);
+            mNetworkManagerList.value(contact->getId())->registerApp(appUID, app);
         }
     }
+    return app;
 }
-void SVoIP::registerNAT(quint16 port,bool connexionType){
 
+AbstractApp* SVoIP::startAppFor(Contact* contact, AppUID distantUID){
+    AbstractApp *app = startApp(contact, distantUID.type());
+    AppUID localUID = mAppList.key(app);
+    if(localUID.type() != Undefined)
+        mNetworkManagerList.value(contact->getId())->registerAppConnection(localUID, distantUID);
+    return app;
+}
+
+void SVoIP::registerNAT(quint16 port,bool connexionType){
     UPNPNAT nat;
     QString error;
     nat.init(15,20);

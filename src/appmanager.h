@@ -16,9 +16,9 @@ public:
 
     enum Command: quint8{
         StartAppCommand = 0x00,
-        AppRegisterCommand = 0x01,
+        AppStartedSignal = 0x01,
         AppRegisteredSignal = 0x02,
-        AppUnregisteredSignal = 0x03,
+        AppClosedSignal = 0x03,
 
         InvalidCommand = 0xFF
     };
@@ -32,7 +32,8 @@ public:
 
     struct Packet{
         Packet(){}
-        Packet(Command cmd, AppUID local, AppUID distant): command(cmd), localUID(local), distantUID(distant){}
+        Packet(Command cmd, AppUID local, AppUID distant):
+            command(cmd), localUID(local), distantUID(distant){}
         Command command;
         AppUID localUID;
         AppUID distantUID;
@@ -40,13 +41,14 @@ public:
 
     explicit AppManager(QObject* parent = 0): QObject(parent){}
 
-    AbstractApp* getApp(AppUID uid)const            { return m_LocalAppsRegister.value(uid, NULL); }
-    AppUID getLocalAppUID(AbstractApp* app) const   { return m_LocalAppsRegister.key(app); }
-    AppUID getLocalAppUID(AppUID distantAppUID)const{ return m_AppConnectionsTable.key(distantAppUID); }
-    AppUID getDistantAppUID(AppUID localAppUID)const{ return m_AppConnectionsTable.value(localAppUID); }
-    AppUID getDistantAppUID(AbstractApp* app)const  { return getDistantAppUID(getLocalAppUID(app)); }
-    bool isAppRegistered(AbstractApp* app)const     { return (m_LocalAppsRegister.key(app).type() != Undefined); }
-    bool isAppConnected(AppUID distantAppUID)const  { return (m_AppConnectionsTable.key(distantAppUID).type() != Undefined); }
+    AbstractApp* getApp(AppUID localUID) const;
+    AppUID getLocalAppUID(AbstractApp* app) const;
+    AppUID getLocalAppUID(AppUID distantAppUID) const;
+    AppUID getDistantAppUID(AppUID localAppUID) const;
+    AppUID getDistantAppUID(AbstractApp* app) const;
+    bool isAppRegistered(AbstractApp* app) const;
+    bool isAppConnected(AppUID appUID) const;
+    bool registerConnection(AppUID localAppUID, AppUID distantAppUID);
 
 public slots:
     void readIncommingData(QByteArray &data);
@@ -55,17 +57,18 @@ public slots:
     void unregisterApp(AppUID localAppUID);
 
 signals:
+    void appRoutingReady(AbstractApp* app);
     void distantAppUnregistered(AppUID distantUID);
     void error(Error);
     void sendData(LinkType linkType, QByteArray& data);
     void startApp(AppType appType);
-
+    void startAppFor(AppUID distantAppUID);
 
 private:
     QMap<AppUID, AppUID> m_AppConnectionsTable;
     QMap<AppUID, AbstractApp*> m_LocalAppsRegister;
 
-    void registerConnection(AppUID localAppUID, AppUID distantAppUID);
+    void sendPacket(Command cmd, AppUID localUID, AppUID distantUID);
 
     Q_DISABLE_COPY(AppManager)
 };
