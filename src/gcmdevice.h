@@ -40,7 +40,6 @@ public:
 
     explicit GcmDevice(AbstractLink* link, QObject *parent = 0);
 
-    void setBypassMode(bool bypass);
     AbstractLink* getLink();
     void setLink(AbstractLink* link, bool destroyOld = true);
     QByteArray getKey() const;

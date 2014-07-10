@@ -14,22 +14,6 @@ GcmDevice::GcmDevice(AbstractLink *link, QObject *parent) :
     setOpenMode(m_Link->openMode());
 }
 
-void GcmDevice::setBypassMode(bool bypass){
-    if(bypass){
-        disconnect(m_Link, &AbstractLink::openModeChanged,
-                this, &GcmDevice::onLinkOpenModeChanged);
-        disconnect(m_Link, &AbstractLink::readyRead,
-                this, &GcmDevice::readFromLink);
-        setOpenMode(NotOpen);
-    }else{
-        connect(m_Link, &AbstractLink::openModeChanged,
-                this, &GcmDevice::onLinkOpenModeChanged);
-        connect(m_Link, &AbstractLink::readyRead,
-                this, &GcmDevice::readFromLink);
-        setOpenMode(m_Link->openMode());
-    }
-}
-
 AbstractLink* GcmDevice::getLink(){
     return m_Link;
 }
