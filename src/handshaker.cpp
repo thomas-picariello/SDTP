@@ -1,57 +1,61 @@
 #include "handshaker.h"
 
-Handshaker::Handshaker(TcpLink *link, RsaKeyring* keyring, QObject *parent):
+Handshaker::Handshaker(QTcpSocket* socket, RsaKeyring* keyring, QObject *parent):
     QObject(parent),
-    m_Link(link),
-    m_LinkStream(m_Link),
-    m_ContactDB(NULL),
-    m_Contact(NULL),
-    m_IpFilter(NULL),
-    m_RsaKeyring(keyring),
-    m_StarterIntegrityHash(32, 0),  //256 bits Hash
-    m_ResponderIntegrityHash(32, 0),  //256 bits Hash
-    m_Mode(UndefinedMode),
-    m_IvOffset(0),
-    m_RecievedBanTime(0)
+    m_socket(socket),
+    m_socketStream(m_socket),
+    m_contactDB(NULL),
+    m_contact(NULL),
+    m_ipFilter(NULL),
+    m_rsaKeyring(keyring),
+    m_starterIntegrityHash(32, 0),  //256 bits Hash
+    m_responderIntegrityHash(32, 0),  //256 bits Hash
+    m_mode(UndefinedMode),
+    m_ivOffset(0),
+    m_receivedBanTime(0)
 {
-    m_Timeout.setSingleShot(true);
-    m_Timeout.setInterval(5000);    //default Timeout 5s
+    m_timeout.setSingleShot(true);
+    m_timeout.setInterval(5000);    //default Timeout 5s
     resetHandshake();
 
-    connect(&m_Timeout, SIGNAL(timeout()),
-            this, SLOT(onTimeout()));
+    connect(&m_timeout, &QTimer::timeout,
+            this, &Handshaker::onTimeout);
 }
 
 void Handshaker::waitForHandshake(ContactDB *contactDB){
-    m_Mode = ResponderMode;
-    m_ContactDB = contactDB;
-    if(m_RsaKeyring->hasPrivateKey()){ //security check
+    m_mode = ResponderMode;
+    m_contactDB = contactDB;
+    if(m_rsaKeyring->hasPrivateKey()){ //security check
         resetHandshake();
     }else{
         emit error(BadPrivateKey);
-        connect(m_RsaKeyring, SIGNAL(privateKeyValidated()),
+        connect(m_rsaKeyring, SIGNAL(privateKeyValidated()),
                 this, SLOT(resetHandshake()));
     }
 }
 
-void Handshaker::beginStarterHandshake(Contact *contact){
-    m_Mode = StarterMode;
-    m_Contact = contact;
-    if(m_RsaKeyring->hasPrivateKey()){ //security check
+void Handshaker::startHandshake(Contact *contact){
+    m_mode = StarterMode;
+    m_contact = contact;
+    if(m_rsaKeyring->hasPrivateKey()){ //security check
         resetHandshake();
     }else{
         emit error(BadPrivateKey);
-        connect(m_RsaKeyring, SIGNAL(privateKeyValidated()),
+        connect(m_rsaKeyring, SIGNAL(privateKeyValidated()),
                 this, SLOT(resetHandshake()));
     }
 }
 
 quint16 Handshaker::getRecievedBanTime() const{
-    return m_RecievedBanTime;
+    return m_receivedBanTime;
+}
+
+QByteArray Handshaker::getGcmBaseIV() const{
+    return m_gcmBaseIV;
 }
 
 Contact* Handshaker::getContact() const{
-    return m_Contact;
+    return m_contact;
 }
 
 QString Handshaker::getErrorString(Error err) const{
@@ -59,51 +63,63 @@ QString Handshaker::getErrorString(Error err) const{
     return QString(errorEnum.valueToKey(static_cast<int>(err)));
 }
 
+QByteArray Handshaker::getGcmKey() const{
+    return m_gcmKey;
+}
+
+QString Handshaker::getHost() const{
+    return m_socket->peerAddress().toString();
+}
+
 Handshaker::Mode Handshaker::getMode() const{
-    return m_Mode;
+    return m_mode;
+}
+
+QTcpSocket *Handshaker::getSocket(){
+    return m_socket;
 }
 
 void Handshaker::setIpFilter(IpFilter *ipFilter){
-    m_IpFilter = ipFilter;
+    m_ipFilter = ipFilter;
 }
 
 void Handshaker::setTimeout(int timeout){
-    m_Timeout.setInterval(timeout);
+    m_timeout.setInterval(timeout);
 }
 
 void Handshaker::resetHandshake(){
-    disconnect(m_RsaKeyring, SIGNAL(privateKeyValidated()), this, 0);
-    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-    m_StarterIntegrityHash.fill(32, 0);
-    m_ResponderIntegrityHash.fill(32, 0);
-    m_RecievedBanTime = 0;
+    disconnect(m_rsaKeyring, SIGNAL(privateKeyValidated()), this, 0);
+    disconnect(m_socket, SIGNAL(readyRead()), this, 0);
+    m_starterIntegrityHash.fill(32, 0);
+    m_responderIntegrityHash.fill(32, 0);
+    m_receivedBanTime = 0;
 
-    switch(m_Mode){
+    switch(m_mode){
     case UndefinedMode:
         try{
-            m_RsaDecryptor.AccessKey().Load(ArraySource((byte*)m_RsaKeyring->getStoredPrivateKey().data(),
-                                                        m_RsaKeyring->getStoredPrivateKey().size(),
+            m_rsaDecryptor.AccessKey().Load(ArraySource((byte*)m_rsaKeyring->getStoredPrivateKey().data(),
+                                                        m_rsaKeyring->getStoredPrivateKey().size(),
                                                         true));
         }catch(CryptoPP::BERDecodeErr&){
             emit error(BadPrivateKey);
-            connect(m_RsaKeyring, SIGNAL(privateKeyValidated()),
+            connect(m_rsaKeyring, SIGNAL(privateKeyValidated()),
                     this, SLOT(resetHandshake()));
         }
         break;
     case StarterMode:
         try{
-            m_RsaEncryptor.AccessKey().Load(ArraySource((byte*)m_Contact->getKey().data(),
-                                                        m_Contact->getKey().size(),
+            m_rsaEncryptor.AccessKey().Load(ArraySource((byte*)m_contact->getKey().data(),
+                                                        m_contact->getKey().size(),
                                                         true));
             starterSayHello();
         }catch(CryptoPP::BERDecodeErr&){
             emit error(BadContactKey);
-            connect(m_RsaKeyring, SIGNAL(privateKeyValidated()),
+            connect(m_rsaKeyring, SIGNAL(privateKeyValidated()),
                     this, SLOT(resetHandshake()));
         }
         break;
     case ResponderMode:
-        connect(m_Link, SIGNAL(readyRead()),
+        connect(m_socket, SIGNAL(readyRead()),
                 this, SLOT(responderParseStarterHello()));
         break;
     }
@@ -118,25 +134,25 @@ void Handshaker::starterSayHello(){ //S:1 forge
     SecurityLevel secLevel = PreSharedIdentity;
     packetStream << (quint8)secLevel;
 
-    clearTextStream << m_RsaKeyring->generatePublicKey();
+    clearTextStream << m_rsaKeyring->generatePublicKey();
 
     clearTextStream << SUPPORTED_PROTOCOL_VERSION;
 
-    updateIntegrityHash(&m_StarterIntegrityHash, (char)secLevel+clearText);
+    updateIntegrityHash(&m_starterIntegrityHash, (char)secLevel+clearText);
 
     packetStream << rsaEncrypt(clearText);
 
-    disconnect(m_Link, &AbstractLink::readyRead, this, 0);
-    connect(m_Link, &AbstractLink::readyRead,
+    disconnect(m_socket, &AbstractLink::readyRead, this, 0);
+    connect(m_socket, &AbstractLink::readyRead,
             this, &Handshaker::starterParseResponderHello);
 
-    m_LinkStream << packet;
-    m_Timeout.start();
+    m_socketStream << packet;
+    m_timeout.start();
 }
 
 void Handshaker::responderParseStarterHello(){ //R:1 parse
     QByteArray packet;
-    m_LinkStream >> packet;
+    m_socketStream >> packet;
     QDataStream packetStream(&packet, QIODevice::ReadOnly);
 
     if(isError(packet)) return;
@@ -158,15 +174,14 @@ void Handshaker::responderParseStarterHello(){ //R:1 parse
     QDataStream clearTextStream(&clearText, QIODevice::ReadOnly);
     QByteArray key;
     clearTextStream >> key;
-    m_Contact = m_ContactDB->findByKey(key);
-    if(m_Contact == NULL){
+    m_contact = m_contactDB->findByKey(key);
+    if(m_contact == NULL){
         processError(IdentityCheckFailed);
         return;
     }
-    emit newContactId(m_Contact->getId());
     try{
-        m_RsaEncryptor.AccessKey().Load(ArraySource((byte*)m_Contact->getKey().data(),
-                                                    m_Contact->getKey().size(),
+        m_rsaEncryptor.AccessKey().Load(ArraySource((byte*)m_contact->getKey().data(),
+                                                    m_contact->getKey().size(),
                                                     true));
     }catch(CryptoPP::BERDecodeErr&){
         processError(BadContactKey);
@@ -179,7 +194,7 @@ void Handshaker::responderParseStarterHello(){ //R:1 parse
         return;
     }
 
-    updateIntegrityHash(&m_StarterIntegrityHash, (char)secLevel+clearText);
+    updateIntegrityHash(&m_starterIntegrityHash, (char)secLevel+clearText);
     responderRespondHello();
 }
 
@@ -189,24 +204,24 @@ void Handshaker::responderRespondHello(){ //R:1 forge
     clearText.append(SUPPORTED_PROTOCOL_VERSION);
 
     QByteArray firstHalfSymKey = generateRandomBlock(32);
-    m_GcmKey.append(firstHalfSymKey.left(16));  //first half key
-    m_GcmBaseIV.append(firstHalfSymKey.right(16));//first half IV
+    m_gcmKey.append(firstHalfSymKey.left(16));  //first half key
+    m_gcmBaseIV.append(firstHalfSymKey.right(16));//first half IV
     clearText.append(firstHalfSymKey);
 
-    updateIntegrityHash(&m_ResponderIntegrityHash, clearText);
+    updateIntegrityHash(&m_responderIntegrityHash, clearText);
 
-    disconnect(m_Link, &AbstractLink::readyRead, this, 0);
-    connect(m_Link, &AbstractLink::readyRead,
+    disconnect(m_socket, &AbstractLink::readyRead, this, 0);
+    connect(m_socket, &AbstractLink::readyRead,
             this, &Handshaker::responderParseHalfKeyAndResponderIntegrity);
 
-    m_LinkStream << rsaEncrypt(clearText);
-    m_Timeout.start();
+    m_socketStream << rsaEncrypt(clearText);
+    m_timeout.start();
 }
 
 void Handshaker::starterParseResponderHello(){ //S:2 parse
-    m_Timeout.stop();
+    m_timeout.stop();
     QByteArray rsaCypherText, clearText;
-    m_LinkStream >> rsaCypherText;
+    m_socketStream >> rsaCypherText;
     if(isError(rsaCypherText)) return;
 
     clearText = rsaDecrypt(rsaCypherText);
@@ -222,38 +237,38 @@ void Handshaker::starterParseResponderHello(){ //S:2 parse
         return;
     }
 
-    m_GcmKey.append(clearText.mid(1, 16));  //first half key
-    m_GcmBaseIV.append(clearText.mid(1 + 16));  //first half IV
-    if(m_GcmKey.size()!=16 || m_GcmBaseIV.size()!=16){
+    m_gcmKey.append(clearText.mid(1, 16));  //first half key
+    m_gcmBaseIV.append(clearText.mid(1 + 16));  //first half IV
+    if(m_gcmKey.size()!=16 || m_gcmBaseIV.size()!=16){
         processError(BadSymmetricKey);
         return;
     }
 
-    updateIntegrityHash(&m_ResponderIntegrityHash, clearText);
+    updateIntegrityHash(&m_responderIntegrityHash, clearText);
     starterSendHalfKeyAndResponderIntegrity();
 }
 
 void Handshaker::starterSendHalfKeyAndResponderIntegrity(){ //S:2 forge
     QByteArray secondHalfSymKey = generateRandomBlock(32);
-    m_GcmKey.append(secondHalfSymKey.left(16));     //second half key
-    m_GcmBaseIV.append(secondHalfSymKey.right(16)); //second half IV
+    m_gcmKey.append(secondHalfSymKey.left(16));     //second half key
+    m_gcmBaseIV.append(secondHalfSymKey.right(16)); //second half IV
 
-    updateIntegrityHash(&m_StarterIntegrityHash, secondHalfSymKey+m_ResponderIntegrityHash);
+    updateIntegrityHash(&m_starterIntegrityHash, secondHalfSymKey+m_responderIntegrityHash);
 
-    disconnect(m_Link, &AbstractLink::readyRead, this, 0);
-    connect(m_Link, &AbstractLink::readyRead,
+    disconnect(m_socket, &AbstractLink::readyRead, this, 0);
+    connect(m_socket, &AbstractLink::readyRead,
             this, &Handshaker::starterParseStarterIntegrity);
 
-    m_LinkStream << rsaEncrypt(secondHalfSymKey);
-    m_LinkStream << gcmEncrypt(m_ResponderIntegrityHash);
+    m_socketStream << rsaEncrypt(secondHalfSymKey);
+    m_socketStream << gcmEncrypt(m_responderIntegrityHash);
 
-    m_Timeout.start();
+    m_timeout.start();
 }
 
 void Handshaker::responderParseHalfKeyAndResponderIntegrity(){ //R:2 parse
-    m_Timeout.stop();
+    m_timeout.stop();
     QByteArray encryptedSymKey;
-    m_LinkStream >> encryptedSymKey;
+    m_socketStream >> encryptedSymKey;
     if(isError(encryptedSymKey)) return;
 
     QByteArray clearSymKey = rsaDecrypt(encryptedSymKey);
@@ -261,38 +276,38 @@ void Handshaker::responderParseHalfKeyAndResponderIntegrity(){ //R:2 parse
         processError(BadSymmetricKey);
         return;
     }
-    m_GcmKey.append(clearSymKey.left(16));      //second half key
-    m_GcmBaseIV.append(clearSymKey.right(16));  //second half IV
+    m_gcmKey.append(clearSymKey.left(16));      //second half key
+    m_gcmBaseIV.append(clearSymKey.right(16));  //second half IV
 
     QByteArray encryptedRespIntegrity, responderIntegrity;
-    m_LinkStream >> encryptedRespIntegrity;
+    m_socketStream >> encryptedRespIntegrity;
     responderIntegrity = gcmDecrypt(encryptedRespIntegrity);
-    if(responderIntegrity != m_ResponderIntegrityHash){
+    if(responderIntegrity != m_responderIntegrityHash){
         processError(DataCorrupted);
         return;
     }
 
-    updateIntegrityHash(&m_StarterIntegrityHash, clearSymKey+responderIntegrity);
+    updateIntegrityHash(&m_starterIntegrityHash, clearSymKey+responderIntegrity);
     responderSendStarterIntegrity();
 }
 
 void Handshaker::responderSendStarterIntegrity(){ //R:2 forge
-    disconnect(m_Link, &AbstractLink::readyRead, this, 0);
-    connect(m_Link, &AbstractLink::readyRead,
+    disconnect(m_socket, &AbstractLink::readyRead, this, 0);
+    connect(m_socket, &AbstractLink::readyRead,
             this, &Handshaker::responderParseHandshakeFinished);
 
-    m_LinkStream << gcmEncrypt(m_StarterIntegrityHash);
-    m_Timeout.start();
+    m_socketStream << gcmEncrypt(m_starterIntegrityHash);
+    m_timeout.start();
 }
 
 void Handshaker::starterParseStarterIntegrity(){ //S:3 parse
-    m_Timeout.stop();
+    m_timeout.stop();
     QByteArray encStarterIntegrity;
-    m_LinkStream >> encStarterIntegrity;
+    m_socketStream >> encStarterIntegrity;
     if(isError(encStarterIntegrity)) return;
 
     QByteArray starterIntegrity = gcmDecrypt(encStarterIntegrity);
-    if(starterIntegrity != m_StarterIntegrityHash){
+    if(starterIntegrity != m_starterIntegrityHash){
         processError(DataCorrupted);
         return;
     }
@@ -301,18 +316,16 @@ void Handshaker::starterParseStarterIntegrity(){ //S:3 parse
 }
 
 void Handshaker::starterSendHandshakeFinished(){ //S:3 forge
-    disconnect(m_Link, &AbstractLink::readyRead, this, 0);
-    m_LinkStream << gcmEncrypt(QByteArray(1,(char)HandshakeFinished));
-    m_Link->flush(); //send everything packet now
-    m_IpFilter->removeBan(m_Link->getHost());
-    emit handshakeFinished(true);
+    disconnect(m_socket, &AbstractLink::readyRead, this, 0);
+    m_socketStream << gcmEncrypt(QByteArray(1,(char)HandshakeFinished));
+    emit success();
 }
 
 void Handshaker::responderParseHandshakeFinished(){ //R:3 parse
-    m_Timeout.stop();
-    disconnect(m_Link, &AbstractLink::readyRead, this, 0);
+    m_timeout.stop();
+    disconnect(m_socket, &AbstractLink::readyRead, this, 0);
     QByteArray cypherResponse;
-    m_LinkStream >> cypherResponse;
+    m_socketStream >> cypherResponse;
     if(isError(cypherResponse))return;
 
     QByteArray clearResponse = gcmDecrypt(cypherResponse);
@@ -320,8 +333,7 @@ void Handshaker::responderParseHandshakeFinished(){ //R:3 parse
     if(clearResponse.isEmpty()) return;
 
     else if(clearResponse.size() == 1 && clearResponse.at(0) == (char)HandshakeFinished){
-        m_IpFilter->removeBan(m_Link->getHost());
-        emit handshakeFinished(true);
+        emit success();
     }else{
         processError(UndefinedError);
     }
@@ -332,11 +344,11 @@ void Handshaker::onTimeout(){
 }
 
 void Handshaker::processError(Error err){
-    quint16 banTime = getRecievedBanTime(); //implicite cast
+    quint16 banTime = m_receivedBanTime;
     QByteArray errorPacket;
     QDataStream errorPacketStream(&errorPacket, QIODevice::WriteOnly);
 
-    disconnect(m_Link, SIGNAL(readyRead()), this, 0);
+    disconnect(m_socket, &QTcpSocket::readyRead, this, 0);
     if(banTime > 0){
         if(banTime <= 32767)
             banTime *= 2;
@@ -344,10 +356,8 @@ void Handshaker::processError(Error err){
         banTime = 1;
     errorPacketStream << (quint8)UndefinedError;
     errorPacketStream << banTime;
-    m_LinkStream << errorPacket;
-    m_IpFilter->addBan(m_Link->getHost(), banTime);
+    m_socketStream << errorPacket;
     emit error(err);
-    emit handshakeFinished(false);
 }
 
 QByteArray Handshaker::generateRandomBlock(uint size){
@@ -361,10 +371,10 @@ QByteArray Handshaker::generateRandomBlock(uint size){
 QByteArray Handshaker::gcmDecrypt(QByteArray& cipherText){
     std::string clearText;
     GCM<AES>::Decryption dec;
-    QByteArray iv = m_GcmBaseIV;
-    iv[iv.size()-1] = iv.at(iv.size()-1) + m_IvOffset + 1;
+    QByteArray iv = m_gcmBaseIV;
+    iv[iv.size()-1] = iv.at(iv.size()-1) + m_ivOffset + 1;
 
-    dec.SetKeyWithIV((byte*)m_GcmKey.data(), m_GcmKey.size(),
+    dec.SetKeyWithIV((byte*)m_gcmKey.data(), m_gcmKey.size(),
                      (byte*)iv.data(), iv.size());
     try{
         ArraySource((byte*)cipherText.data(), cipherText.size(), true,
@@ -372,9 +382,8 @@ QByteArray Handshaker::gcmDecrypt(QByteArray& cipherText){
                                                       new StringSink(clearText)
                                                       )//AuthenticatedDecryptionFilter
                     );  //ArraySource
-        m_IvOffset++;
-    }catch(CryptoPP::Exception& e){
-        qDebug()<< e.what();
+        m_ivOffset++;
+    }catch(CryptoPP::Exception&){
         emit error(DataCorrupted);
     }
     return QByteArray(clearText.data(), (int)clearText.size());
@@ -383,10 +392,10 @@ QByteArray Handshaker::gcmDecrypt(QByteArray& cipherText){
 QByteArray Handshaker::gcmEncrypt(QByteArray& clearText){
     std::string cipherText;
     GCM<AES>::Encryption enc;
-    QByteArray iv = m_GcmBaseIV;
-    iv[iv.size()-1] = iv.at(iv.size()-1) + m_IvOffset + 1;
+    QByteArray iv = m_gcmBaseIV;
+    iv[iv.size()-1] = iv.at(iv.size()-1) + m_ivOffset + 1;
 
-    enc.SetKeyWithIV((byte*)m_GcmKey.data(), m_GcmKey.size(),
+    enc.SetKeyWithIV((byte*)m_gcmKey.data(), m_gcmKey.size(),
                      (byte*)iv.data(), iv.size());
     try{
         ArraySource((byte*)clearText.data(), clearText.size(), true,
@@ -394,9 +403,8 @@ QByteArray Handshaker::gcmEncrypt(QByteArray& clearText){
                                                       new StringSink(cipherText)
                                                       ) //AuthenticatedEncryptionFilter
                     ); //ArraySource
-        m_IvOffset++;
-    }catch(CryptoPP::Exception& e){
-        qDebug()<<e.what();
+        m_ivOffset++;
+    }catch(CryptoPP::Exception&){
         emit error(BadSymmetricKey);
     }
     return QByteArray(cipherText.data(), (int)cipherText.size());
@@ -407,9 +415,8 @@ bool Handshaker::isError(const QByteArray &packet){
     quint8 errorCode;
     packetStream >> errorCode;
     if(packet.size() == 3 && errorCode == (quint8)UndefinedError){
-        disconnect(m_Link, SIGNAL(readyRead()), this, 0);
-        packetStream >> m_RecievedBanTime;
-        handshakeFinished(false);
+        disconnect(m_socket, SIGNAL(readyRead()), this, 0);
+        packetStream >> m_receivedBanTime;
         emit error(UndefinedError);
         return true;
     }
@@ -418,12 +425,12 @@ bool Handshaker::isError(const QByteArray &packet){
 
 QByteArray Handshaker::rsaDecrypt(QByteArray& cipherText){
     QByteArray clearText;
-    QList<QByteArray*> cipherChunks = splitData(cipherText, (int)m_RsaDecryptor.FixedCiphertextLength());
+    QList<QByteArray*> cipherChunks = splitData(cipherText, (int)m_rsaDecryptor.FixedCiphertextLength());
     foreach(QByteArray *chunk, cipherChunks){
         std::string clearChunk;
         try{
             ArraySource((byte*)chunk->data(), chunk->size(), true,
-                        new PK_DecryptorFilter(m_RandomGenerator, m_RsaDecryptor,
+                        new PK_DecryptorFilter(m_randomGenerator, m_rsaDecryptor,
                                                new StringSink(clearChunk)));
 
             clearText.append(clearChunk.data(), (int)clearChunk.size());
@@ -439,12 +446,12 @@ QByteArray Handshaker::rsaDecrypt(QByteArray& cipherText){
 
 QByteArray Handshaker::rsaEncrypt(QByteArray& clearText){
     QByteArray cipherText;
-    QList<QByteArray*> clearChunks = splitData(clearText, (int)m_RsaEncryptor.FixedMaxPlaintextLength());
+    QList<QByteArray*> clearChunks = splitData(clearText, (int)m_rsaEncryptor.FixedMaxPlaintextLength());
     foreach(QByteArray *chunk, clearChunks){
         std::string cipherChunk;
         try{
             ArraySource((byte*)chunk->data(), chunk->size(), true,
-                        new PK_EncryptorFilter(m_RandomGenerator, m_RsaEncryptor,
+                        new PK_EncryptorFilter(m_randomGenerator, m_rsaEncryptor,
                                                   new StringSink(cipherChunk)
                                                )
                         );

@@ -1,4 +1,4 @@
-#ifndef HANDSHAKER_H
+﻿#ifndef HANDSHAKER_H
 #define HANDSHAKER_H
 
 #include <QObject>
@@ -80,26 +80,28 @@ public:
     };
     Q_ENUMS(SecurityLevel)
 
-    explicit Handshaker(TcpLink *link,
+    explicit Handshaker(QTcpSocket* socket,
                         RsaKeyring *keyring,
                         QObject *parent = 0);
 
-    void beginStarterHandshake(Contact *contact);
+    void startHandshake(Contact *contact);
     void waitForHandshake(ContactDB *contactDB);
 
     quint16 getRecievedBanTime() const;
-    QByteArray getGcmBaseIV() const{ return m_GcmBaseIV; }
+    QByteArray getGcmBaseIV() const;
     Contact* getContact() const;
     QString getErrorString(Error err) const;
-    QByteArray getGcmKey() const{ return m_GcmKey; }
+    QByteArray getGcmKey() const;
+    QString getHost() const;
     Mode getMode() const;
+    QTcpSocket* getSocket();
     void setIpFilter(IpFilter *ipFilter);
     void setTimeout(int timeout);
 
 signals:
     void error(Handshaker::Error);
-    void handshakeFinished(bool success);
-    void newContactId(int id);
+    void success();
+    void newContact(Contact* contact);
 
 public slots:
     void resetHandshake();
@@ -113,36 +115,35 @@ private slots:
     void onTimeout();
 
 private:
-    byte m_IvOffset;
-    quint16 m_RecievedBanTime;
-    Mode m_Mode;
-    QTimer m_Timeout;
-    TcpLink *m_Link;
-    QDataStream m_LinkStream;
-    Contact *m_Contact;
-    ContactDB *m_ContactDB;
-    IpFilter *m_IpFilter;
-    RsaKeyring *m_RsaKeyring;
-    AutoSeededRandomPool m_RandomGenerator;
-    RSAES_OAEP_SHA_Encryptor m_RsaEncryptor;
-    RSAES_OAEP_SHA_Decryptor m_RsaDecryptor;
-    QByteArray m_GcmKey;
-    QByteArray m_GcmBaseIV;
-    QByteArray m_StarterIntegrityHash;
-    QByteArray m_ResponderIntegrityHash;
-
+    byte m_ivOffset;
+    quint16 m_receivedBanTime;
+    Mode m_mode;
+    QTimer m_timeout;
+    QTcpSocket *m_socket;
+    QDataStream m_socketStream;
+    Contact *m_contact;
+    ContactDB *m_contactDB;
+    IpFilter *m_ipFilter;
+    RsaKeyring *m_rsaKeyring;
+    AutoSeededRandomPool m_randomGenerator;
+    RSAES_OAEP_SHA_Encryptor m_rsaEncryptor;
+    RSAES_OAEP_SHA_Decryptor m_rsaDecryptor;
+    QByteArray m_gcmKey;
+    QByteArray m_gcmBaseIV;
+    QByteArray m_starterIntegrityHash;
+    QByteArray m_responderIntegrityHash;
 
     void starterSayHello();
     void responderRespondHello();
     void starterSendHalfKeyAndResponderIntegrity();
     void responderSendStarterIntegrity();
     void starterSendHandshakeFinished();
-    void processError(Error err);
 
     QByteArray generateRandomBlock(uint size);
     QByteArray gcmDecrypt(QByteArray& cipherText);
     QByteArray gcmEncrypt(QByteArray& clearText);
     bool isError(const QByteArray &packet);
+    void processError(Error err);
     QByteArray rsaDecrypt(QByteArray& cipherText);
     QByteArray rsaEncrypt(QByteArray& clearText);
     QList<QByteArray*> splitData(const QByteArray &data, const uint chunkSize);

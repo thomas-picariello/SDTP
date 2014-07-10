@@ -25,10 +25,12 @@ qint32 IpFilter::getRemainingBanTime(QString &ip) const{
 }
 
 void IpFilter::filter(QTcpSocket *socket){
-    if(getRemainingBanTime(socket->peerAddress().toString()) == 0)
+    if(getRemainingBanTime(socket->peerAddress().toString()) == 0){
         emit accepted(socket);
-    else
+    }else{
+        socket->abort();
         delete socket;
+    }
 }
 
 void IpFilter::removeBan(const QString &ip){

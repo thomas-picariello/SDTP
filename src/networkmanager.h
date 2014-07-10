@@ -14,10 +14,6 @@
 #include "abstractlink.h"
 #include "tcplink.h"
 #include "contact.h"
-#include "contactdb.h"
-#include "pinger.h"
-#include "handshaker.h"
-#include "ipfilter.h"
 #include "appuid.h"
 #include "appmanager.h"
 #include "gcmdevice.h"
@@ -44,20 +40,17 @@ public:
     };
 
     NetworkManager(Contact *contact,
-                   ContactDB *contactDB,
-                   RsaKeyring *keyring,
-                   IpFilter *ipFilter,
-                   QObject *parent=0);     //Starter
-    NetworkManager(QTcpSocket *socket,
-                   ContactDB *contactDB,
-                   RsaKeyring *keyring,
-                   IpFilter *ipFilter,
-                   QObject *parent=0);   //Responder
+                   QTcpSocket *socket,
+                   QByteArray gcmKey,
+                   QByteArray gcmBaseIV,
+                   QObject *parent = 0);
     ~NetworkManager();
 
-    Contact* getContact() const{ return m_Contact; }
+    QString getHost();
+    Contact* getContact() const;
     int getContactId() const;
     QString getErrorString(Error err) const;
+//    State getState() const;
     //inline Contact::Status getStatus() const{ return m_Contact->getStatus(); } //TODO: implement Contact status
     void registerApp(AppUID localUID, AbstractApp *app);
     void registerAppConnection(AppUID localUID, AppUID distantUID);
@@ -72,38 +65,37 @@ signals :
     void contactStatusChanged(int id, Contact::Status status);
     void destroyed(NetworkManager* networkManager);
     void error(NetworkManager::Error err);
-    void newContactId(int id);
+//    void newContactId(int id);
     void startApp(Contact* contact, AppType type);
     void startAppFor(Contact *contact, AppUID distantAppUID);
 
 private slots:
-    void waitForHandshake();
-    void doStarterHandshake();
-    void onHandshakeFinished(bool successfull);
+//    void waitForHandshake();
+//    void doStarterHandshake();
+//    void onHandshakeFinished(bool successfull);
     void onStartAppRequest(AppType type);
     void onStartAppForRequest(AppUID distantUID);
     void onRouteReady(AbstractApp* app);
     void routeIncommingData();
     void onTcpDisconnect();
-    void onHandshakeError(Handshaker::Error);
+//    void onHandshakeError(Handshaker::Error);
 
 private :
-    quint64 m_LastTimeStamp;
-    quint8 m_LastPacketNumber;
+//    State m_State;
     Contact::Status m_Status;
     Contact *m_Contact;
-    ContactDB *m_ContactDB;
-    Handshaker *m_Handshaker;
+//    ContactDB *m_ContactDB;
+//    Handshaker *m_Handshaker;
     AppManager m_AppManager;
-    Pinger m_Pinger;
+//    Pinger m_Pinger;
     QMap<LinkType, GcmDevice*> m_GcmDevicesList;
     QByteArray m_GcmKey;
     QByteArray m_GcmBaseIv;
 
     void cleanLinks();
     GcmDevice* getGcmDevice(LinkType linkType);
-    QByteArray gcmDecrypt(QByteArray& cipherText);
-    QByteArray gcmEncrypt(QByteArray& clearText);
+//    QByteArray gcmDecrypt(QByteArray& cipherText);
+//    QByteArray gcmEncrypt(QByteArray& clearText);
 
     Q_DISABLE_COPY(NetworkManager)
 };

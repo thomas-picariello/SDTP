@@ -7,8 +7,10 @@
 #include <QTcpServer>
 #include <QMap>
 #include <QPair>
+
 #include <cryptopp/base64.h>
 #include <cryptopp/osrng.h>
+
 #include "contactdb.h"
 #include "contactlistwindow.h"
 #include "passwordwindow.h"
@@ -17,6 +19,8 @@
 #include "confwizard.h"
 #include "messengerapp.h"
 #include "ipfilter.h"
+#include "pinger.h"
+#include "handshaker.h"
 #include "appuid.h"
 #include "upnpnat.h"
 
@@ -24,6 +28,12 @@ class SVoIP: public QObject
 {
     Q_OBJECT
 public: 
+    enum IpState{
+        NotConnected,
+        Handshaking,
+        Connected
+    };
+
     enum Error{
         InvalidAppID
     };
@@ -32,18 +42,19 @@ public:
     ~SVoIP();
 
 public slots:
-    void restartListener();
-    void onNetworkManagerDestroy(NetworkManager *networkManager);
-    void updateNetworkManagerId(int newId);
-    void updateContactStatus(int id, Contact::Status status);
     void onContactEvent(int id, Contact::Event event);
+    void onHandshakeSuccess();
+    void onHandshakeError(Handshaker::Error error);
+    void onNetworkManagerDestroy(NetworkManager *networkManager);
+    void registerNAT(quint16 port,bool connexionType);
+    void restartListener();
     AbstractApp* startApp(Contact *contact, AppType appType);
     AbstractApp* startAppFor(Contact *contact, AppUID distantUID);
-    void registerNAT(quint16 port,bool connexionType);
+    void startHandshaker(QTcpSocket *socket);
+    void updateContactStatus(int id, Contact::Status status);
 
 private slots:
     void checkParameters(QByteArray key = QByteArray());
-    void onIpAccepted(QTcpSocket* socket);
     void onNewConnection();
     void startProgram();
 
@@ -53,18 +64,20 @@ signals:
 private :
 
     ConfWizard *m_wizard;
-    ContactDB *mContactDB;
-    PasswordWindow *mPasswordWindow;
-    ContactListWindow *mContactListWindow;
-    RsaKeyring *mRsaKeyring;
-    QPair<QByteArray,QByteArray> mFileKey;
-    IpFilter mIpFilter;
-    QTcpServer mListener;
-    QMap<int,NetworkManager*> mNetworkManagerList;
-    QMap<AppUID,AbstractApp*> mAppList;
+    ContactDB *m_contactDB;
+    PasswordWindow *m_passwordWindow;
+    ContactListWindow *m_contactListWindow;
+    RsaKeyring *m_rsaKeyring;
+    QPair<QByteArray,QByteArray> m_fileKey;
+    IpFilter m_ipFilter;
+    QTcpServer m_listener;
+    QMap<Contact*, Pinger*> m_pingerList;
+    QMap<QString, Handshaker*> m_handshakerList;
+    QMap<int,NetworkManager*> m_networkManagerList;
+    QMap<AppUID,AbstractApp*> m_appList;
 
-    void displayFirstStartWizard();
-    void connectNetworkManagerSignals(NetworkManager *networkManager);
+    void displayConfWizard();
+    IpState getHostState(QString host);
     QString generateSalt();
 
     Q_DISABLE_COPY(SVoIP)

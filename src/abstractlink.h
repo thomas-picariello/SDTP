@@ -23,7 +23,6 @@ public:
     State state(){ return m_State; }
 
     virtual qint64 bytesAvailable() const = 0;
-    virtual bool flush(){ return false; }   //return false if not reimplemented
     virtual bool isSequential(){ return true; }
     virtual QString getHost() const = 0;
     virtual quint16 getPort() const = 0;

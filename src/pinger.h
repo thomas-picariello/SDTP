@@ -12,29 +12,27 @@ class Pinger : public QObject
 {
     Q_OBJECT
 public:
-    explicit Pinger(QObject *parent = 0);
+    explicit Pinger(Contact* contact, QObject *parent = 0);
 
-    QString getActiveHost() const;
-    void setLink(AbstractLink *link);
-    void setContact(Contact *contact);
-    bool start(int delay = 0);
+    Contact* getContact();
+    QTcpSocket* getSocket();
+    void setSocket(QTcpSocket* socket);
 
 signals:
-    void connected();
+    void connected(QTcpSocket* socket);
 
 public slots:
-
+    void start(int delay = 0);
 
 private slots:
     void onConnected();
     void connectToNextHost();
 
 private:
-    uint m_HostIndex;
-    QString m_ActiveHost;
-    QTimer m_ConnectTimer;
-    Contact *m_Contact;
-    TcpLink *m_Link;
+    uint m_hostIndex;
+    QTimer m_connectTimer;
+    Contact *m_contact;
+    QTcpSocket *m_socket;
 
     Q_DISABLE_COPY(Pinger)
 };

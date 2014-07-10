@@ -39,10 +39,6 @@ qint64 TcpLink::bytesAvailable() const{
     return m_Socket->bytesAvailable();
 }
 
-bool TcpLink::flush(){
-    return m_Socket->flush();
-}
-
 QString TcpLink::getHost() const{
     return m_Socket->peerAddress().toString();
 }
@@ -59,6 +55,7 @@ void TcpLink::setHost(const QString &host, const quint16 port){
 void TcpLink::setSocket(QTcpSocket *socket){
     delete m_Socket;
     m_Socket = socket;
+    m_Socket->setParent(this);
     connectSocketSignals();
     m_State = Online;
     setOpenMode(ReadWrite);

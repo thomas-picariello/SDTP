@@ -20,7 +20,6 @@ public:
     ~TcpLink();
 
     virtual qint64 bytesAvailable() const;
-    virtual bool flush();
     virtual QString getHost() const;
     virtual quint16 getPort() const;
     virtual void setHost(const QString &host, const quint16 port);

@@ -2,10 +2,10 @@
 
 SVoIP::SVoIP(QObject *parent):
     QObject(parent),
-    mContactDB(NULL),
-    mRsaKeyring(NULL),
-    mContactListWindow(NULL),
-    mPasswordWindow(NULL)
+    m_contactDB(NULL),
+    m_rsaKeyring(NULL),
+    m_contactListWindow(NULL),
+    m_passwordWindow(NULL)
 
 {
     QSettings settings("settings.ini", QSettings::IniFormat);
@@ -17,132 +17,142 @@ SVoIP::SVoIP(QObject *parent):
         settings.setValue("encryption/salt", generateSalt());
     }
     //256 bits IV for GCM
-    mFileKey.second = salt;
+    m_fileKey.second = salt;
 
     if(pwdHash.isEmpty()){
         checkParameters();
     }else{
-        mPasswordWindow = new PasswordWindow(pwdHash, salt);
-        connect(mPasswordWindow, SIGNAL(validate(QByteArray)),
+        m_passwordWindow = new PasswordWindow(pwdHash, salt);
+        connect(m_passwordWindow, SIGNAL(validate(QByteArray)),
                 this, SLOT(checkParameters(QByteArray)));
     }
 }
 
 void SVoIP::checkParameters(QByteArray key){
     QSettings settings("settings.ini", QSettings::IniFormat);
-    mFileKey.first = key;
-    mRsaKeyring = new RsaKeyring(&mFileKey);
-    if(!mRsaKeyring->hasPrivateKey() ||
+    m_fileKey.first = key;
+    m_rsaKeyring = new RsaKeyring(&m_fileKey);
+    if(!m_rsaKeyring->hasPrivateKey() ||
        settings.value("network/listen_port").isNull()
       ){
-        displayFirstStartWizard();
+        displayConfWizard();
     }else
         startProgram();
 }
 
-void SVoIP::displayFirstStartWizard(){
-    m_wizard = new ConfWizard(mFileKey);
+void SVoIP::displayConfWizard(){
+    m_wizard = new ConfWizard(m_fileKey);
 
     connect(m_wizard,SIGNAL(accepted()),this,SLOT(startProgram()));
     connect(m_wizard,SIGNAL(rejected()),qApp,SLOT(quit()));
 }
 
 void SVoIP::startProgram(){
-    disconnect(mRsaKeyring, SIGNAL(privateKeyGenerationFinished(QByteArray)), this, 0);
-    mContactDB = new ContactDB(&mFileKey, this);
-    mContactListWindow = new ContactListWindow(mContactDB, mRsaKeyring, &mFileKey);
+    disconnect(m_rsaKeyring, SIGNAL(privateKeyGenerationFinished(QByteArray)), this, 0);
+    m_contactDB = new ContactDB(&m_fileKey, this);
+    m_contactListWindow = new ContactListWindow(m_contactDB, m_rsaKeyring, &m_fileKey);
 
     //registerNAT(100,0);
 
     restartListener();
-    connect(&mListener, &QTcpServer::newConnection,
+    connect(&m_listener, &QTcpServer::newConnection,
             this, &SVoIP::onNewConnection);
-    connect(&mIpFilter, &IpFilter::accepted,
-            this, &SVoIP::onIpAccepted);
-    connect(mContactListWindow, &ContactListWindow::settingsUpdated,
+    connect(&m_ipFilter, &IpFilter::accepted,
+            this, &SVoIP::startHandshaker);
+    connect(m_contactListWindow, &ContactListWindow::settingsUpdated,
             this, &SVoIP::restartListener);
-    connect(mContactListWindow, &ContactListWindow::contactEvent,
+    connect(m_contactListWindow, &ContactListWindow::contactEvent,
             this, &SVoIP::onContactEvent);
-    connect(mContactListWindow, &ContactListWindow::startApp,
+    connect(m_contactListWindow, &ContactListWindow::startApp,
             this, &SVoIP::startApp);
 
-    //start a NetworkManager for each contact
-    QList<Contact*> contactList = mContactDB->getAllContacts();
+    //start a Pinger for each contact
+    QList<Contact*> contactList = m_contactDB->getAllContacts();
     foreach(Contact *contact, contactList){
-        NetworkManager* networkManager = new NetworkManager(contact, mContactDB, mRsaKeyring, &mIpFilter, this);
-        connectNetworkManagerSignals(networkManager);
-        mNetworkManagerList.insert(contact->getId(), networkManager);
+        Pinger* pinger = new Pinger(contact);
+        m_pingerList.insert(contact, pinger);
+        connect(pinger, &Pinger::connected,
+                this, &SVoIP::startHandshaker);
+        pinger->start();
     }
-}
-
-void SVoIP::onIpAccepted(QTcpSocket *socket){
-    //negative unique id for hanshaking network managers
-    int id = -1;
-    while(mNetworkManagerList.contains(id))
-        id--;
-    NetworkManager* networkManager = new NetworkManager(socket,mContactDB, mRsaKeyring, &mIpFilter, this);
-    connectNetworkManagerSignals(networkManager);
-    mNetworkManagerList.insert(id, networkManager);
 }
 
 void SVoIP::onNewConnection(){
-    mIpFilter.filter(mListener.nextPendingConnection());
+    m_ipFilter.filter(m_listener.nextPendingConnection());
 }
 
 void SVoIP::onNetworkManagerDestroy(NetworkManager* networkManager){
-    mNetworkManagerList.remove(mNetworkManagerList.key(networkManager));
-}
-
-void SVoIP::updateNetworkManagerId(int newId){
-    NetworkManager *networkManager = dynamic_cast<NetworkManager*>(sender());
-    if(networkManager){
-        int oldId = mNetworkManagerList.key(networkManager, 0);
-        if(oldId){
-            mNetworkManagerList.remove(oldId);
-            mNetworkManagerList.insert(newId, networkManager);
-        }
-    }
+    m_networkManagerList.remove(m_networkManagerList.key(networkManager));
 }
 
 void SVoIP::updateContactStatus(int id, Contact::Status status){
     if(id)
-        mContactListWindow->setContactStatusIcon(id, status);
+        m_contactListWindow->setContactStatusIcon(id, status);
 }
 
 void SVoIP::onContactEvent(int id, Contact::Event event){
-    NetworkManager* networkManager;
+//    NetworkManager* networkManager;
     switch(event){
     case Contact::Added:
-        networkManager = new NetworkManager(mContactDB->findById(id), mContactDB, mRsaKeyring, &mIpFilter, this);
-        connectNetworkManagerSignals(networkManager);
-        mNetworkManagerList.insert(id, networkManager);
+//        networkManager = new NetworkManager(m_contactDB->findById(id), m_contactDB, m_rsaKeyring, &m_ipFilter, this);
+//        connectNetworkManagerSignals(networkManager);
+//        m_networkManagerList.insert(id, networkManager);
         break;
     case Contact::Deleted:
-        delete mNetworkManagerList.value(id);
+//        delete m_networkManagerList.value(id);
         break;
     case Contact::Updated:
-        mNetworkManagerList.value(id)->onContactEvent(event);
+//        m_networkManagerList.value(id)->onContactEvent(event);
         break;
     }
 }
 
-void SVoIP::restartListener(){
-    mListener.close();
-    qint16 port = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toInt();
-    mListener.listen(QHostAddress::Any, port);
+void SVoIP::onHandshakeSuccess(){
+    Handshaker* handshaker = dynamic_cast<Handshaker*>(sender());
+    if(handshaker){
+        QString host = handshaker->getHost();
+        m_ipFilter.removeBan(host);
+        NetworkManager* netMgr = new NetworkManager(handshaker->getContact(),
+                                                    handshaker->getSocket(),
+                                                    handshaker->getGcmKey(),
+                                                    handshaker->getGcmBaseIV(),
+                                                    this);
+        m_networkManagerList.insert(handshaker->getContact()->getId(), netMgr);
+        connect(netMgr, &NetworkManager::contactStatusChanged,
+                this, &SVoIP::updateContactStatus); //TODO contact self signal
+        connect(netMgr, &NetworkManager::destroyed,
+                this, &SVoIP::onNetworkManagerDestroy);
+        connect(netMgr, &NetworkManager::startApp,
+                this, &SVoIP::startApp);
+        connect(netMgr, &NetworkManager::startAppFor,
+                this, &SVoIP::startAppFor);
+        delete handshaker;
+        m_handshakerList.remove(host);
+    }
 }
 
-void SVoIP::connectNetworkManagerSignals(NetworkManager *networkManager){
-    connect(networkManager, &NetworkManager::contactStatusChanged,
-            this, &SVoIP::updateContactStatus); //TODO contact self signal
-    connect(networkManager, &NetworkManager::destroyed,
-            this, &SVoIP::onNetworkManagerDestroy);
-    connect(networkManager, &NetworkManager::newContactId,
-            this, &SVoIP::updateNetworkManagerId);
-    connect(networkManager, &NetworkManager::startApp,
-            this, &SVoIP::startApp);
-    connect(networkManager, &NetworkManager::startAppFor,
-            this, &SVoIP::startAppFor);
+void SVoIP::onHandshakeError(Handshaker::Error error){
+    Handshaker* handshaker = dynamic_cast<Handshaker*>(sender());
+    qDebug()<< handshaker->getErrorString(error);
+    if(handshaker){
+        QString host = handshaker->getHost();
+        if(handshaker->getRecievedBanTime() != 0)
+            m_ipFilter.addBan(host, handshaker->getRecievedBanTime());
+        Contact* contact = handshaker->getContact();
+        if(contact){
+            const quint16 banTime = m_ipFilter.getRemainingBanTime(host);
+            m_pingerList.value(contact)->start(banTime);
+        }
+        delete handshaker;
+        m_handshakerList.remove(host);
+    }
+
+}
+
+void SVoIP::restartListener(){
+    m_listener.close();
+    qint16 port = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toInt();
+    m_listener.listen(QHostAddress::Any, port);
 }
 
 QString SVoIP::generateSalt(){
@@ -165,12 +175,12 @@ AbstractApp* SVoIP::startApp(Contact* contact, AppType appType){
     //TODO: retrieve the right app for the right contact group
     AbstractApp* app = NULL;
     AppUID appUID(appType);
-    if(mAppList.contains(appUID)){
-        app = mAppList.value(appUID);
+    if(m_appList.contains(appUID)){
+        app = m_appList.value(appUID);
         app->show();
     }else{
         //generate instance id
-        foreach(AppUID existingAppUID, mAppList.keys()){
+        foreach(AppUID existingAppUID, m_appList.keys()){
             if(existingAppUID == appUID)
                 appUID.setInstanceID(appUID.instanceID() + 1);
         }
@@ -182,8 +192,8 @@ AbstractApp* SVoIP::startApp(Contact* contact, AppType appType){
         }
         if(app){
             //register
-            mAppList.insert(appUID, app);
-            mNetworkManagerList.value(contact->getId())->registerApp(appUID, app);
+            m_appList.insert(appUID, app);
+            m_networkManagerList.value(contact->getId())->registerApp(appUID, app);
         }
     }
     return app;
@@ -191,10 +201,30 @@ AbstractApp* SVoIP::startApp(Contact* contact, AppType appType){
 
 AbstractApp* SVoIP::startAppFor(Contact* contact, AppUID distantUID){
     AbstractApp *app = startApp(contact, distantUID.type());
-    AppUID localUID = mAppList.key(app);
+    AppUID localUID = m_appList.key(app);
     if(localUID.type() != Undefined)
-        mNetworkManagerList.value(contact->getId())->registerAppConnection(localUID, distantUID);
+        m_networkManagerList.value(contact->getId())->registerAppConnection(localUID, distantUID);
     return app;
+}
+
+void SVoIP::startHandshaker(QTcpSocket* socket){
+    Pinger* pinger = dynamic_cast<Pinger*>(sender());
+    IpFilter* filter = dynamic_cast<IpFilter*>(sender());
+    if(pinger || filter){
+        QString host = socket->peerAddress().toString();
+        if(getHostState(host) != NotConnected && host != "127.0.0.1")   //TODO: remove debug localhost
+            socket->close();
+        else{
+            Handshaker* handshaker = new Handshaker(socket, m_rsaKeyring, this);
+            m_handshakerList.insert(socket->peerAddress().toString(), handshaker);
+            connect(handshaker, &Handshaker::success, this, &SVoIP::onHandshakeSuccess);
+            connect(handshaker, &Handshaker::error, this, &SVoIP::onHandshakeError);
+            if(pinger)
+                handshaker->startHandshake(pinger->getContact());
+            else
+                handshaker->waitForHandshake(m_contactDB);
+        }
+    }
 }
 
 void SVoIP::registerNAT(quint16 port,bool connexionType){
@@ -220,10 +250,21 @@ void SVoIP::registerNAT(quint16 port,bool connexionType){
     }
 }
 
+SVoIP::IpState SVoIP::getHostState(QString host){
+    foreach(NetworkManager* netMgr, m_networkManagerList) {
+        if(netMgr->getHost() == host)
+            return Connected;
+    }
+    if(m_handshakerList.contains(host)){
+        return Handshaking;
+    }else
+        return NotConnected;
+}
+
 SVoIP::~SVoIP(){
-    if(mContactListWindow) delete mContactListWindow;
-    if(mContactDB) delete mContactDB;
-    if(mPasswordWindow) delete mPasswordWindow;
-    qDeleteAll(mAppList);
-    qDeleteAll(QMap<int,NetworkManager*>(mNetworkManagerList)); //copy list to avoid networkManager self remove
+    if(m_contactListWindow) delete m_contactListWindow;
+    if(m_contactDB) delete m_contactDB;
+    if(m_passwordWindow) delete m_passwordWindow;
+    qDeleteAll(m_appList);
+    qDeleteAll(QMap<int,NetworkManager*>(m_networkManagerList)); //copy list to avoid networkManager self remove
 }
