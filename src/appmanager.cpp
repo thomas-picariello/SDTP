@@ -1,6 +1,7 @@
 #include "appmanager.h"
 
 void AppManager::readIncommingData(QByteArray &data){
+    qDebug()<<data.toHex();
     Packet packet;
     QDataStream (&data, QIODevice::ReadOnly) >> packet;
     switch(packet.command){
@@ -53,10 +54,7 @@ bool AppManager::isAppConnected(AppUID appUID) const{
 }
 
 void AppManager::requestPartnerApp(AppUID localAppUID){
-    Packet packet(StartAppCommand, localAppUID, AppUID());
-    QByteArray data;
-    QDataStream(&data, QIODevice::WriteOnly) << packet;
-    emit sendData(TCP, data);
+    sendPacket(StartAppCommand, localAppUID, AppUID());
 }
 
 void AppManager::registerApp(AppUID localAppUID, AbstractApp *app){

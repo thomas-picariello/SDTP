@@ -89,7 +89,8 @@ qint64 TcpLink::readData(char *data, qint64 maxSize){
 }
 
 qint64 TcpLink::writeData(const char *data, qint64 size){
-    return m_Socket->write(data, size);
+    QByteArray packet(data, size);
+    return m_Socket->write(packet);
 }
 
 TcpLink::~TcpLink(){
