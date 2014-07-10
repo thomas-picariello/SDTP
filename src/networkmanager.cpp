@@ -2,19 +2,19 @@
 
 NetworkManager::NetworkManager(Contact *contact, QTcpSocket *socket, QByteArray gcmKey, QByteArray gcmBaseIV, QObject *parent):
     QObject(parent),
-    m_Contact(contact),
-    m_GcmBaseIv(gcmBaseIV),
-    m_GcmKey(gcmKey),
-    m_Status(Contact::Offline)
+    m_contact(contact),
+    m_gcmBaseIv(gcmBaseIV),
+    m_gcmKey(gcmKey)
 {
     dynamic_cast<TcpLink*>(getGcmDevice(TCP)->getLink())->setSocket(socket);
+    getGcmDevice(TCP)->setKeyAndBaseIV(m_gcmKey, m_gcmBaseIv);
     connect(getGcmDevice(TCP), &QIODevice::readyRead,
             this, &NetworkManager::routeIncommingData);
-    connect(&m_AppManager, &AppManager::sendData,
+    connect(&m_appManager, &AppManager::sendData,
             this, &NetworkManager::sendData);
-    connect(&m_AppManager, &AppManager::startApp,
+    connect(&m_appManager, &AppManager::startApp,
             this, &NetworkManager::onStartAppRequest);
-    connect(&m_AppManager, &AppManager::startAppFor,
+    connect(&m_appManager, &AppManager::startAppFor,
             this, &NetworkManager::onStartAppForRequest);
 }
 
@@ -23,12 +23,12 @@ QString NetworkManager::getHost(){
 }
 
 Contact* NetworkManager::getContact() const{
-    return m_Contact;
+    return m_contact;
 }
 
 int NetworkManager::getContactId() const{
-    if(m_Contact)
-        return m_Contact->getId();
+    if(m_contact)
+        return m_contact->getId();
     else
         return 0;
 }
@@ -38,33 +38,28 @@ QString NetworkManager::getErrorString(Error err) const{
     return QString(errorEnum.valueToKey(static_cast<int>(err)));
 }
 
-//NetworkManager::State NetworkManager::getState() const{
-//    return m_State;
-//}
-
 void NetworkManager::registerApp(AppUID localUID, AbstractApp *app){
     connect(app, &AbstractApp::sendData,
             this, &NetworkManager::sendData);
-    m_AppManager.registerApp(localUID, app);
+    m_appManager.registerApp(localUID, app);
 }
 
 void NetworkManager::registerAppConnection(AppUID localUID, AppUID distantUID){
-    m_AppManager.registerConnection(localUID, distantUID);
+    m_appManager.registerConnection(localUID, distantUID);
 }
 
 void NetworkManager::unregisterApp(AppUID uid){
-    disconnect(m_AppManager.getApp(uid), &AbstractApp::sendData,
+    disconnect(m_appManager.getApp(uid), &AbstractApp::sendData,
             this, &NetworkManager::sendData);
-    m_AppManager.unregisterApp(uid);
+    m_appManager.unregisterApp(uid);
 }
 
 void NetworkManager::onTcpDisconnect(){
-    m_Status = Contact::Offline;
-    emit contactStatusChanged(getContactId(), m_Status);
+    m_contact->setStatus(Contact::Offline);
 }
 
 void NetworkManager::onContactEvent(Contact::Event event){
-    if(m_Contact){
+    if(m_contact){
         //TODO: do something intelligent with event
         //ie: if contact offline retry to connect after change other than name
         //m_Contact = m_ContactDB->findById(m_Contact->getId());
@@ -75,18 +70,16 @@ void NetworkManager::sendData(LinkType linkType, QByteArray &data){
     AppManager* manager = dynamic_cast<AppManager*>(sender());
     AbstractApp* app = dynamic_cast<AbstractApp*>(sender());
     if(manager || app){
-        if(manager || m_AppManager.isAppRegistered(app)){
+        if(manager || m_appManager.isAppRegistered(app)){
             Packet packet;
             if(manager)
                 packet.destAppUID = AppUID(Manager);
             else
-                packet.destAppUID = m_AppManager.getDistantAppUID(app);
+                packet.destAppUID = m_appManager.getDistantAppUID(app);
             packet.payload = data;
 
             if(packet.destAppUID.type() != AppType::Undefined){
-                QByteArray serializedPacket;
-                QDataStream(&serializedPacket, QIODevice::WriteOnly) << packet;
-                getGcmDevice(linkType)->write(serializedPacket);
+                QDataStream(getGcmDevice(linkType)) << packet;
             }else
                 emit error(UnconnectedApp);
         }else
@@ -100,91 +93,37 @@ void NetworkManager::routeIncommingData(){
         Packet packet;
         QDataStream (gcmDevice) >> packet;
         if(packet.destAppUID.type() == Manager)
-            m_AppManager.readIncommingData(packet.payload);
-        else if(m_AppManager.isAppConnected(packet.destAppUID))
+            m_appManager.readIncommingData(packet.payload);
+        else if(m_appManager.isAppConnected(packet.destAppUID))
             emit error(UnconnectedApp);
         else if(packet.payload.isEmpty())
             emit error(NoPayload);
         else{
-            if(m_AppManager.isAppConnected(packet.destAppUID))
-                m_AppManager.getApp(packet.destAppUID)->readIncommingData(packet.payload);
+            if(m_appManager.isAppConnected(packet.destAppUID))
+                m_appManager.getApp(packet.destAppUID)->readIncommingData(packet.payload);
         }
     }
 }
 
-//void NetworkManager::waitForHandshake(){
-//    m_Handshaker->waitForHandshake(m_ContactDB);
-//}
-
-//void NetworkManager::doStarterHandshake(){
-//    m_Handshaker->beginStarterHandshake(m_Contact);
-//}
-
-//void NetworkManager::onHandshakeFinished(bool successfull){
-//    if(successfull){
-//        m_State = Connected;
-//        m_GcmKey = m_Handshaker->getGcmKey();
-//        m_GcmBaseIv = m_Handshaker->getGcmBaseIV();
-//        getGcmDevice(TCP)->setKeyAndBaseIV(m_GcmKey, m_GcmBaseIv);
-//        getGcmDevice(TCP)->setBypassMode(false);
-//        m_Contact = m_Handshaker->getContact();
-//        emit contactStatusChanged(getContactId(), Contact::Online); //TODO: Contact self-signal on internal status change
-//        connect(getGcmDevice(TCP), &QIODevice::readyRead,
-//                this, &NetworkManager::routeIncommingData);
-//        connect(&m_AppManager, &AppManager::sendData,
-//                this, &NetworkManager::sendData);
-//        connect(&m_AppManager, &AppManager::startApp,
-//                this, &NetworkManager::onStartAppRequest);
-//        connect(&m_AppManager, &AppManager::startAppFor,
-//                this, &NetworkManager::onStartAppForRequest);
-
-//    }else{
-//        if(m_Handshaker->getMode() == Handshaker::StarterMode){
-//            disconnect(getGcmDevice(TCP), &QIODevice::readyRead,
-//                    this, &NetworkManager::routeIncommingData);
-//            disconnect(&m_AppManager, &AppManager::sendData,
-//                    this, &NetworkManager::sendData);
-//            disconnect(&m_AppManager, &AppManager::startApp,
-//                    this, &NetworkManager::onStartAppRequest);
-//            disconnect(&m_AppManager, &AppManager::startAppFor,
-//                    this, &NetworkManager::onStartAppForRequest);
-//            m_GcmKey.clear();
-//            m_GcmBaseIv.clear();
-////            m_State = Pinging;
-////            m_Pinger.start(m_Handshaker->getRecievedBanTime()); //restart pinger after ban time
-//        }else if(m_Handshaker->getMode() == Handshaker::ResponderMode)
-//            deleteLater(); //close connection, delete the network manager
-//    }
-//}
-
 void NetworkManager::onStartAppRequest(AppType type){
-    if(m_Contact)
-        emit startApp(m_Contact, type);
+    if(m_contact)
+        emit startApp(m_contact, type);
 }
 
 void NetworkManager::onStartAppForRequest(AppUID distantUID){
-    if(m_Contact)
-        emit startAppFor(m_Contact, distantUID);
+    if(m_contact)
+        emit startAppFor(m_contact, distantUID);
 }
-
-void NetworkManager::onRouteReady(AbstractApp *app){
-    //connect app signals
-}
-
-//void NetworkManager::onHandshakeError(Handshaker::Error err){
-//     //TODO: report error in a proper way
-//    qDebug()<<"Handshake error:"<<m_Handshaker->getErrorString(err);
-//}
 
 GcmDevice* NetworkManager::getGcmDevice(LinkType linkType){
     GcmDevice* gcmDevice = NULL;
-    if(m_GcmDevicesList.contains(linkType)){
-        gcmDevice = m_GcmDevicesList.value(linkType);
+    if(m_gcmDevicesList.contains(linkType)){
+        gcmDevice = m_gcmDevicesList.value(linkType);
     }else{
         switch(linkType){
         case TCP:
             gcmDevice = new GcmDevice(new TcpLink(), this);
-            m_GcmDevicesList.insert(linkType, gcmDevice);
+            m_gcmDevicesList.insert(linkType, gcmDevice);
             connect(dynamic_cast<TcpLink*>(gcmDevice->getLink()), &TcpLink::disconnected,
                     this, &NetworkManager::onTcpDisconnect);
             break;

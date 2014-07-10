@@ -24,8 +24,6 @@ class NetworkManager : public QObject
 
 public:
     enum Error{
-        BadTimestamp,
-        BadPacketNumber,
         BadSymmetricKey,
         NoPayload,
         PacketCorrupted,
@@ -50,11 +48,10 @@ public:
     Contact* getContact() const;
     int getContactId() const;
     QString getErrorString(Error err) const;
-//    State getState() const;
     //inline Contact::Status getStatus() const{ return m_Contact->getStatus(); } //TODO: implement Contact status
     void registerApp(AppUID localUID, AbstractApp *app);
     void registerAppConnection(AppUID localUID, AppUID distantUID);
-    void setContact(Contact *contact){ m_Contact = contact; }
+    void setContact(Contact *contact){ m_contact = contact; }
     void unregisterApp(AppUID uid);
 
 public slots :
@@ -62,40 +59,26 @@ public slots :
     void sendData(LinkType linkType, QByteArray &data);
 
 signals :
-    void contactStatusChanged(int id, Contact::Status status);
     void destroyed(NetworkManager* networkManager);
     void error(NetworkManager::Error err);
-//    void newContactId(int id);
     void startApp(Contact* contact, AppType type);
     void startAppFor(Contact *contact, AppUID distantAppUID);
 
 private slots:
-//    void waitForHandshake();
-//    void doStarterHandshake();
-//    void onHandshakeFinished(bool successfull);
     void onStartAppRequest(AppType type);
     void onStartAppForRequest(AppUID distantUID);
-    void onRouteReady(AbstractApp* app);
     void routeIncommingData();
     void onTcpDisconnect();
-//    void onHandshakeError(Handshaker::Error);
 
 private :
-//    State m_State;
-    Contact::Status m_Status;
-    Contact *m_Contact;
-//    ContactDB *m_ContactDB;
-//    Handshaker *m_Handshaker;
-    AppManager m_AppManager;
-//    Pinger m_Pinger;
-    QMap<LinkType, GcmDevice*> m_GcmDevicesList;
-    QByteArray m_GcmKey;
-    QByteArray m_GcmBaseIv;
+    Contact *m_contact;
+    AppManager m_appManager;
+    QMap<LinkType, GcmDevice*> m_gcmDevicesList;
+    QByteArray m_gcmKey;
+    QByteArray m_gcmBaseIv;
 
     void cleanLinks();
     GcmDevice* getGcmDevice(LinkType linkType);
-//    QByteArray gcmDecrypt(QByteArray& cipherText);
-//    QByteArray gcmEncrypt(QByteArray& clearText);
 
     Q_DISABLE_COPY(NetworkManager)
 };
