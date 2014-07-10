@@ -10,6 +10,8 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Multimedia REQUIRED)
 find_package(Qt5Sql REQUIRED)
 
+
+
 find_package(Cryptlib REQUIRED)
 find_package(Opus REQUIRED)
 find_package(Jrtplib REQUIRED)
@@ -45,4 +47,4 @@ target_link_libraries(${PROJECT}
     ${JTHREAD_LIBRARIES}
 )
 
-qt5_use_modules(${PROJECT} Widgets Multimedia Sql)
+qt5_use_modules(${PROJECT} Widgets Multimedia MultimediaWidgets Sql )

@@ -161,6 +161,11 @@ QString SVoIP::generateSalt(){
 void SVoIP::startApp(Contact* contact, AppType appType){
     //TODO: see if templated factory may works here...
     //TODO: retrieve the right app for the right contact group
+
+    AbstractApp *vid = NULL;
+    vid = new VideoApp(contact);
+
+
     AppUID appUID(appType);
     if(mAppList.contains(appUID)){
         mAppList.value(appUID)->show();

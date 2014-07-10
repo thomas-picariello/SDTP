@@ -20,6 +20,7 @@
 #include "ipfilter.h"
 #include "appuid.h"
 #include "upnpnat.h"
+#include "videoapp.h"
 
 class SVoIP: public QObject
 {

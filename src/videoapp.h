@@ -4,6 +4,13 @@
 #include <contact.h>
 #include <QList>
 #include <QScrollBar>
+#include <QtMultimedia>
+#include <QVideoWindowControl>
+#include <QtMultimediaWidgets/QVideoWidget>
+#include <QMediaPlayer>
+#include <QMediaObject>
+#include <QCamera>
+#include <QDebug>
 #include "typesenums.h"
 #include "abstractapp.h"
 
@@ -33,6 +40,9 @@ private slots:
 
 private:
     Ui::VideoApp *ui;
+    QMediaPlayer *m_player;
+    QVideoWidget *m_videoWidget;
+    QCamera *m_Camera;
 
 };
 
