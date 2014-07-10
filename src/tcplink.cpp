@@ -16,14 +16,10 @@ TcpLink::TcpLink(const QString &host, quint16 port, QIODevice *parent):
 }
 
 TcpLink::TcpLink(QTcpSocket *socket, QIODevice *parent):
-    AbstractLink(parent),
-    m_Socket(socket)
+    AbstractLink(parent)
 {
+    setSocket(socket);
     connectSocketSignals();
-    m_State = Online;
-    setOpenMode(ReadWrite);
-    emit stateChanged(m_State);
-    emit connected();
 }
 
 void TcpLink::connectSocketSignals(){
@@ -58,7 +54,8 @@ void TcpLink::setSocket(QTcpSocket *socket){
     m_Socket->setParent(this);
     connectSocketSignals();
     m_State = Online;
-    setOpenMode(ReadWrite);
+    setOpenMode(socket->openMode());
+    emit openModeChanged(openMode());
     emit stateChanged(m_State);
     emit connected();
 }

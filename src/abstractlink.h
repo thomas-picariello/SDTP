@@ -37,7 +37,7 @@ private slots:
     virtual void onConnected(){}
     virtual void onConnectionError(QAbstractSocket::SocketError) = 0;
 
-    void privateOnConnected(){
+    void private_onConnected(){
         setOpenMode(ReadWrite);
         emit openModeChanged(ReadWrite);
         emit stateChanged(Online);
@@ -49,9 +49,6 @@ protected :
 
     virtual qint64 readData(char * data, qint64 maxSize) = 0;
     virtual qint64 writeData(const char * data, qint64 size) = 0;
-
-private:
-
 
     Q_DISABLE_COPY(AbstractLink)
 };
