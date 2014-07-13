@@ -49,9 +49,9 @@ void ContactListWindow::editContact(){
 void ContactListWindow::listItemClicked(QListWidgetItem *currentItem){
     QList<QListWidgetItem*> itemList = ui->list->findItems("*", Qt::MatchWildcard);
     foreach(QListWidgetItem *item, itemList){
-           dynamic_cast<ContactItemWidget*>(ui->list->itemWidget(item))->hide();
+           dynamic_cast<ContactActionsWidget*>(ui->list->itemWidget(item))->hide();
     }
-    dynamic_cast<ContactItemWidget*>(ui->list->itemWidget(currentItem))->show();
+    dynamic_cast<ContactActionsWidget*>(ui->list->itemWidget(currentItem))->show();
 }
 
 void ContactListWindow::openSettingsWindow(){
@@ -59,18 +59,18 @@ void ContactListWindow::openSettingsWindow(){
     mSettingsWindow.activateWindow();
 }
 
-void ContactListWindow::onListItemAction(int contactId, ContactItemWidget::Action action){
+void ContactListWindow::onListItemAction(int contactId, ContactActionsWidget::Action action){
     switch(action){
-    case ContactItemWidget::CallAction:
+    case ContactActionsWidget::CallAction:
         emit startApp(mContactDB->findById(contactId), VoIP);
         break;
-    case ContactItemWidget::MessengerAction:
+    case ContactActionsWidget::MessengerAction:
         emit startApp(mContactDB->findById(contactId), Messenger);
         break;
-    case ContactItemWidget::EditAction:
+    case ContactActionsWidget::EditAction:
         editContact();
         break;
-    case ContactItemWidget::DeleteAction:
+    case ContactActionsWidget::DeleteAction:
         deleteContact();
         break;
     }
@@ -95,11 +95,11 @@ void ContactListWindow::refreshList(){
             connect(contact, &Contact::statusChanged,
                     this, &ContactListWindow::updateContactStatusIcon);
             ui->list->addItem(item);
-            ContactItemWidget *itemWidget = new ContactItemWidget(contact->getId());
+            ContactActionsWidget *itemWidget = new ContactActionsWidget(contact->getId());
             ui->list->setItemWidget(item, itemWidget);
             itemWidget->hide();
-            connect(itemWidget, SIGNAL(actionTriggered(int,ContactItemWidget::Action)),
-                    this, SLOT(onListItemAction(int,ContactItemWidget::Action)));
+            connect(itemWidget, SIGNAL(actionTriggered(int,ContactActionsWidget::Action)),
+                    this, SLOT(onListItemAction(int,ContactActionsWidget::Action)));
         }
     }
 

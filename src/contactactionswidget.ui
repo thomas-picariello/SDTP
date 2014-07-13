@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ContactItemWidget</class>
- <widget class="QWidget" name="ContactItemWidget">
+ <class>ContactActionsWidget</class>
+ <widget class="QWidget" name="ContactActionsWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>140</width>
+    <height>32</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>

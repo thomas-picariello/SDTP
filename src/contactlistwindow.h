@@ -9,7 +9,7 @@
 #include "editcontactwindow.h"
 #include "settingswindow.h"
 #include "contact.h"
-#include "contactitemwidget.h"
+#include "contactactionswidget.h"
 #include "abstractapp.h"
 #include "typesenums.h"
 
@@ -46,7 +46,7 @@ public slots:
     void editContact();
     void listItemClicked(QListWidgetItem *currentItem);
     void openSettingsWindow();
-    void onListItemAction(int contactId, ContactItemWidget::Action action);
+    void onListItemAction(int contactId, ContactActionsWidget::Action action);
     void refreshList();
     void deleteContact();
 

@@ -1,5 +1,5 @@
-#ifndef CONTACTITEMDELEGATE_H
-#define CONTACTITEMDELEGATE_H
+#ifndef CONTACTACTIONSWIDGET_H
+#define CONTACTACTIONSWIDGET_H
 
 #include <QDebug>
 #include <QWidget>
@@ -9,10 +9,10 @@
 #include <QMenu>
 
 namespace Ui {
-class ContactItemWidget;
+class ContactActionsWidget;
 }
 
-class ContactItemWidget : public QWidget
+class ContactActionsWidget : public QWidget
 {
     Q_OBJECT
 public:
@@ -23,9 +23,9 @@ public:
         DeleteAction
     };
 
-    explicit ContactItemWidget(int contactId = 0,
+    explicit ContactActionsWidget(int contactId = 0,
                                QWidget *parent = 0);
-    ~ContactItemWidget();
+    ~ContactActionsWidget();
 
     int getContactId() const;
     void hide();
@@ -33,7 +33,7 @@ public:
     void show();
 
 signals:
-    void actionTriggered(int id, ContactItemWidget::Action action);
+    void actionTriggered(int id, ContactActionsWidget::Action action);
 
 public slots:
     void onButtonEvent(QEvent *event);
@@ -44,9 +44,9 @@ public slots:
     void showOptionsMenu();
 
 private:
-    Ui::ContactItemWidget *ui;
+    Ui::ContactActionsWidget *ui;
     int mContactId;
     QMenu *mOptionsMenu;
 };
 
-#endif // CONTACTITEMDELEGATE_H
+#endif // CONTACTACTIONSWIDGET_H

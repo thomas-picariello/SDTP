@@ -1,8 +1,8 @@
-#include "contactitemwidget.h"
-#include "ui_contactitemwidget.h"
+#include "contactactionswidget.h"
+#include "ui_contactactionswidget.h"
 
-ContactItemWidget::ContactItemWidget(int contactId, QWidget *parent) :
-    QWidget(parent), ui(new Ui::ContactItemWidget)
+ContactActionsWidget::ContactActionsWidget(int contactId, QWidget *parent) :
+    QWidget(parent), ui(new Ui::ContactActionsWidget)
 {
     mContactId = contactId;
     ui->setupUi(this);
@@ -21,17 +21,17 @@ ContactItemWidget::ContactItemWidget(int contactId, QWidget *parent) :
             this, SLOT(showOptionsMenu()));
 }
 
-int ContactItemWidget::getContactId() const{
+int ContactActionsWidget::getContactId() const{
     return mContactId;
 }
 
-void ContactItemWidget::hide(){
+void ContactActionsWidget::hide(){
     ui->call_bt->hide();
     ui->messenger_bt->hide();
     ui->options_bt->hide();
 }
 
-void ContactItemWidget::onButtonEvent(QEvent *event){
+void ContactActionsWidget::onButtonEvent(QEvent *event){
     QPushButton* button = dynamic_cast<QPushButton*>(sender());
     qDebug()<<event->type();
     switch(event->type()){
@@ -40,40 +40,40 @@ void ContactItemWidget::onButtonEvent(QEvent *event){
     }
 }
 
-void ContactItemWidget::onCallButtonClick(){
+void ContactActionsWidget::onCallButtonClick(){
     emit(actionTriggered(mContactId, CallAction));
 }
 
-void ContactItemWidget::onMessengerButtonClick(){
+void ContactActionsWidget::onMessengerButtonClick(){
     emit actionTriggered(mContactId, MessengerAction);
 }
 
-void ContactItemWidget::onEditActionClick(){
+void ContactActionsWidget::onEditActionClick(){
     emit actionTriggered(mContactId, EditAction);
 }
 
-void ContactItemWidget::onDeleteActionClick(){
+void ContactActionsWidget::onDeleteActionClick(){
     emit actionTriggered(mContactId, DeleteAction);
 }
 
 
-void ContactItemWidget::setContactId(int id){
+void ContactActionsWidget::setContactId(int id){
     mContactId = id;
 }
 
-void ContactItemWidget::show(){
+void ContactActionsWidget::show(){
     ui->call_bt->show();
     ui->messenger_bt->show();
     ui->options_bt->show();
 }
 
-void ContactItemWidget::showOptionsMenu(){
+void ContactActionsWidget::showOptionsMenu(){
     QPoint pos = ui->options_bt->geometry().bottomLeft();
     pos = ui->options_bt->mapFromParent(pos);
     pos = ui->options_bt->mapToGlobal(pos);
     mOptionsMenu->exec(pos);
 }
 
-ContactItemWidget::~ContactItemWidget(){
+ContactActionsWidget::~ContactActionsWidget(){
     delete ui;
 }
