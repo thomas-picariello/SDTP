@@ -13,7 +13,7 @@ class Contact: public QObject
     Q_OBJECT
 public: 
     /**
-     * @brief The Event enum describs the events that can happen to a contact object.
+     * @brief The Event enum describs the events that can happen to a Contact.
      */
     enum Event{
         Added,
@@ -22,7 +22,7 @@ public:
     };
 
     /**
-     * @brief The Status enum enumerates the possibles states for a contact
+     * @brief The Status enum describs the possibles states for a Contact.
      */
     enum Status{
         Offline,
@@ -32,20 +32,20 @@ public:
     };
 
     /**
-     * @brief Constructs an empty contact object.
+     * @brief Constructs an empty Contact object.
      *
      * @param parent the parent **QObject**
      */
     explicit Contact(QObject *parent = 0);
 
     /**
-     * @brief Constructs a contact object with all the fields defined.
+     * @brief Constructs a Contact object with all the fields defined.
      *
-     * @param id the id of the contact
-     * @param name the name of the contact
-     * @param hostList the host list of the contact
-     * @param port the port to use for the contact
-     * @param key the public key of the contact
+     * @param id the id of the Contact
+     * @param name the name of the Contact
+     * @param hostList the host list of the Contact
+     * @param port the port to use for the Contact
+     * @param key the public key of the Contact
      * @param parent the parent **QObject**
      */
     explicit Contact(int id,
@@ -56,76 +56,87 @@ public:
             QObject *parent = 0);
 
     /**
-     * @brief Returns a copy of the hosts list of the contact.
-     * @return a copy of the hosts list of the contact
+     * @brief Returns a copy of the hosts list of the Contact.
+     * @return a copy of the hosts list of the Contact
      */
     QStringList getHostsList() const;
 
     /**
-     * @brief Returns the unique ID of the contact.
-     * @return the ID of the contact
+     * @brief Returns the unique ID of the Contact.
+     * @return the ID of the Contact
      */
     uint getId() const;
 
     /**
-     * @brief Returns the unique public key of the contact.
-     * @return the public key of the contact
+     * @brief Returns the unique public key of the Contact.
+     * @return the public key of the Contact
      */
     QByteArray getKey() const;
 
     /**
-     * @brief Returns the name of the contact.
-     * @return the name of the contact
+     * @brief Returns the name of the Contact.
+     * @return the name of the Contact
      */
     QString getName() const;
 
     /**
-     * @brief Returns the port to be used for the contact.
-     * @return the port to use for the contact
+     * @brief Returns the port to be used for the Contact.
+     * @return the port to use for the Contact
      */
     quint16 getPort() const;
 
+    /**
+     * @brief Returns the Status of the Contact.
+     * @return the Status of the Contact
+     */
     Status getStatus() const;
 
     /**
-     * @brief Returns a pointer to the internal hosts list of the contact.
-     * @return a pointer to the internal hosts list of the contact
+     * @brief Returns a pointer to the internal hosts list of the Contact.
+     * @return a pointer to the internal hosts list of the Contact
      */
     QStringList* hostsList();
 
     /**
-     * @brief Defines the host list of the contact.
-     * @param hostsList the host list to copy to the contact
+     * @brief Defines the host list of the Contact.
+     * @param hostsList the host list to copy to the Contact
      */
     void setHostsList(QStringList hostsList);
 
     /**
-     * @brief Defines the unique ID of the contact.
-     * @param id the unique id of the contact
+     * @brief Defines the unique ID of the Contact.
+     * @param id the unique id of the Contact
      */
     void setId(uint id);
 
     /**
-     * @brief Defines the unique public key of the contact.
-     * @param key the public key of the contact
+     * @brief Defines the unique public key of the Contact.
+     * @param key the public key of the Contact
      */
     void setKey(QByteArray key);
 
     /**
-     * @brief Defines the name of the contact.
-     * @param name the name of the contact
+     * @brief Defines the name of the Contact.
+     * @param name the name of the Contact
      */
     void setName(QString name);
 
     /**
-     * @brief Defines the port to be used for the contact.
-     * @param port the port to be used for the contact
+     * @brief Defines the port to be used for the Contact.
+     * @param port the port to be used for the Contact
      */
     void setPort(quint16 port);
 
+    /**
+     * @brief Defines the Status of the Contact.
+     * @param status the Status to be set
+     */
     void setStatus(Status status);
 
 signals:
+    /**
+     * @brief signal emited when setStatus is called.
+     */
     void statusChanged();
 
 private :
