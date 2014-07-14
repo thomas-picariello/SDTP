@@ -15,8 +15,18 @@ class ContactDB: public QObject
 {
     Q_OBJECT
 public:
+    /**
+     * @brief The Event enum describs the events that can happen to a Contact.
+     */
+    enum Event{
+        ContactAdded,
+        ContactEdited,
+        ContactDeleted
+    };
+
     explicit ContactDB(QPair<QByteArray, QByteArray> *fileKey, QObject *parent = 0);
     ~ContactDB();
+
     void updateFileKey();
     bool erase(int id);
     Contact* const findById(int id);

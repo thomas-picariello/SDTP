@@ -12,16 +12,7 @@ class Contact: public QObject
 {
     Q_OBJECT
 public: 
-    /**
-     * @brief The Event enum describs the events that can happen to a Contact.
-     */
-    enum Event{
-        Added,
-        Updated,
-        Deleted
-    };
-
-    /**
+     /**
      * @brief The Status enum describs the possibles states for a Contact.
      */
     enum Status{

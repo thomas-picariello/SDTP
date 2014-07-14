@@ -58,7 +58,7 @@ void NetworkManager::onTcpDisconnect(){
     m_contact->setStatus(Contact::Offline);
 }
 
-void NetworkManager::onContactEvent(Contact::Event event){
+void NetworkManager::onContactEvent(ContactDB::Event event){
     if(m_contact){
         //TODO: do something intelligent with event
         //ie: if contact offline retry to connect after change other than name

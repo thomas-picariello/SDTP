@@ -133,7 +133,7 @@ void ContactListWindow::deleteContact(){
             int currentId = currentItem->data(IdRole).toInt();
             mContactDB->erase(currentId);
             refreshList();
-            emit contactEvent(currentId, Contact::Deleted);
+            emit contactEvent(currentId, ContactDB::ContactDeleted);
         }
     }
 }

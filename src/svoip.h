@@ -42,7 +42,7 @@ public:
     ~SVoIP();
 
 public slots:
-    void onContactEvent(int id, Contact::Event event);
+    void onContactEvent(int id, ContactDB::Event event);
     void onHandshakeSuccess();
     void onHandshakeError(Handshaker::Error error);
     void onNetworkManagerDestroy(NetworkManager *networkManager);

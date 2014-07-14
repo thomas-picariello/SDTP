@@ -26,7 +26,7 @@ public:
     void clear();
 
 signals:
-    void contactEvent(int, Contact::Event);
+    void contactEvent(int, ContactDB::Event);
 
 public slots:
     void addHost();

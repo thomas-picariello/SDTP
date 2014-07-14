@@ -55,7 +55,7 @@ public:
     void unregisterApp(AppUID uid);
 
 public slots :
-    void onContactEvent(Contact::Event event);
+    void onContactEvent(ContactDB::Event event);
     void sendData(LinkType linkType, QByteArray &data);
     void onAppStarted(AppUID localUID);
 

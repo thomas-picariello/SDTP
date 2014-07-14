@@ -85,19 +85,25 @@ void SVoIP::onNetworkManagerDestroy(NetworkManager* networkManager){
     m_networkManagerList.remove(m_networkManagerList.key(networkManager));
 }
 
-void SVoIP::onContactEvent(int id, Contact::Event event){
-//    NetworkManager* networkManager;
+void SVoIP::onContactEvent(int id, ContactDB::Event event){
     switch(event){
-    case Contact::Added:
-//        networkManager = new NetworkManager(m_contactDB->findById(id), m_contactDB, m_rsaKeyring, &m_ipFilter, this);
-//        connectNetworkManagerSignals(networkManager);
-//        m_networkManagerList.insert(id, networkManager);
+        case ContactDB::ContactAdded:{
+            Pinger* pinger = new Pinger(m_contactDB->findById(id));
+            m_pingerList.insert(m_contactDB->findById(id), pinger);
+            connect(pinger, &Pinger::connected,
+                    this, &SVoIP::startHandshaker);
+            pinger->start();
+        }
         break;
-    case Contact::Deleted:
-//        delete m_networkManagerList.value(id);
+        case ContactDB::ContactDeleted:{
+            if(m_networkManagerList.contains(id))
+                delete m_networkManagerList.value(id);
+        }
         break;
-    case Contact::Updated:
-//        m_networkManagerList.value(id)->onContactEvent(event);
+        case ContactDB::ContactEdited:{
+            //not usefull theoretically...
+
+        }
         break;
     }
 }
@@ -113,7 +119,10 @@ void SVoIP::onHandshakeSuccess(){
                                                     handshaker->getGcmKey(),
                                                     handshaker->getGcmBaseIV(),
                                                     this);
-        m_networkManagerList.insert(handshaker->getContact()->getId(), netMgr);
+        if(host == "127.0.0.1" && handshaker->getMode() == Handshaker::ResponderMode)
+            m_networkManagerList.insert(0, netMgr);     //TODO: remove localhost debug
+        else
+            m_networkManagerList.insert(handshaker->getContact()->getId(), netMgr);
         connect(netMgr, &NetworkManager::destroyed,
                 this, &SVoIP::onNetworkManagerDestroy);
         connect(netMgr, &NetworkManager::startApp,
@@ -169,7 +178,7 @@ AbstractApp* SVoIP::startApp(Contact* contact, AppType appType){
     //TODO: retrieve the right app for the right contact group
     AbstractApp* app = NULL;
     AppUID appUID(appType);
-    if(m_appList.contains(appUID)){
+    if(m_appList.contains(appUID) && contact->getHostsList().contains("127.0.0.1")){ //TODO: remove localhost debug
         app = m_appList.value(appUID);
         app->show();
     }else{
@@ -213,7 +222,7 @@ void SVoIP::startHandshaker(QTcpSocket* socket){
             socket->close();
         else{
             Handshaker* handshaker = new Handshaker(socket, m_rsaKeyring, this);
-            m_handshakerList.insert(socket->peerAddress().toString(), handshaker);
+            m_handshakerList.insertMulti(socket->peerAddress().toString(), handshaker); //TODO: debug multi
             connect(handshaker, &Handshaker::success, this, &SVoIP::onHandshakeSuccess);
             connect(handshaker, &Handshaker::error, this, &SVoIP::onHandshakeError);
             if(pinger)

@@ -63,9 +63,9 @@ void EditContactWindow::save(){
         mContact->setKey(QByteArray::fromBase64(key.toUtf8()));
         if(mContact->getId() == 0){
             mContactDB->add(mContact);
-            emit contactEvent(mContact->getId(), Contact::Added);
+            emit contactEvent(mContact->getId(), ContactDB::ContactAdded);
         }else
-            emit contactEvent(mContact->getId(), Contact::Updated);
+            emit contactEvent(mContact->getId(), ContactDB::ContactEdited);
         mContactDB->commitToDatabase();
         close();
     }

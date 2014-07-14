@@ -38,7 +38,7 @@ public:
 
 signals:
     void startApp(Contact* contact, AppType appTypeId);
-    void contactEvent(int contactId, Contact::Event);
+    void contactEvent(int contactId, ContactDB::Event);
     void settingsUpdated();
 
 public slots:
