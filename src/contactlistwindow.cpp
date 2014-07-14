@@ -27,10 +27,8 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, RsaKeyring *keyring, 
             this, &ContactListWindow::openSettingsWindow);
     connect(&mSettingsWindow, &SettingsWindow::settingsUpdated,
             this, &ContactListWindow::settingsUpdated);
-    connect(&mEditContactWindow, &EditContactWindow::contactEvent,
+    connect(mContactDB, &ContactDB::contactEvent,
             this, &ContactListWindow::refreshList);
-    connect(&mEditContactWindow, &EditContactWindow::contactEvent,
-            this, &ContactListWindow::contactEvent);
 
     refreshList();
     show();
@@ -133,15 +131,18 @@ void ContactListWindow::deleteContact(){
             int currentId = currentItem->data(IdRole).toInt();
             mContactDB->erase(currentId);
             refreshList();
-            emit contactEvent(currentId, ContactDB::ContactDeleted);
+//            emit contactEvent(currentId, ContactDB::ContactDeleted);
         }
     }
 }
 
 void ContactListWindow::updateContactStatusIcon(){
     Contact* contact = dynamic_cast<Contact*>(sender());
-    if(contact)
-        setContactStatusIcon(contact->getId(), contact->getStatus());
+    if(contact){
+        QListWidgetItem *item = findItemByContactId(contact->getId());
+        if(item)
+            setContactStatusIcon(item, contact->getStatus());
+    }
 }
 
 Contact* ContactListWindow::getSelectedContact(){
@@ -175,12 +176,6 @@ void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, Contact::Sta
                         (int)(5*iconScaleFactor), (int)(5*iconScaleFactor));
 
     item->setData(Qt::DecorationRole, statusIcon);
-}
-
-void ContactListWindow::setContactStatusIcon(int id, Contact::Status status){
-    QListWidgetItem *item = findItemByContactId(id);
-    if(item)
-        setContactStatusIcon(item, status);
 }
 
 QListWidgetItem* ContactListWindow::findItemByContactId(int id){

@@ -24,19 +24,24 @@ public:
         ContactDeleted
     };
 
+    enum Action{
+        Add,
+        Edit,
+        Delete
+    };
+
     explicit ContactDB(QPair<QByteArray, QByteArray> *fileKey, QObject *parent = 0);
     ~ContactDB();
 
-    void updateFileKey();
     bool erase(int id);
     Contact* const findById(int id);
     Contact* const findByKey(QByteArray key);
     QList<Contact*> getAllContacts() const;
-    uint add(Contact *contact);
-    void commitToDatabase();
-    void importDatabase();
+    uint save(Contact *contact);
+    void updateFileKey();
 
 signals:
+    void contactEvent(int id, Event);
     void error(QString err);
 
 private:
@@ -44,7 +49,9 @@ private:
     QSqlDatabase mDatabase;
     QPair<QByteArray, QByteArray> *mFileKey;
 
+    void commitToDatabase();
     QByteArray generateHash();
+    void importDatabase();
     void initDbTables();
     uint getNextAvailableId();
     QByteArray serializeStringList(QStringList list);

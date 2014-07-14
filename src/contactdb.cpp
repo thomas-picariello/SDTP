@@ -21,6 +21,7 @@ bool ContactDB::erase(int id){
     QSqlQuery eraseDiskEntryQuery(mDatabase);
     eraseDiskEntryQuery.prepare("DELETE FROM contacts WHERE id=:id");
     eraseDiskEntryQuery.bindValue(":id", id);
+    emit contactEvent(id, ContactDeleted);
     return eraseDiskEntryQuery.exec();
 }
 
@@ -40,11 +41,19 @@ QList<Contact*> ContactDB::getAllContacts() const{
     return mContactList.values();
 }
 
-uint ContactDB::add(Contact *contact){
-    uint id = getNextAvailableId();
-    contact->setParent(this);
-    contact->setId(id);
-    mContactList.insert(id, contact);
+uint ContactDB::save(Contact *contact){
+    uint id;
+    if(contact->getId() == 0){  //new contact
+        id = getNextAvailableId();
+        contact->setParent(this);
+        contact->setId(id);
+        mContactList.insert(id, contact);
+        emit contactEvent(contact->getId(), ContactAdded);
+    }else{
+        id = contact->getId();
+        emit contactEvent(contact->getId(), ContactEdited);
+    }
+    commitToDatabase();
     return id;
 }
 

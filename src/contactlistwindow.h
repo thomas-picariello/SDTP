@@ -23,8 +23,7 @@ class ContactListWindow : public QWidget
     
 public:
     enum ItemDataRole{
-        IdRole = 33,
-        StatusRole = 34
+        IdRole = 33
     };
 
     explicit ContactListWindow(ContactDB *contactDB,
@@ -33,15 +32,17 @@ public:
                                QWidget *parent = 0);
     ~ContactListWindow();
 
-    void setContactStatusIcon(QListWidgetItem *item, Contact::Status status);
-    void setContactStatusIcon(int id, Contact::Status status);
+
 
 signals:
     void startApp(Contact* contact, AppType appTypeId);
-    void contactEvent(int contactId, ContactDB::Event);
+    void contactAction(int contactId, ContactDB::Action action);
     void settingsUpdated();
 
 public slots:
+
+
+private slots:
     void addContact();
     void editContact();
     void listItemClicked(QListWidgetItem *currentItem);
@@ -49,8 +50,6 @@ public slots:
     void onListItemAction(int contactId, ContactActionsWidget::Action action);
     void refreshList();
     void deleteContact();
-
-private slots:
     void updateContactStatusIcon();
 
 private:
@@ -61,6 +60,7 @@ private:
 
     Contact* getSelectedContact();
     QListWidgetItem* findItemByContactId(int id);
+    void setContactStatusIcon(QListWidgetItem *item, Contact::Status status);
 };
 
 #endif // CONTACTLISTWINDOW_H

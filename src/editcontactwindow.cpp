@@ -61,12 +61,7 @@ void EditContactWindow::save(){
         mContact->setPort(port);
         mContact->setHostsList(hostsList);
         mContact->setKey(QByteArray::fromBase64(key.toUtf8()));
-        if(mContact->getId() == 0){
-            mContactDB->add(mContact);
-            emit contactEvent(mContact->getId(), ContactDB::ContactAdded);
-        }else
-            emit contactEvent(mContact->getId(), ContactDB::ContactEdited);
-        mContactDB->commitToDatabase();
+        mContactDB->save(mContact);
         close();
     }
 }
