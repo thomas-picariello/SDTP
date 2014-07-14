@@ -16,6 +16,13 @@ QTcpSocket* Pinger::getSocket(){
     return m_socket;
 }
 
+bool Pinger::hasHost(QString &host) const{
+    foreach(QString contactHost, m_contact->getHostsList())
+        if(host == contactHost)
+            return true;
+    return false;
+}
+
 Contact* Pinger::getContact(){
     return m_contact;
 }
@@ -26,6 +33,11 @@ void Pinger::setSocket(QTcpSocket *socket){
 
 void Pinger::start(int delay){
     m_connectTimer.start(delay*1000); //default 0s
+}
+
+void Pinger::stop(){
+    m_connectTimer.stop();
+    m_hostIndex = 0;
 }
 
 void Pinger::connectToNextHost(){

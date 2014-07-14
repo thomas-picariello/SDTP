@@ -61,7 +61,7 @@ void SVoIP::startProgram(){
             this, &SVoIP::startHandshaker);
     connect(m_contactListWindow, &ContactListWindow::settingsUpdated,
             this, &SVoIP::restartListener);
-    connect(m_contactListWindow, &ContactListWindow::contactEvent,
+    connect(m_contactDB, &ContactDB::contactEvent,
             this, &SVoIP::onContactEvent);
     connect(m_contactListWindow, &ContactListWindow::startApp,
             this, &SVoIP::startApp);
@@ -137,13 +137,18 @@ void SVoIP::onHandshakeSuccess(){
 void SVoIP::onHandshakeError(Handshaker::Error error){
     Handshaker* handshaker = dynamic_cast<Handshaker*>(sender());
     if(handshaker){
-        qDebug()<< handshaker->getErrorString(error);
+        qDebug()<< "Handshake error:" << handshaker->getErrorString(error);
         QString host = handshaker->getHost();
         if(handshaker->getRecievedBanTime() != 0)
             m_ipFilter.addBan(host, handshaker->getRecievedBanTime());
+
+        const quint16 banTime = m_ipFilter.getRemainingBanTime(host);
+        foreach (Pinger* pinger, m_pingerList){
+            if(pinger->hasHost(host))
+                pinger->start(banTime);
+        }
         Contact* contact = handshaker->getContact();
         if(contact){
-            const quint16 banTime = m_ipFilter.getRemainingBanTime(host);
             m_pingerList.value(contact)->start(banTime);
         }
         delete handshaker;
@@ -227,8 +232,13 @@ void SVoIP::startHandshaker(QTcpSocket* socket){
             connect(handshaker, &Handshaker::error, this, &SVoIP::onHandshakeError);
             if(pinger)
                 handshaker->startHandshake(pinger->getContact());
-            else
+            else{
+                foreach (Pinger* pinger, m_pingerList){
+                    if(pinger->hasHost(host))
+                        pinger->stop();
+                }
                 handshaker->waitForHandshake(m_contactDB);
+            }
         }
     }
 }

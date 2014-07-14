@@ -16,6 +16,7 @@ public:
 
     Contact* getContact();
     QTcpSocket* getSocket();
+    bool hasHost(QString &host) const;
     void setSocket(QTcpSocket* socket);
 
 signals:
@@ -23,6 +24,7 @@ signals:
 
 public slots:
     void start(int delay = 0);
+    void stop();
 
 private slots:
     void onConnected();
