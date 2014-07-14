@@ -19,18 +19,18 @@ ContactListWindow::ContactListWindow(ContactDB *contactDB, RsaKeyring *keyring, 
     ui->settings->setMinimumHeight(ui->settings->minimumHeight()*(logicalDpiX()/96));
     ui->settings->setMinimumWidth(ui->settings->minimumWidth() * (logicalDpiX()/96));
 
-    connect(ui->add, SIGNAL(clicked()),
-            this, SLOT(addContact()));
-    connect(ui->list, SIGNAL(itemClicked(QListWidgetItem*)),
-            this, SLOT(listItemClicked(QListWidgetItem*)));
-    connect(ui->settings, SIGNAL(clicked()),
-            this, SLOT(openSettingsWindow()));
-    connect(&mSettingsWindow, SIGNAL(settingsUpdated()),
-            this, SIGNAL(settingsUpdated()));
-    connect(&mEditContactWindow, SIGNAL(contactEvent(int,Contact::Event)),
-            this, SLOT(refreshList()));
-    connect(&mEditContactWindow, SIGNAL(contactEvent(int,Contact::Event)),
-            this, SIGNAL(contactEvent(int, Contact::Event)));
+    connect(ui->add, &QPushButton::clicked,
+            this, &ContactListWindow::addContact);
+    connect(ui->list, &QListWidget::itemClicked,
+            this, &ContactListWindow::listItemClicked);
+    connect(ui->settings, &QPushButton::clicked,
+            this, &ContactListWindow::openSettingsWindow);
+    connect(&mSettingsWindow, &SettingsWindow::settingsUpdated,
+            this, &ContactListWindow::settingsUpdated);
+    connect(&mEditContactWindow, &EditContactWindow::contactEvent,
+            this, &ContactListWindow::refreshList);
+    connect(&mEditContactWindow, &EditContactWindow::contactEvent,
+            this, &ContactListWindow::contactEvent);
 
     refreshList();
     show();
