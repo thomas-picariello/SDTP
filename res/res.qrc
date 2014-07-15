@@ -3,9 +3,7 @@
         <file alias="app_icon">icons/app_icon.png</file>
         <file alias="call_normal">icons/call_normal.png</file>
         <file alias="messenger_normal">icons/messenger_normal.png</file>
-        <file alias="no">icons/no.png</file>
         <file alias="tools">icons/tools.png</file>
-        <file alias="yes">icons/yes.png</file>
         <file alias="call_hover">icons/call_hover.png</file>
         <file alias="call_pressed">icons/call_pressed.png</file>
         <file alias="messenger_hover">icons/messenger_hover.png</file>
@@ -19,5 +17,14 @@
         <file alias="addcontact_hover">icons/addcontact_hover.png</file>
         <file alias="addcontact_normal">icons/addcontact_normal.png</file>
         <file alias="addcontact_pressed">icons/addcontact_pressed.png</file>
+        <file alias="delete_hover">icons/delete_hover.png</file>
+        <file alias="delete_normal">icons/delete_normal.png</file>
+        <file alias="delete_pressed">icons/delete_pressed.png</file>
+        <file alias="edit_hover">icons/edit_hover.png</file>
+        <file alias="edit_normal">icons/edit_normal.png</file>
+        <file alias="edit_pressed">icons/edit_pressed.png</file>
+        <file alias="video_hover">icons/video_hover.png</file>
+        <file alias="video_normal">icons/video_normal.png</file>
+        <file alias="video_pressed">icons/video_pressed.png</file>
     </qresource>
 </RCC>
