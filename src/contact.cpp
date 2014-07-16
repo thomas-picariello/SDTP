@@ -69,3 +69,11 @@ void Contact::setStatus(Contact::Status status){
     m_status = status;
     emit statusChanged();
 }
+
+bool Contact::operator ==(const Contact &other) const{
+    return (m_id == other.getId());
+}
+
+bool Contact::operator <(const Contact &other) const{
+    return (m_id < other.getId());
+}

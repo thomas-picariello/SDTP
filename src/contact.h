@@ -124,6 +124,20 @@ public:
      */
     void setStatus(Status status);
 
+    /**
+     * @brief operator == return true if both Contact have the same id, false otherwise.
+     * @param other the other Contact to be compared with
+     * @return true if the ids are the same
+     */
+    bool operator ==(const Contact &other) const;
+
+    /**
+     * @brief operator < return true if the other Contact has a higher id, false otherwise.
+     * @param other the other Contact to be compared with
+     * @return true if the other's id is higher
+     */
+    bool operator <(const Contact &other) const;
+
 signals:
     /**
      * @brief signal emited when setStatus is called.
