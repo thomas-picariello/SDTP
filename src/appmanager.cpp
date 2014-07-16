@@ -43,9 +43,8 @@ bool AppManager::isAppRegistered(AbstractApp* app) const{
     return (m_LocalAppsRegister.key(app).type() != Undefined);
 }
 
-bool AppManager::isAppConnected(AppUID appUID) const{
-    return (m_AppConnectionsTable.key(appUID).type() != Undefined ||
-            m_AppConnectionsTable.value(appUID).type() != Undefined );
+bool AppManager::isLocalAppConnected(AppUID appUID) const{
+    return m_AppConnectionsTable.contains(appUID);
 }
 
 void AppManager::requestPartnerApp(AppUID localAppUID){

@@ -46,7 +46,7 @@ public:
     AppUID getDistantAppUID(AppUID localAppUID) const;
     AppUID getDistantAppUID(AbstractApp* app) const;
     bool isAppRegistered(AbstractApp* app) const;
-    bool isAppConnected(AppUID appUID) const;
+    bool isLocalAppConnected(AppUID appUID) const;
     bool registerConnection(AppUID localAppUID, AppUID distantAppUID);
     void sendAppStartedSignal(AppUID localUID);
 

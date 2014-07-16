@@ -94,13 +94,12 @@ void NetworkManager::routeIncommingData(){
         QDataStream (gcmDevice) >> packet;
         if(packet.destAppUID.type() == Manager)
             m_appManager.readIncommingData(packet.payload);
-        else if(m_appManager.isAppConnected(packet.destAppUID))
+        else if(!m_appManager.isLocalAppConnected(packet.destAppUID))
             emit error(UnconnectedApp);
         else if(packet.payload.isEmpty())
             emit error(NoPayload);
         else{
-            if(m_appManager.isAppConnected(packet.destAppUID))
-                m_appManager.getApp(packet.destAppUID)->readIncommingData(packet.payload);
+            m_appManager.getApp(packet.destAppUID)->readIncommingData(packet.payload);
         }
     }
 }
