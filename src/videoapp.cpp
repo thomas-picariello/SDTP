@@ -7,37 +7,22 @@ VideoApp::VideoApp(Contact * contact, QWidget* parent) :
     ui(new Ui::VideoApp)
 {
 
-    QList<QByteArray> cameras = QCamera::availableDevices();
 
-    if(!cameras.isEmpty()){
-        m_Camera = new QCamera(cameras.first());
+    wrapper = new ViewFinderWrapper();
+    widget = new QVideoWidget;
 
-
-        m_videoWidget = new QVideoWidget();
-        m_Camera->setViewfinder(m_videoWidget);
-        m_Camera->start();
-
-        m_videoWidget->show();
+    wrapper->setWidth(800);
+    wrapper->setHeight(600);
 
 
+    wrapper->startCamera();
 
-    }else{
-        m_player = new QMediaPlayer();
+    connect(wrapper,SIGNAL(newFrameAvaillable(QImage)),this,SLOT(drawFrame(QImage)));
 
-        m_player->setMedia(QUrl::fromLocalFile("test.avi"));
-
-        m_videoWidget = new QVideoWidget();
-
-        m_player->setVideoOutput(m_videoWidget);
-
-        m_videoWidget->show();
-
-        m_player->play();
-    }
 
 
     ui->setupUi(this);
-
+    widget->show();
 
 }
 void VideoApp::addContact(){
@@ -46,13 +31,27 @@ void VideoApp::addContact(){
 void VideoApp::updateDisplay(){
 
 }
+
+
 void VideoApp::readIncommingData(QByteArray &data){
+
+}
+
+void VideoApp::drawFrame(QImage frame)
+{
+
+
+
+   // qDebug()<<frame.scanLine(1);
+
+
+
 
 }
 void VideoApp::senddata(){
 
 }
 VideoApp::~VideoApp(){
-    m_Camera->stop();
+
     delete ui;
 }

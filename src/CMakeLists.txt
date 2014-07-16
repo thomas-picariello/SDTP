@@ -45,6 +45,7 @@ target_link_libraries(${PROJECT}
     ${OPUS_LIBRARIES}
     ${JRTPLIB_LIBRARIES}
     ${JTHREAD_LIBRARIES}
+    ${LIBVPX_LIBRARIES}
 )
 
-qt5_use_modules(${PROJECT} Widgets Multimedia MultimediaWidgets Sql )
+qt5_use_modules(${PROJECT} Widgets Multimedia MultimediaWidgets Sql Declarative Gui )
