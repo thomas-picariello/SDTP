@@ -9,11 +9,6 @@ void AppManager::readIncommingData(QByteArray &data){
         break;
     case AppStartedSignal:
         registerConnection(packet.localUID, packet.distantUID);
-//        sendPacket(AppRegisteredSignal, packet.localUID, packet.distantUID);
-//        break;
-//    case AppRegisteredSignal:
-//        registerConnection(packet.localUID, packet.distantUID);
-//        break;
     case AppClosedSignal:
         emit distantAppUnregistered(getLocalAppUID(packet.distantUID));
         unregisterApp(packet.distantUID);
@@ -58,7 +53,6 @@ void AppManager::requestPartnerApp(AppUID localAppUID){
 
 void AppManager::registerApp(AppUID localAppUID, AbstractApp *app){
     m_LocalAppsRegister.insert(localAppUID, app);
-    requestPartnerApp(localAppUID);
 }
 
 void AppManager::unregisterApp(AppUID localAppUID){
@@ -74,7 +68,6 @@ bool AppManager::registerConnection(AppUID localAppUID, AppUID distantAppUID){
 }
 
 void AppManager::sendAppStartedSignal(AppUID localUID){
-    registerConnection(localUID, getDistantAppUID(localUID));
     sendPacket(AppStartedSignal, localUID, getDistantAppUID(localUID));
 }
 

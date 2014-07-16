@@ -12,8 +12,8 @@ NetworkManager::NetworkManager(Contact *contact, QTcpSocket *socket, QByteArray 
             this, &NetworkManager::routeIncommingData);
     connect(&m_appManager, &AppManager::sendData,
             this, &NetworkManager::sendData);
-    connect(&m_appManager, &AppManager::startApp,
-            this, &NetworkManager::onStartAppRequest);
+//    connect(&m_appManager, &AppManager::startApp,
+//            this, &NetworkManager::onStartAppRequest);
     connect(&m_appManager, &AppManager::startAppFor,
             this, &NetworkManager::onStartAppForRequest);
 }
@@ -42,6 +42,10 @@ void NetworkManager::registerApp(AppUID localUID, AbstractApp *app){
     connect(app, &AbstractApp::sendData,
             this, &NetworkManager::sendData);
     m_appManager.registerApp(localUID, app);
+}
+
+void NetworkManager::requestPartnerApp(AppUID localUID){
+    m_appManager.requestPartnerApp(localUID);
 }
 
 void NetworkManager::registerAppConnection(AppUID localUID, AppUID distantUID){
@@ -111,10 +115,10 @@ void NetworkManager::routeIncommingData(){
     }
 }
 
-void NetworkManager::onStartAppRequest(AppType type){
-    if(m_contact)
-        emit startApp(m_contact, type);
-}
+//void NetworkManager::onStartAppRequest(AppType type){
+//    if(m_contact)
+//        emit startApp(m_contact, type);
+//}
 
 void NetworkManager::onStartAppForRequest(AppUID distantUID){
     if(m_contact)

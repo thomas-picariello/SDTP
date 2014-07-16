@@ -17,8 +17,7 @@ public:
     enum Command: quint8{
         StartAppCommand = 0x00,
         AppStartedSignal = 0x01,
-        AppRegisteredSignal = 0x02,
-        AppClosedSignal = 0x03,
+        AppClosedSignal = 0x02,
 
         InvalidCommand = 0xFF
     };
@@ -62,7 +61,6 @@ signals:
     void distantAppUnregistered(AppUID distantUID);
     void error(Error);
     void sendData(LinkType linkType, QByteArray& data);
-    void startApp(AppType appType);
     void startAppFor(AppUID distantAppUID);
 
 private:

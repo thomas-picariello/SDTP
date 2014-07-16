@@ -48,8 +48,8 @@ public:
     Contact* getContact() const;
     int getContactId() const;
     QString getErrorString(Error err) const;
-    //inline Contact::Status getStatus() const{ return m_Contact->getStatus(); } //TODO: implement Contact status
     void registerApp(AppUID localUID, AbstractApp *app);
+    void requestPartnerApp(AppUID localUID);
     void registerAppConnection(AppUID localUID, AppUID distantUID);
     void setContact(Contact *contact){ m_contact = contact; }
     void unregisterApp(AppUID uid);
@@ -62,11 +62,11 @@ public slots :
 signals :
     void destroyed(NetworkManager* networkManager);
     void error(NetworkManager::Error err);
-    void startApp(Contact* contact, AppType type);
+//    void startApp(Contact* contact, AppType type);
     void startAppFor(Contact *contact, AppUID distantAppUID);
 
 private slots:
-    void onStartAppRequest(AppType type);
+//    void onStartAppRequest(AppType type);
     void onStartAppForRequest(AppUID distantUID);
     void routeIncommingData();
     void onTcpDisconnect();

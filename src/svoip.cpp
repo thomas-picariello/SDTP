@@ -64,7 +64,7 @@ void SVoIP::startProgram(){
     connect(m_contactDB, &ContactDB::contactEvent,
             this, &SVoIP::onContactEvent);
     connect(m_contactListWindow, &ContactListWindow::startApp,
-            this, &SVoIP::startApp);
+            this, &SVoIP::onStartAppRequest);
 
     //start a Pinger for each contact
     QList<Contact*> contactList = m_contactDB->getAllContacts();
@@ -125,10 +125,10 @@ void SVoIP::onHandshakeSuccess(){
             m_networkManagerList.insert(handshaker->getContact()->getId(), netMgr);
         connect(netMgr, &NetworkManager::destroyed,
                 this, &SVoIP::onNetworkManagerDestroy);
-        connect(netMgr, &NetworkManager::startApp,
-                this, &SVoIP::startApp);
+//        connect(netMgr, &NetworkManager::startApp,
+//                this, &SVoIP::startApp);
         connect(netMgr, &NetworkManager::startAppFor,
-                this, &SVoIP::startAppFor);
+                this, &SVoIP::onStartAppForRequest);
         delete handshaker;
         m_handshakerList.remove(host);
     }
@@ -163,6 +163,36 @@ void SVoIP::restartListener(){
     m_listener.listen(QHostAddress::Any, port);
 }
 
+QPair<AppUID,AbstractApp*> SVoIP::startApp(Contact* contact, AppType appType){
+    //TODO: see if templated factory may works here...
+    //TODO: retrieve the right app for the right contact group
+    AbstractApp* app = NULL;
+    AppUID localUID(appType);
+    if(m_appList.contains(localUID)){
+        app = m_appList.value(localUID);
+        app->show();
+    }else{
+        foreach(AppUID existingAppUID, m_appList.keys())
+            if(existingAppUID == localUID)
+                localUID.setInstanceID(localUID.instanceID() + 1);
+
+        switch(appType){
+        case Messenger:
+            app = new MessengerApp(contact);
+            break;
+        case VideoStreamer:
+            app = new VideoApp(contact);
+            break;
+        default:
+            emit error(InvalidAppID);
+            break;
+        }
+        if(app)
+            m_appList.insert(localUID, app);
+    }
+    return qMakePair(localUID, app);
+}
+
 QString SVoIP::generateSalt(){
     const uint blockSize = 32;
     byte randomBlock[blockSize];
@@ -178,51 +208,27 @@ QString SVoIP::generateSalt(){
     return QString::fromStdString(encodedBlock);
 }
 
-AbstractApp* SVoIP::startApp(Contact* contact, AppType appType){
-    //TODO: see if templated factory may works here...
-    //TODO: retrieve the right app for the right contact group
-    AbstractApp* app = NULL;
-    AppUID appUID(appType);
-    if(m_networkManagerList.contains(contact->getId())){
-        if(m_appList.contains(appUID) && contact->getHostsList().contains("127.0.0.1")){ //TODO: remove localhost debug
-            app = m_appList.value(appUID);
-            app->show();
-        }else{
-            foreach(AppUID existingAppUID, m_appList.keys())
-                if(existingAppUID == appUID)
-                    appUID.setInstanceID(appUID.instanceID() + 1);
-
-            switch(appType){
-            case Messenger:
-                app = new MessengerApp(contact);
-                break;
-            case VideoStreamer:
-                app = new VideoApp(contact);
-                break;
-            default:
-                emit error(InvalidAppID);
-                break;
-            }
-            if(app){
-                m_appList.insert(appUID, app);
-                m_networkManagerList.value(contact->getId())->registerApp(appUID, app);
-            }
+void SVoIP::onStartAppRequest(Contact* contact, AppType appType){
+    NetworkManager* netMgr = m_networkManagerList.value(contact->getId(), NULL);
+    if(netMgr){
+        QPair<AppUID,AbstractApp*> appEntry = startApp(contact, appType);
+        if(appEntry.second){
+            netMgr->registerApp(appEntry.first, appEntry.second);
+            netMgr->requestPartnerApp(appEntry.first);
         }
     }
-    return app;
 }
 
-AbstractApp* SVoIP::startAppFor(Contact* contact, AppUID distantUID){
-    AbstractApp *app = startApp(contact, distantUID.type());
-    if(app){
-        AppUID localUID = m_appList.key(app);
-        if(localUID.type() != Undefined){
-            NetworkManager* netMgr = m_networkManagerList.value(contact->getId());
-            netMgr->registerAppConnection(localUID, distantUID);
-            netMgr->onAppStarted(localUID);
+void SVoIP::onStartAppForRequest(Contact* contact, AppUID distantUID){
+    NetworkManager* netMgr = m_networkManagerList.value(contact->getId(), NULL);
+    if(netMgr){
+        QPair<AppUID,AbstractApp*> appEntry = startApp(contact, distantUID.type());
+        if(appEntry.second){
+            netMgr->registerApp(appEntry.first, appEntry.second);
+            netMgr->registerAppConnection(appEntry.first, distantUID);
+            netMgr->onAppStarted(appEntry.first);
         }
     }
-    return app;
 }
 
 void SVoIP::startHandshaker(QTcpSocket* socket){

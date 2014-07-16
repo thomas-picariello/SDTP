@@ -49,8 +49,9 @@ public slots:
     void onNetworkManagerDestroy(NetworkManager *networkManager);
     void registerNAT(quint16 port,bool connexionType);
     void restartListener();
-    AbstractApp* startApp(Contact *contact, AppType appType);
-    AbstractApp* startAppFor(Contact *contact, AppUID distantUID);
+
+    void onStartAppRequest(Contact *contact, AppType appType);
+    void onStartAppForRequest(Contact *contact, AppUID distantUID);
     void startHandshaker(QTcpSocket *socket);
 
 private slots:
@@ -62,7 +63,6 @@ signals:
     void error(Error err);
 
 private :
-
     ConfWizard *m_wizard;
     ContactDB *m_contactDB;
     PasswordWindow *m_passwordWindow;
@@ -79,6 +79,7 @@ private :
     void displayConfWizard();
     IpState getHostState(QString host);
     QString generateSalt();
+    QPair<AppUID,AbstractApp*> startApp(Contact *contact, AppType appType);
 
     Q_DISABLE_COPY(SVoIP)
 };
