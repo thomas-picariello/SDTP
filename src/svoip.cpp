@@ -23,8 +23,8 @@ SVoIP::SVoIP(QObject *parent):
         checkParameters();
     }else{
         m_passwordWindow = new PasswordWindow(pwdHash, salt);
-        connect(m_passwordWindow, SIGNAL(validate(QByteArray)),
-                this, SLOT(checkParameters(QByteArray)));
+        connect(m_passwordWindow, &PasswordWindow::validate,
+                this, &SVoIP::checkParameters);
     }
 }
 
@@ -48,7 +48,7 @@ void SVoIP::displayConfWizard(){
 }
 
 void SVoIP::startProgram(){
-    disconnect(m_rsaKeyring, SIGNAL(privateKeyGenerationFinished(QByteArray)), this, 0);
+    disconnect(m_rsaKeyring, &RsaKeyring::privateKeyGenerationFinished, this, 0);
     m_contactDB = new ContactDB(&m_fileKey, this);
     m_contactListWindow = new ContactListWindow(m_contactDB, m_rsaKeyring, &m_fileKey);
 
@@ -183,25 +183,30 @@ AbstractApp* SVoIP::startApp(Contact* contact, AppType appType){
     //TODO: retrieve the right app for the right contact group
     AbstractApp* app = NULL;
     AppUID appUID(appType);
-    if(m_appList.contains(appUID) && contact->getHostsList().contains("127.0.0.1")){ //TODO: remove localhost debug
-        app = m_appList.value(appUID);
-        app->show();
-    }else{
-        //generate instance id
-        foreach(AppUID existingAppUID, m_appList.keys()){
-            if(existingAppUID == appUID)
-                appUID.setInstanceID(appUID.instanceID() + 1);
-        }
-
-        if(appType == Messenger){
-            app = new MessengerApp(contact);
+    if(m_networkManagerList.contains(contact->getId())){
+        if(m_appList.contains(appUID) && contact->getHostsList().contains("127.0.0.1")){ //TODO: remove localhost debug
+            app = m_appList.value(appUID);
+            app->show();
         }else{
-            emit error(InvalidAppID);
-        }
-        if(app){
-            //register
-            m_appList.insert(appUID, app);
-            m_networkManagerList.value(contact->getId())->registerApp(appUID, app);
+            foreach(AppUID existingAppUID, m_appList.keys())
+                if(existingAppUID == appUID)
+                    appUID.setInstanceID(appUID.instanceID() + 1);
+
+            switch(appType){
+            case Messenger:
+                app = new MessengerApp(contact);
+                break;
+            case VideoStreamer:
+                app = new VideoApp(contact);
+                break;
+            default:
+                emit error(InvalidAppID);
+                break;
+            }
+            if(app){
+                m_appList.insert(appUID, app);
+                m_networkManagerList.value(contact->getId())->registerApp(appUID, app);
+            }
         }
     }
     return app;
@@ -209,11 +214,13 @@ AbstractApp* SVoIP::startApp(Contact* contact, AppType appType){
 
 AbstractApp* SVoIP::startAppFor(Contact* contact, AppUID distantUID){
     AbstractApp *app = startApp(contact, distantUID.type());
-    AppUID localUID = m_appList.key(app);
-    if(localUID.type() != Undefined){
-        NetworkManager* netMgr = m_networkManagerList.value(contact->getId());
-        netMgr->registerAppConnection(localUID, distantUID);
-        netMgr->onAppStarted(localUID);
+    if(app){
+        AppUID localUID = m_appList.key(app);
+        if(localUID.type() != Undefined){
+            NetworkManager* netMgr = m_networkManagerList.value(contact->getId());
+            netMgr->registerAppConnection(localUID, distantUID);
+            netMgr->onAppStarted(localUID);
+        }
     }
     return app;
 }

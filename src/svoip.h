@@ -18,6 +18,7 @@
 #include "typesenums.h"
 #include "confwizard.h"
 #include "messengerapp.h"
+#include "videoapp.h"
 #include "ipfilter.h"
 #include "pinger.h"
 #include "handshaker.h"
