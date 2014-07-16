@@ -4,11 +4,13 @@ AppLauncherItem::AppLauncherItem()
 {
 }
 
-AppLauncherItem::AppLauncherItem(AppType appType, QMap<AppLauncherItem::IconState, QString> &iconUrls, QString &title):
+AppLauncherItem::AppLauncherItem(AppType appType, QString title, QString iconUrl_normal, QString iconUrl_hover, QString iconUrl_pressed):
     m_appType(appType),
-    m_iconUrls(iconUrls),
     m_title(title)
 {
+    m_iconUrls.insert(Normal, iconUrl_normal);
+    m_iconUrls.insert(Hover, iconUrl_hover);
+    m_iconUrls.insert(Pressed, iconUrl_pressed);
 }
 
 AppType AppLauncherItem::getAppType() const{

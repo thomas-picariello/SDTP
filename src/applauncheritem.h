@@ -16,7 +16,11 @@ public:
     };
 
     AppLauncherItem();
-    AppLauncherItem(AppType appType, QMap<AppLauncherItem::IconState, QString> &iconUrls, QString &title);
+    AppLauncherItem(AppType appType,
+                    QString title,
+                    QString iconUrl_normal,
+                    QString iconUrl_hover,
+                    QString iconUrl_pressed);
 
     AppType getAppType() const;
     QMap<IconState, QString> getIconUrls() const;

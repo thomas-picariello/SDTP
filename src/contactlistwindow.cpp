@@ -92,20 +92,25 @@ void ContactListWindow::refreshList(){
             ui->list->addItem(item);
             ContactActionsWidget *itemWidget = new ContactActionsWidget(contact->getId());
             //add apps items
-            AppLauncherItem* messengerLauncher = new AppLauncherItem();
-            messengerLauncher->setAppType(Messenger);
-            messengerLauncher->setTitle(tr("Messenger"));
-            messengerLauncher->setIconUrls(":/icons/messenger_normal",":/icons/messenger_hover",":/icons/messenger_pressed");
+            AppLauncherItem* messengerLauncher = new AppLauncherItem(Messenger,
+                                                                     tr("Messenger"),
+                                                                     ":/icons/messenger_normal",
+                                                                     ":/icons/messenger_hover",
+                                                                     ":/icons/messenger_pressed");
             itemWidget->addAppLauncherItem(messengerLauncher);
-            AppLauncherItem* callLauncher = new AppLauncherItem();
-            callLauncher->setAppType(VoIP);
-            callLauncher->setTitle(tr("Messenger"));
-            callLauncher->setIconUrls(":/icons/call_normal",":/icons/call_hover",":/icons/call_pressed");
+
+            AppLauncherItem* callLauncher = new AppLauncherItem(VoIP,
+                                                                tr("Call"),
+                                                                ":/icons/call_normal",
+                                                                ":/icons/call_hover",
+                                                                ":/icons/call_pressed");
             itemWidget->addAppLauncherItem(callLauncher);
-            AppLauncherItem* videoLauncher = new AppLauncherItem();
-            videoLauncher->setAppType(VideoStreamer);
-            videoLauncher->setTitle(tr("Messenger"));
-            videoLauncher->setIconUrls(":/icons/video_normal",":/icons/video_hover",":/icons/video_pressed");
+
+            AppLauncherItem* videoLauncher = new AppLauncherItem(VideoStreamer,
+                                                                 tr("Video"),
+                                                                 ":/icons/video_normal",
+                                                                 ":/icons/video_hover",
+                                                                 ":/icons/video_pressed");
             itemWidget->addAppLauncherItem(videoLauncher);
 
             ui->list->setItemWidget(item, itemWidget);
