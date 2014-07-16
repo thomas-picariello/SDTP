@@ -85,14 +85,11 @@ void TcpLink::onConnectionError(QAbstractSocket::SocketError){
 }
 
 qint64 TcpLink::readData(char *data, qint64 maxSize){
-    QByteArray packet = m_Socket->readAll();
-    memcpy(data, packet.data(), qMin(maxSize, (qint64)packet.size()));
-    return packet.size();
+    return m_Socket->read(data, maxSize);
 }
 
 qint64 TcpLink::writeData(const char *data, qint64 size){
-    QByteArray packet(data, size);
-    return m_Socket->write(packet);
+    return m_Socket->write(data, size);
 }
 
 TcpLink::~TcpLink(){
