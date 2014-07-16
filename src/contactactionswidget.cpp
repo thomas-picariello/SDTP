@@ -43,13 +43,13 @@ ContactActionsWidget::ContactActionsWidget(int contactId, QWidget *parent) :
 
     m_optionsMenuButton = new QPushButton();
     m_optionsMenuButton->setStyleSheet("QPushButton{"
-                           "image: url(\":/icons/options_normal\");"
+                           "image: url(\":/icons/menu_normal\");"
                       "}"
                       "QPushButton:hover{"
-                           "image: url(\":/icons/options_hover\");"
+                           "image: url(\":/icons/menu_hover\");"
                       "}"
                       "QPushButton:pressed{"
-                          "image: url(\":/icons/options_pressed\");"
+                          "image: url(\":/icons/menu_pressed\");"
                       "}");
     m_optionsMenuButton->setToolTip(tr("more..."));
     m_optionsMenuButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);

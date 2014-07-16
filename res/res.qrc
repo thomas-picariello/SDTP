@@ -8,9 +8,9 @@
         <file alias="call_pressed">icons/call_pressed.png</file>
         <file alias="messenger_hover">icons/messenger_hover.png</file>
         <file alias="messenger_pressed">icons/messenger_pressed.png</file>
-        <file alias="options_hover">icons/options_hover.png</file>
-        <file alias="options_pressed">icons/options_pressed.png</file>
-        <file alias="options_normal">icons/options_normal.png</file>
+        <file alias="menu_hover">icons/menu_hover.png</file>
+        <file alias="menu_pressed">icons/menu_pressed.png</file>
+        <file alias="menu_normal">icons/menu_normal.png</file>
         <file alias="settings_hover">icons/settings_hover.png</file>
         <file alias="settings_normal">icons/settings_normal.png</file>
         <file alias="settings_pressed">icons/settings_pressed.png</file>
