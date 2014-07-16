@@ -38,12 +38,6 @@ void ContactListWindow::addContact(){
     mEditContactWindow.open(new Contact());
 }
 
-void ContactListWindow::editContact(){
-    Contact *contact = getSelectedContact();
-    if(contact)
-        mEditContactWindow.open(contact);
-}
-
 void ContactListWindow::listItemClicked(QListWidgetItem *currentItem){
     QList<QListWidgetItem*> itemList = ui->list->findItems("*", Qt::MatchWildcard);
     foreach(QListWidgetItem *item, itemList){
@@ -57,22 +51,25 @@ void ContactListWindow::openSettingsWindow(){
     mSettingsWindow.activateWindow();
 }
 
-void ContactListWindow::onListItemAction(int contactId, ContactActionsWidget::Action action){
+void ContactListWindow::onContactAction(int contactId, ContactDB::Action action){
     switch(action){
-    case ContactActionsWidget::CallAction:
-        emit startApp(mContactDB->findById(contactId), VoIP);
+    case ContactDB::Edit:
+        mEditContactWindow.open(mContactDB->findById(contactId));
         break;
-    case ContactActionsWidget::MessengerAction:
-        emit startApp(mContactDB->findById(contactId), Messenger);
-        break;
-    case ContactActionsWidget::EditAction:
-        editContact();
-        break;
-    case ContactActionsWidget::DeleteAction:
-        deleteContact();
+    case ContactDB::Delete:
+        if(QMessageBox::warning(this,
+                                tr("Confirmation"),
+                                tr("Are you sure want to delete this contact ?"),
+                                QMessageBox::No,
+                                QMessageBox::Yes) == QMessageBox::Yes)
+            mContactDB->erase(contactId);
         break;
     }
-    //TODO: put AppTypeId in ContactItemWidget and separate signal
+    refreshList();
+}
+
+void ContactListWindow::onStartApp(int contactId, AppType type){
+    emit startApp(mContactDB->findById(contactId), type);
 }
 
 //TODO: split in addContact(Contact* contact), updateContactName(Contact* contact), deleteContact(int id)
@@ -91,13 +88,37 @@ void ContactListWindow::refreshList(){
             item->setData(IdRole, contact->getId());
             setContactStatusIcon(item, contact->getStatus());
             connect(contact, &Contact::statusChanged,
-                    this, &ContactListWindow::updateContactStatusIcon);
+                    this, &ContactListWindow::updateContactStatus);
             ui->list->addItem(item);
             ContactActionsWidget *itemWidget = new ContactActionsWidget(contact->getId());
+            //add apps items
+            AppLauncherItem* messengerLauncher = new AppLauncherItem();
+            messengerLauncher->setAppType(Messenger);
+            messengerLauncher->setTitle(tr("Messenger"));
+            messengerLauncher->setIconUrls(":/icons/messenger_normal",":/icons/messenger_hover",":/icons/messenger_pressed");
+            itemWidget->addAppLauncherItem(messengerLauncher);
+            AppLauncherItem* callLauncher = new AppLauncherItem();
+            callLauncher->setAppType(VoIP);
+            callLauncher->setTitle(tr("Messenger"));
+            callLauncher->setIconUrls(":/icons/call_normal",":/icons/call_hover",":/icons/call_pressed");
+            itemWidget->addAppLauncherItem(callLauncher);
+            AppLauncherItem* videoLauncher = new AppLauncherItem();
+            videoLauncher->setAppType(VideoStreamer);
+            videoLauncher->setTitle(tr("Messenger"));
+            videoLauncher->setIconUrls(":/icons/video_normal",":/icons/video_hover",":/icons/video_pressed");
+            itemWidget->addAppLauncherItem(videoLauncher);
+            AppLauncherItem* dummyLauncher = new AppLauncherItem();
+            //dummyLauncher->setAppType(Messenger);
+            dummyLauncher->setTitle(tr("Custom App"));
+            dummyLauncher->setIconUrls(":/icons/messenger_normal",":/icons/messenger_hover",":/icons/messenger_pressed");
+            itemWidget->addAppLauncherItem(dummyLauncher);
+
             ui->list->setItemWidget(item, itemWidget);
-            itemWidget->hide();
-            connect(itemWidget, SIGNAL(actionTriggered(int,ContactActionsWidget::Action)),
-                    this, SLOT(onListItemAction(int,ContactActionsWidget::Action)));
+            ui->list->itemWidget(item)->hide();
+            connect(itemWidget, &ContactActionsWidget::contactAction,
+                    this, &ContactListWindow::onContactAction);
+            connect(itemWidget, &ContactActionsWidget::startApp,
+                    this, &ContactListWindow::onStartApp);
         }
     }
 
@@ -120,28 +141,14 @@ void ContactListWindow::refreshList(){
     ui->list->clearFocus();
 }
 
-void ContactListWindow::deleteContact(){
-    QListWidgetItem *currentItem = ui->list->currentItem();
-    if(currentItem){
-        if(QMessageBox::warning(this,
-                                tr("Confirmation"),
-                                tr("Are you sure want to delete this contact ?"),
-                                QMessageBox::No,
-                                QMessageBox::Yes) == QMessageBox::Yes){
-            int currentId = currentItem->data(IdRole).toInt();
-            mContactDB->erase(currentId);
-            refreshList();
-//            emit contactEvent(currentId, ContactDB::ContactDeleted);
-        }
-    }
-}
-
-void ContactListWindow::updateContactStatusIcon(){
+void ContactListWindow::updateContactStatus(){
     Contact* contact = dynamic_cast<Contact*>(sender());
     if(contact){
         QListWidgetItem *item = findItemByContactId(contact->getId());
-        if(item)
+        if(item){
             setContactStatusIcon(item, contact->getStatus());
+            dynamic_cast<ContactActionsWidget*>(ui->list->itemWidget(item))->setAppLauncherHidden(contact->getStatus() == Contact::Offline);
+        }
     }
 }
 
@@ -179,7 +186,7 @@ void ContactListWindow::setContactStatusIcon(QListWidgetItem *item, Contact::Sta
 }
 
 QListWidgetItem* ContactListWindow::findItemByContactId(int id){
-    QList<QListWidgetItem*> itemList = ui->list->findItems("*", Qt::MatchWildcard); //TODO: find exit bug
+    QList<QListWidgetItem*> itemList = ui->list->findItems("*", Qt::MatchWildcard);
     foreach(QListWidgetItem *item, itemList){
         if(item->data(IdRole).toInt() == id)
             return item;

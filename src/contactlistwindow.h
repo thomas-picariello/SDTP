@@ -11,6 +11,7 @@
 #include "contact.h"
 #include "contactactionswidget.h"
 #include "abstractapp.h"
+#include "applauncheritem.h"
 #include "typesenums.h"
 
 namespace Ui {
@@ -36,7 +37,7 @@ public:
 
 signals:
     void startApp(Contact* contact, AppType appTypeId);
-    void contactAction(int contactId, ContactDB::Action action);
+//    void contactAction(int contactId, ContactDB::Action action);
     void settingsUpdated();
 
 public slots:
@@ -44,13 +45,12 @@ public slots:
 
 private slots:
     void addContact();
-    void editContact();
     void listItemClicked(QListWidgetItem *currentItem);
     void openSettingsWindow();
-    void onListItemAction(int contactId, ContactActionsWidget::Action action);
+    void onContactAction(int contactId, ContactDB::Action action);
+    void onStartApp(int contactId, AppType type);
     void refreshList();
-    void deleteContact();
-    void updateContactStatusIcon();
+    void updateContactStatus();
 
 private:
     Ui::ContactListWindow *ui;
