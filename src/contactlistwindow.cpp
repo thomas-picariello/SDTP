@@ -107,11 +107,6 @@ void ContactListWindow::refreshList(){
             videoLauncher->setTitle(tr("Messenger"));
             videoLauncher->setIconUrls(":/icons/video_normal",":/icons/video_hover",":/icons/video_pressed");
             itemWidget->addAppLauncherItem(videoLauncher);
-            AppLauncherItem* dummyLauncher = new AppLauncherItem();
-            //dummyLauncher->setAppType(Messenger);
-            dummyLauncher->setTitle(tr("Custom App"));
-            dummyLauncher->setIconUrls(":/icons/messenger_normal",":/icons/messenger_hover",":/icons/messenger_pressed");
-            itemWidget->addAppLauncherItem(dummyLauncher);
 
             ui->list->setItemWidget(item, itemWidget);
             ui->list->itemWidget(item)->hide();
