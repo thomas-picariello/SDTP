@@ -10,7 +10,7 @@ AppUID::AppUID(AppType typeId, quint16 instanceId):
     m_InstanceID(instanceId)
 {}
 
-bool AppUID::operator<(const AppUID &second) const{
+bool AppUID::operator <(const AppUID &second) const{
     if(m_Type == second.type())
         return (m_InstanceID < second.instanceID());
     return (m_Type < second.type());
@@ -20,14 +20,14 @@ bool AppUID::operator ==(const AppUID &second) const{
     return (m_Type == second.type()) && (m_InstanceID == second.instanceID());
 }
 
-QDataStream &operator<<(QDataStream &out, const AppUID& appUID){
+QDataStream& operator <<(QDataStream &out, const AppUID& appUID){
     out << (quint8)appUID.type();
     if(appUID.type() != Manager)
         out << appUID.instanceID();
     return out;
 }
 
-QDataStream &operator>>(QDataStream &in, AppUID& appUID){
+QDataStream& operator >>(QDataStream &in, AppUID& appUID){
     quint8 _type;
     quint16 _instanceID = 0;
     in >> _type;

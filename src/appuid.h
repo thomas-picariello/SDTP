@@ -16,8 +16,8 @@ public:
     inline void setType(AppType type){ m_Type = type; }
     inline void setInstanceID(quint16 id){ m_InstanceID = id; }
 
-    bool operator<(const AppUID &second) const;
-    bool operator==(const AppUID &second) const;
+    bool operator <(const AppUID &second) const;
+    bool operator ==(const AppUID &second) const;
 
 private:
     AppType m_Type;
