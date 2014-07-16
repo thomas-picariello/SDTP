@@ -27,12 +27,12 @@ AppUID AppManager::getLocalAppUID(AbstractApp* app) const{
     return m_LocalAppsRegister.key(app);
 }
 
-AppUID AppManager::getLocalAppUID(AppUID distantAppUID) const{
-    return m_AppConnectionsTable.key(distantAppUID);
+AppUID AppManager::getLocalAppUID(AppUID distantUID) const{
+    return m_AppConnectionsTable.key(distantUID);
 }
 
-AppUID AppManager::getDistantAppUID(AppUID localAppUID) const{
-    return m_AppConnectionsTable.value(localAppUID);
+AppUID AppManager::getDistantAppUID(AppUID localUID) const{
+    return m_AppConnectionsTable.value(localUID);
 }
 
 AppUID AppManager::getDistantAppUID(AbstractApp* app) const{
@@ -43,8 +43,8 @@ bool AppManager::isAppRegistered(AbstractApp* app) const{
     return (m_LocalAppsRegister.key(app).type() != Undefined);
 }
 
-bool AppManager::isLocalAppConnected(AppUID appUID) const{
-    return m_AppConnectionsTable.contains(appUID);
+bool AppManager::isLocalAppConnected(AppUID localUID) const{
+    return m_AppConnectionsTable.contains(localUID);
 }
 
 void AppManager::requestPartnerApp(AppUID localAppUID){
@@ -60,15 +60,13 @@ void AppManager::unregisterApp(AppUID localAppUID){
     m_LocalAppsRegister.remove(localAppUID);
 }
 
-bool AppManager::registerConnection(AppUID localAppUID, AppUID distantAppUID){
-    bool appRegistered = m_LocalAppsRegister.value(localAppUID, NULL) != NULL;
-    if(appRegistered)
-        m_AppConnectionsTable.insert(localAppUID, distantAppUID);
+bool AppManager::registerConnection(AppUID localUID, AppUID distantUID){
+    bool appRegistered = m_LocalAppsRegister.value(localUID, NULL) != NULL;
+    if(appRegistered){
+        m_AppConnectionsTable.insert(localUID, distantUID);
+        sendPacket(AppStartedSignal, localUID, distantUID);
+    }
     return appRegistered;
-}
-
-void AppManager::sendAppStartedSignal(AppUID localUID){
-    sendPacket(AppStartedSignal, localUID, getDistantAppUID(localUID));
 }
 
 void AppManager::sendPacket(Command cmd, AppUID localUID, AppUID distantUID){

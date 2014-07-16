@@ -42,13 +42,12 @@ public:
 
     AbstractApp* getApp(AppUID localUID) const;
     AppUID getLocalAppUID(AbstractApp* app) const;
-    AppUID getLocalAppUID(AppUID distantAppUID) const;
-    AppUID getDistantAppUID(AppUID localAppUID) const;
+    AppUID getLocalAppUID(AppUID distantUID) const;
+    AppUID getDistantAppUID(AppUID localUID) const;
     AppUID getDistantAppUID(AbstractApp* app) const;
     bool isAppRegistered(AbstractApp* app) const;
-    bool isLocalAppConnected(AppUID appUID) const;
-    bool registerConnection(AppUID localAppUID, AppUID distantAppUID);
-    void sendAppStartedSignal(AppUID localUID);
+    bool isLocalAppConnected(AppUID localUID) const;
+    bool registerConnection(AppUID localUID, AppUID distantUID);
 
 public slots:
     void readIncommingData(QByteArray &data);
