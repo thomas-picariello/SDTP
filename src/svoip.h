@@ -73,8 +73,10 @@ private :
     QTcpServer m_listener;
     QMap<Contact*, Pinger*> m_pingerList;
     QMap<QString, Handshaker*> m_handshakerList;
-    QMap<int,NetworkManager*> m_networkManagerList;
+
+    QMap<Contact*,NetworkManager*> m_networkManagerList;
     QMap<AppUID,AbstractApp*> m_appList;
+    QMap<AppUID, Contact*> m_appRegisterTable;
 
     void displayConfWizard();
     IpState getHostState(QString host);

@@ -134,7 +134,6 @@ void NetworkManager::cleanLinks(){
 
 NetworkManager::~NetworkManager(){
     //Rem: do not delete m_ContactDB and m_AppList pointers
-//    delete m_Handshaker;
     emit destroyed(this);
 }
 

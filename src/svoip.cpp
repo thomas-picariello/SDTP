@@ -82,22 +82,23 @@ void SVoIP::onNewConnection(){
 }
 
 void SVoIP::onNetworkManagerDestroy(NetworkManager* networkManager){
-    m_networkManagerList.remove(m_networkManagerList.key(networkManager));
+    m_networkManagerList.remove(networkManager->getContact());
 }
 
 void SVoIP::onContactEvent(int id, ContactDB::Event event){
+    Contact* contact = m_contactDB->findById(id);
     switch(event){
         case ContactDB::ContactAdded:{
-            Pinger* pinger = new Pinger(m_contactDB->findById(id));
-            m_pingerList.insert(m_contactDB->findById(id), pinger);
+            Pinger* pinger = new Pinger(contact);
+            m_pingerList.insert(contact, pinger);
             connect(pinger, &Pinger::connected,
                     this, &SVoIP::startHandshaker);
             pinger->start();
         }
         break;
         case ContactDB::ContactDeleted:{
-            if(m_networkManagerList.contains(id))
-                delete m_networkManagerList.value(id);
+            NetworkManager* netMgr = m_networkManagerList.value(contact, NULL);
+            if(netMgr) delete netMgr;
         }
         break;
         case ContactDB::ContactEdited:{
@@ -111,26 +112,24 @@ void SVoIP::onContactEvent(int id, ContactDB::Event event){
 void SVoIP::onHandshakeSuccess(){
     Handshaker* handshaker = dynamic_cast<Handshaker*>(sender());
     if(handshaker){
-        handshaker->getContact()->setStatus(Contact::Online);
+        Contact* contact = handshaker->getContact();
+        contact->setStatus(Contact::Online);
         QString host = handshaker->getHost();
         m_ipFilter.removeBan(host);
-        NetworkManager* netMgr = new NetworkManager(handshaker->getContact(),
-                                                    handshaker->getSocket(),
-                                                    handshaker->getGcmKey(),
-                                                    handshaker->getGcmBaseIV(),
-                                                    this);
-        if(host == "127.0.0.1" && handshaker->getMode() == Handshaker::ResponderMode)
-            m_networkManagerList.insert(0, netMgr);     //TODO: remove localhost debug
-        else
-            m_networkManagerList.insert(handshaker->getContact()->getId(), netMgr);
-        connect(netMgr, &NetworkManager::destroyed,
-                this, &SVoIP::onNetworkManagerDestroy);
-//        connect(netMgr, &NetworkManager::startApp,
-//                this, &SVoIP::startApp);
-        connect(netMgr, &NetworkManager::startAppFor,
-                this, &SVoIP::onStartAppForRequest);
+        if(!m_networkManagerList.contains(contact)){
+            NetworkManager* netMgr = new NetworkManager(handshaker->getContact(),
+                                                        handshaker->getSocket(),
+                                                        handshaker->getGcmKey(),
+                                                        handshaker->getGcmBaseIV(),
+                                                        this);
+            m_networkManagerList.insert(contact, netMgr);
+            connect(netMgr, &NetworkManager::destroyed,
+                    this, &SVoIP::onNetworkManagerDestroy);
+            connect(netMgr, &NetworkManager::startAppFor,
+                    this, &SVoIP::onStartAppForRequest);
+        }
         delete handshaker;
-        m_handshakerList.remove(host);
+        //m_handshakerList.remove(host);
     }
 }
 
@@ -164,71 +163,50 @@ void SVoIP::restartListener(){
 }
 
 QPair<AppUID,AbstractApp*> SVoIP::startApp(Contact* contact, AppType appType){
-    //TODO: see if templated factory may works here...
-    //TODO: retrieve the right app for the right contact group
     AbstractApp* app = NULL;
     AppUID localUID(appType);
-    if(m_appList.contains(localUID)){
-        app = m_appList.value(localUID);
-        app->show();
-    }else{
-        foreach(AppUID existingAppUID, m_appList.keys())
-            if(existingAppUID == localUID)
-                localUID.setInstanceID(localUID.instanceID() + 1);
+    NetworkManager* netMgr = m_networkManagerList.value(contact, NULL);
+    if(netMgr){
+        if(m_appRegisterTable.contains(localUID) && m_appRegisterTable.value(localUID, NULL) == contact){
+            app = m_appList.value(localUID);
+            app->show();
+        }else{
+            foreach(AppUID existingAppUID, m_appList.keys())
+                if(existingAppUID == localUID)
+                    localUID.setInstanceID(localUID.instanceID() + 1);
 
-        switch(appType){
-        case Messenger:
-            app = new MessengerApp(contact);
-            break;
-        case VideoStreamer:
-            app = new VideoApp(contact);
-            break;
-        default:
-            emit error(InvalidAppID);
-            break;
+            switch(appType){
+            case Messenger:
+                app = new MessengerApp(contact);
+                break;
+            case VideoStreamer:
+                app = new VideoApp(contact);
+                break;
+            default:
+                emit error(InvalidAppID);
+                break;
+            }
+            if(app){
+                m_appList.insert(localUID, app);
+                netMgr->registerApp(localUID, app);
+                m_appRegisterTable.insert(localUID, contact);
+            }
         }
-        if(app)
-            m_appList.insert(localUID, app);
     }
     return qMakePair(localUID, app);
 }
 
-QString SVoIP::generateSalt(){
-    const uint blockSize = 32;
-    byte randomBlock[blockSize];
-    std::string encodedBlock;
-    CryptoPP::AutoSeededRandomPool rng;
-    rng.GenerateBlock(randomBlock,blockSize);
-    CryptoPP::ArraySource(randomBlock,
-                          blockSize,
-                          true,
-                          new CryptoPP::Base64Encoder(
-                              new CryptoPP::StringSink(encodedBlock),
-                              false));
-    return QString::fromStdString(encodedBlock);
-}
-
 void SVoIP::onStartAppRequest(Contact* contact, AppType appType){
-    NetworkManager* netMgr = m_networkManagerList.value(contact->getId(), NULL);
-    if(netMgr){
-        QPair<AppUID,AbstractApp*> appEntry = startApp(contact, appType);
-        if(appEntry.second){
-            netMgr->registerApp(appEntry.first, appEntry.second);
-            netMgr->requestPartnerApp(appEntry.first);
-        }
-    }
+    QPair<AppUID,AbstractApp*> appEntry = startApp(contact, appType);
+    if(appEntry.second)
+        m_networkManagerList.value(contact, NULL)->requestPartnerApp(appEntry.first);
+
 }
 
 void SVoIP::onStartAppForRequest(Contact* contact, AppUID distantUID){
-    NetworkManager* netMgr = m_networkManagerList.value(contact->getId(), NULL);
-    if(netMgr){
-        QPair<AppUID,AbstractApp*> appEntry = startApp(contact, distantUID.type());
-        if(appEntry.second){
-            netMgr->registerApp(appEntry.first, appEntry.second);
-            netMgr->registerAppConnection(appEntry.first, distantUID);
-            netMgr->onAppStarted(appEntry.first);
-        }
-    }
+    QPair<AppUID,AbstractApp*> appEntry = startApp(contact, distantUID.type());
+    if(appEntry.second)
+        m_networkManagerList.value(contact, NULL)->registerAppConnection(appEntry.first, distantUID);
 }
 
 void SVoIP::startHandshaker(QTcpSocket* socket){
@@ -279,6 +257,21 @@ void SVoIP::registerNAT(quint16 port,bool connexionType){
     }
 }
 
+QString SVoIP::generateSalt(){
+    const uint blockSize = 32;
+    byte randomBlock[blockSize];
+    std::string encodedBlock;
+    CryptoPP::AutoSeededRandomPool rng;
+    rng.GenerateBlock(randomBlock,blockSize);
+    CryptoPP::ArraySource(randomBlock,
+                          blockSize,
+                          true,
+                          new CryptoPP::Base64Encoder(
+                              new CryptoPP::StringSink(encodedBlock),
+                              false));
+    return QString::fromStdString(encodedBlock);
+}
+
 SVoIP::IpState SVoIP::getHostState(QString host){
     foreach(NetworkManager* netMgr, m_networkManagerList) {
         if(netMgr->getHost() == host)
@@ -295,5 +288,5 @@ SVoIP::~SVoIP(){
     if(m_contactDB) delete m_contactDB;
     if(m_passwordWindow) delete m_passwordWindow;
     qDeleteAll(m_appList);
-    qDeleteAll(QMap<int,NetworkManager*>(m_networkManagerList)); //copy list to avoid networkManager self remove
+    qDeleteAll(QMap<Contact*,NetworkManager*>(m_networkManagerList)); //copy list to avoid networkManager self remove
 }
