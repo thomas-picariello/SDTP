@@ -9,6 +9,7 @@ void AppManager::readIncommingData(QByteArray &data){
         break;
     case AppStartedSignal:
         registerConnection(packet.localUID, packet.distantUID);
+        break;
     case AppClosedSignal:
         emit distantAppUnregistered(getLocalAppUID(packet.distantUID));
         unregisterApp(packet.distantUID);
