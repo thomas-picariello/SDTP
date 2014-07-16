@@ -1,7 +1,6 @@
 #include "appmanager.h"
 
 void AppManager::readIncommingData(QByteArray &data){
-    qDebug()<<data.toHex();
     Packet packet;
     QDataStream (&data, QIODevice::ReadOnly) >> packet;
     switch(packet.command){
@@ -10,11 +9,11 @@ void AppManager::readIncommingData(QByteArray &data){
         break;
     case AppStartedSignal:
         registerConnection(packet.localUID, packet.distantUID);
-        sendPacket(AppRegisteredSignal, packet.localUID, packet.distantUID);
-        break;
-    case AppRegisteredSignal:
-        registerConnection(packet.localUID, packet.distantUID);
-        break;
+//        sendPacket(AppRegisteredSignal, packet.localUID, packet.distantUID);
+//        break;
+//    case AppRegisteredSignal:
+//        registerConnection(packet.localUID, packet.distantUID);
+//        break;
     case AppClosedSignal:
         emit distantAppUnregistered(getLocalAppUID(packet.distantUID));
         unregisterApp(packet.distantUID);

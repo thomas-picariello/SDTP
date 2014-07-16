@@ -155,7 +155,6 @@ qint64 GcmDevice::writeData(const char *data, qint64 len){
     QByteArray packetBytes;
     QDataStream(&packetBytes, QIODevice::WriteOnly) << seqNum << cypherText;
     m_Link->write(packetBytes);
-    qDebug()<<packetBytes.toHex();
     m_LastSequenceNumber++;
     return sizeof(seqNum) + sizeof(quint32) + cypherText.size();
 }
