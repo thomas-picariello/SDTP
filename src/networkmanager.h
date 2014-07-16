@@ -54,19 +54,16 @@ public:
     void setContact(Contact *contact){ m_contact = contact; }
     void unregisterApp(AppUID uid);
 
-public slots :
-    void onContactEvent(ContactDB::Event event);
+public slots:
     void sendData(LinkType linkType, QByteArray &data);
     void onAppStarted(AppUID localUID);
 
-signals :
+signals:
     void destroyed(NetworkManager* networkManager);
     void error(NetworkManager::Error err);
-//    void startApp(Contact* contact, AppType type);
     void startAppFor(Contact *contact, AppUID distantAppUID);
 
 private slots:
-//    void onStartAppRequest(AppType type);
     void onStartAppForRequest(AppUID distantUID);
     void routeIncommingData();
     void onTcpDisconnect();

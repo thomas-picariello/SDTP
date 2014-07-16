@@ -12,8 +12,6 @@ NetworkManager::NetworkManager(Contact *contact, QTcpSocket *socket, QByteArray 
             this, &NetworkManager::routeIncommingData);
     connect(&m_appManager, &AppManager::sendData,
             this, &NetworkManager::sendData);
-//    connect(&m_appManager, &AppManager::startApp,
-//            this, &NetworkManager::onStartAppRequest);
     connect(&m_appManager, &AppManager::startAppFor,
             this, &NetworkManager::onStartAppForRequest);
 }
@@ -62,14 +60,6 @@ void NetworkManager::onTcpDisconnect(){
     m_contact->setStatus(Contact::Offline);
 }
 
-void NetworkManager::onContactEvent(ContactDB::Event event){
-    if(m_contact){
-        //TODO: do something intelligent with event
-        //ie: if contact offline retry to connect after change other than name
-        //m_Contact = m_ContactDB->findById(m_Contact->getId());
-    }
-}
-
 void NetworkManager::sendData(LinkType linkType, QByteArray &data){
     AppManager* manager = dynamic_cast<AppManager*>(sender());
     AbstractApp* app = dynamic_cast<AbstractApp*>(sender());
@@ -114,11 +104,6 @@ void NetworkManager::routeIncommingData(){
         }
     }
 }
-
-//void NetworkManager::onStartAppRequest(AppType type){
-//    if(m_contact)
-//        emit startApp(m_contact, type);
-//}
 
 void NetworkManager::onStartAppForRequest(AppUID distantUID){
     if(m_contact)
