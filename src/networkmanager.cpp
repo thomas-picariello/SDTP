@@ -83,10 +83,6 @@ void NetworkManager::sendData(LinkType linkType, QByteArray &data){
     }
 }
 
-void NetworkManager::onAppStarted(AppUID localUID){
-    m_appManager.sendAppStartedSignal(localUID);
-}
-
 void NetworkManager::routeIncommingData(){
     GcmDevice *gcmDevice = dynamic_cast<GcmDevice*>(sender());
     if(gcmDevice){

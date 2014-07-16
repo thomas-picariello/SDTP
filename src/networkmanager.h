@@ -56,7 +56,6 @@ public:
 
 public slots:
     void sendData(LinkType linkType, QByteArray &data);
-    void onAppStarted(AppUID localUID);
 
 signals:
     void destroyed(NetworkManager* networkManager);
