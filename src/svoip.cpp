@@ -190,6 +190,7 @@ QPair<AppUID,AbstractApp*> SVoIP::startApp(Contact* contact, AppType appType){
                 m_appList.insert(localUID, app);
                 netMgr->registerApp(localUID, app);
                 m_appRegisterTable.insert(localUID, contact);
+                app->show();
             }
         }
     }

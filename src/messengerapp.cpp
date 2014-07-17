@@ -7,7 +7,6 @@ MessengerApp::MessengerApp(Contact * contact, QWidget* parent) :
     ui(new Ui::MessengerApp)
 {
     ui->setupUi(this);
-    show();
 
     m_MsgList.append("<div align='center' style='color:grey; margin: 10px;'>Welcome to the Messenger App</div>");
     updateDisplay();
