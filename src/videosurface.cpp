@@ -6,7 +6,8 @@ const int FILLCOLOR = 0xFF0000;
 VideoSurface::VideoSurface(QObject *parent) :
     QAbstractVideoSurface(parent)
 {
-    m_lastFrame.fill(FILLCOLOR);
+    m_lastFrame = new QVideoFrame();
+
 }
 
 VideoSurface::~VideoSurface()
@@ -14,37 +15,42 @@ VideoSurface::~VideoSurface()
     stop();
 }
 
-QImage VideoSurface::frame() const
+QVideoFrame* VideoSurface::frame() const
 {
     return m_lastFrame;
+}
+bool VideoSurface::isFormatSupported(const QVideoSurfaceFormat &format, QVideoSurfaceFormat *similar) const{
+    Q_UNUSED(similar);
+
+         const QImage::Format imageFormat = QVideoFrame::imageFormatFromPixelFormat(format.pixelFormat());
+         const QSize size = format.frameSize();
+
+         return imageFormat != QImage::Format_Invalid
+                 && !size.isEmpty()
+                 && format.handleType() == QAbstractVideoBuffer::NoHandle;
+}
+void VideoSurface::paint(QPainter *painter){
+
 }
 
 QList<QVideoFrame::PixelFormat> VideoSurface::supportedPixelFormats(QAbstractVideoBuffer::HandleType handleType) const
 {
     return QList<QVideoFrame::PixelFormat>() << QVideoFrame::Format_ARGB32;
 }
-
 bool VideoSurface::present(const QVideoFrame &frame)
 {
 
 
-    if (frame.isValid())
-    {
+    if(frame.isValid()){
         QVideoFrame videoFrame(frame);
-        if( videoFrame.map(QAbstractVideoBuffer::ReadOnly) )
-        {
-            m_lastFrame = QImage(videoFrame.width(), videoFrame.height(), QImage::Format_ARGB32);
-            memcpy(m_lastFrame.bits(), videoFrame.bits(), videoFrame.mappedBytes());
-
-            videoFrame.unmap();
-
-            emit frameAvailable();
-            return true;
-        }
+        emit newFrame(&videoFrame);
+        return true;
     }
     return false;
-}
 
+
+
+}
 bool VideoSurface::start(const QVideoSurfaceFormat &format)
 {
     if (isActive()) {
@@ -53,10 +59,11 @@ bool VideoSurface::start(const QVideoSurfaceFormat &format)
         return QAbstractVideoSurface::start(format);
     }
     return false;
+
 }
 
 void VideoSurface::stop()
 {
-    m_lastFrame.fill(FILLCOLOR);
+    delete m_lastFrame;
     QAbstractVideoSurface::stop();
 }

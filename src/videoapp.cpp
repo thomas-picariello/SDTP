@@ -9,7 +9,9 @@ VideoApp::VideoApp(Contact * contact, QWidget* parent) :
 
 
     wrapper = new ViewFinderWrapper();
-    widget = new QVideoWidget;
+
+
+
 
     wrapper->setWidth(800);
     wrapper->setHeight(600);
@@ -17,12 +19,14 @@ VideoApp::VideoApp(Contact * contact, QWidget* parent) :
 
     wrapper->startCamera();
 
-    connect(wrapper,SIGNAL(newFrameAvaillable(QImage)),this,SLOT(drawFrame(QImage)));
+    connect(wrapper,SIGNAL(newFrameAvaillable(QVideoFrame)),this,SLOT(drawFrame(QVideoFrame)));
 
 
 
     ui->setupUi(this);
-    widget->show();
+
+
+
 
 }
 void VideoApp::addContact(){
@@ -36,18 +40,27 @@ void VideoApp::updateDisplay(){
 void VideoApp::readIncommingData(QByteArray &data){
 
 }
-
-void VideoApp::drawFrame(QImage frame)
+void VideoApp::drawFrame(QVideoFrame frame)
 {
+    frame.map(QAbstractVideoBuffer::ReadOnly);
 
 
 
-   // qDebug()<<frame.scanLine(1);
+    QImage img(frame.bits(),
+    frame.width(),
+    frame.height(),
+    QVideoFrame::imageFormatFromPixelFormat(frame.pixelFormat()));
 
 
+    qDebug()<<frame<<"  "<<img<<"  ";
+    ui->label->setPixmap(QPixmap::fromImage(img));
+
+    //update();
+    frame.unmap();
 
 
 }
+
 void VideoApp::senddata(){
 
 }

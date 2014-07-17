@@ -17,6 +17,7 @@ ViewFinderWrapper::ViewFinderWrapper(QDeclarativeItem *parent) :
 
     // Connect surface to our slot
     connect(&m_surface, SIGNAL(frameAvailable()), this, SLOT(frameReady()));
+    connect(&m_surface,SIGNAL(newFrame(QVideoFrame*)),this,SLOT(onNewFrame(QVideoFrame*)));
 }
 
 ViewFinderWrapper::~ViewFinderWrapper()
@@ -165,47 +166,34 @@ void ViewFinderWrapper::frameReady()
     emit frameCountChanged(m_receivedFrameCounter);
 
     // Get the current frame from the video surface
-    QImage frame = m_surface.frame();
+
     // Add received frame to processing thread for processing
     if (m_processor) {
-        m_processor->addFrameToProcessingQueue(frame);
+        m_processor->addFrameToProcessingQueue(m_surface.frame());
     }
 
-    // And take a copy for ourselves for drawing it on the screen
-    m_currentFrame = QPixmap::fromImage(frame);
+}
+void ViewFinderWrapper::onNewFrame(QVideoFrame *frame){
 
 
-
-    // Update the UI
-    emit newFrameAvaillable(frame);
-    update();
+    emit newFrameAvaillable(*frame);
+    if (m_processor) {
+        m_processor->addFrameToProcessingQueue(m_surface.frame());
+    }
 
 }
 
 void ViewFinderWrapper::onFrameProcessed()
 {
+
     m_processedFrameCounter++;
     emit processedCountChanged(m_processedFrameCounter);
-    update();
+
 }
 
 void ViewFinderWrapper::onThreadCongested()
 {
 
-}
+    qDebug()<<"onthread congested";
 
-void ViewFinderWrapper::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    Q_UNUSED(widget);
-
-    if (painter)
-    {
-        QRect rect = option->rect;
-
-        if (m_currentFrame.isNull()) {
-            painter->fillRect(rect, Qt::lightGray);
-        } else {
-            painter->drawPixmap(rect, m_currentFrame);
-        }
-    }
 }

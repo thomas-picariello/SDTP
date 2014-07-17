@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QImage>
 #include <QQueue>
+#include <QVideoFrame>
 
 class ProcessingThread : public QThread
 {
@@ -16,11 +17,11 @@ signals:
     void queueFull();
 public:
     void stop();
-    void addFrameToProcessingQueue(QImage frame);
+    void addFrameToProcessingQueue(QVideoFrame* frame);
 private:
     virtual void run();
 private:
-    QQueue<QImage> m_queue;
+    QQueue<QVideoFrame> m_queue;
     int m_queueMaxLength;
     bool m_stopped;
 };

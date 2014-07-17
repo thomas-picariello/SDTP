@@ -1,7 +1,7 @@
 #include "processingthread.h"
 #include <QDebug>
 
-static const int QUEUE_MAX_LENGTH = 1;
+static const int QUEUE_MAX_LENGTH = 5;
 static const int THREAD_SLEEP_MS = 50;
 
 ProcessingThread::ProcessingThread(QObject *parent) :
@@ -19,12 +19,14 @@ void ProcessingThread::stop()
     m_stopped = true;
 }
 
-void ProcessingThread::addFrameToProcessingQueue(QImage frame)
+void ProcessingThread::addFrameToProcessingQueue(QVideoFrame *frame)
 {
     if (m_queue.length() < m_queueMaxLength) {
-        QImage threadCopy = frame.copy();
+        QVideoFrame threadCopy;
+        threadCopy = *frame;
         m_queue.enqueue(threadCopy);
     } else {
+        qDebug()<<"queue Full";
         emit queueFull();
     }
 }
@@ -32,13 +34,17 @@ void ProcessingThread::addFrameToProcessingQueue(QImage frame)
 void ProcessingThread::run()
 {
     // Process until stop() called
+    qDebug()<<"processing thread starts";
     while (!m_stopped)
     {
         if (!m_queue.isEmpty())
         {
-            QImage currentFrame = m_queue.dequeue();
+            QVideoFrame currentFrame = m_queue.dequeue();
 
-            // Here you can do whatever processing you need on the frame, like detect barcodes, etc.
+            // EncoreStuff
+            //Send Stuff
+            //Decode Stuff
+            //other stuff
 
             emit frameProcessed();
         }

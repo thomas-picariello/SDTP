@@ -14,11 +14,11 @@ class ViewFinderWrapper : public QDeclarativeItem
 {
     Q_OBJECT
 
-    Q_PROPERTY(int cameraStatus READ cameraStatus NOTIFY cameraStatusChanged);
-    Q_PROPERTY(int cameraError READ cameraError NOTIFY cameraErrorChanged);
-    Q_PROPERTY(long frameCount READ frameCount NOTIFY frameCountChanged);
-    Q_PROPERTY(long processedCount READ processedCount NOTIFY processedCountChanged);
-    Q_PROPERTY(bool running READ running NOTIFY runningChanged);
+    Q_PROPERTY(int cameraStatus READ cameraStatus NOTIFY cameraStatusChanged)
+    Q_PROPERTY(int cameraError READ cameraError NOTIFY cameraErrorChanged)
+    Q_PROPERTY(long frameCount READ frameCount NOTIFY frameCountChanged)
+    Q_PROPERTY(long processedCount READ processedCount NOTIFY processedCountChanged)
+    Q_PROPERTY(bool running READ running NOTIFY runningChanged)
 public:
     explicit ViewFinderWrapper(QDeclarativeItem *parent = 0);
     virtual ~ViewFinderWrapper();
@@ -28,7 +28,8 @@ signals:
     void frameCountChanged(long count);
     void processedCountChanged(long count);
     void runningChanged();
-    void newFrameAvaillable(QImage);
+    void newFrameAvaillable(QVideoFrame);
+
 public slots:
     int cameraStatus() const;
     int cameraError() const;
@@ -47,6 +48,7 @@ private slots:
 
     // Surface
     void frameReady();
+    void onNewFrame(QVideoFrame* frame);
 
     // ProcessingThread
     void onFrameProcessed();
@@ -57,8 +59,6 @@ private:
     void startViewFinder();
     void stopViewFinder();
 
-    // From QDeclarativeItem
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 
 private:
