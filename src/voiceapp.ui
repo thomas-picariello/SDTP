@@ -20,32 +20,15 @@ QPushButton{
 	background-color:#888;
 	color:white;
 	border:none;
-	padding: 10 10;
+	padding: 5 10;
 	margin:1;
-}
-QPushButton::hover{
-	background-color:#09f;
-}
-QPushButton::pressed{
-	background-color:#07f;
-}
-QPushButton::disabled{
-	background-color:#aaa;
 }
 
 /*QToolButton*/
 QToolButton{
-	background-color:#888;
+	background-color:transparent;
 	color:white;
 	border:none;
-	padding: 5;
-	margin:1;
-}
-QToolButton::hover{
-	background-color:#09f;
-}
-QToolButton::pressed{
-	background-color:#07f;
 }
 
 /*QMenu*/
@@ -84,7 +67,6 @@ QSlider{
  QSlider::handle:vertical {
     height: 15px;
     background: rgba(80,80,80,200);
-    margin: 0 -14px; /* expand outside the groove */
  }
 QSlider::handle::vertical::hover{
 	background: rgba(0,153,255,200);
@@ -97,7 +79,7 @@ QSlider::handle::vertical::pressed{
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
-    <number>0</number>
+    <number>6</number>
    </property>
    <property name="leftMargin">
     <number>0</number>
@@ -117,14 +99,17 @@ QSlider::handle::vertical::pressed{
       <number>6</number>
      </property>
      <property name="bottomMargin">
-      <number>6</number>
+      <number>0</number>
      </property>
     </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="monitor_layout">
-     <property name="spacing">
-      <number>0</number>
+     <property name="leftMargin">
+      <number>10</number>
+     </property>
+     <property name="rightMargin">
+      <number>10</number>
      </property>
      <item>
       <layout class="QVBoxLayout" name="mic_monitor_layout">
@@ -134,7 +119,7 @@ QSlider::handle::vertical::pressed{
        <item>
         <layout class="QGridLayout" name="mic_vol_layout">
          <item row="0" column="0">
-          <widget class="QProgressBar" name="mic_monitor_pb">
+          <widget class="AudioBargraph" name="mic_monitor_pb">
            <property name="minimumSize">
             <size>
              <width>30</width>
@@ -164,7 +149,7 @@ QSlider::handle::vertical::pressed{
             <number>100</number>
            </property>
            <property name="value">
-            <number>0</number>
+            <number>75</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -177,8 +162,22 @@ QSlider::handle::vertical::pressed{
         <layout class="QGridLayout" name="mic_mute_layout">
          <item row="0" column="0">
           <widget class="QToolButton" name="mic_mute_bt">
-           <property name="text">
-            <string>Mute</string>
+           <property name="icon">
+            <iconset resource="../res/res.qrc">
+             <normaloff>:/icons/mic_disabled</normaloff>
+             <normalon>:/icons/mic_enabled</normalon>:/icons/mic_disabled</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>22</width>
+             <height>22</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -194,7 +193,7 @@ QSlider::handle::vertical::pressed{
        <item>
         <layout class="QGridLayout" name="output_vol_layout">
          <item row="0" column="0">
-          <widget class="QProgressBar" name="output_monitor_pb">
+          <widget class="AudioBargraph" name="output_monitor_pb">
            <property name="minimumSize">
             <size>
              <width>30</width>
@@ -223,6 +222,9 @@ QSlider::handle::vertical::pressed{
            <property name="maximum">
             <number>100</number>
            </property>
+           <property name="value">
+            <number>75</number>
+           </property>
            <property name="tracking">
             <bool>true</bool>
            </property>
@@ -237,8 +239,22 @@ QSlider::handle::vertical::pressed{
         <layout class="QGridLayout" name="output_mute_layout">
          <item row="0" column="0">
           <widget class="QToolButton" name="output_mute_bt">
-           <property name="text">
-            <string>Mute</string>
+           <property name="icon">
+            <iconset resource="../res/res.qrc">
+             <normaloff>:/icons/speaker_disabled</normaloff>
+             <normalon>:/icons/speaker_enabled</normalon>:/icons/speaker_disabled</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>22</width>
+             <height>22</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -251,12 +267,30 @@ QSlider::handle::vertical::pressed{
    <item>
     <widget class="QPushButton" name="call_bt">
      <property name="text">
-      <string>Call</string>
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normalon>:/icons/call</normalon>
+      </iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>22</width>
+       <height>22</height>
+      </size>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AudioBargraph</class>
+   <extends>QProgressBar</extends>
+   <header>audiobargraph.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../res/res.qrc"/>
  </resources>
