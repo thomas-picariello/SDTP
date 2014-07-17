@@ -15,15 +15,17 @@
 #include "contactlistwindow.h"
 #include "passwordwindow.h"
 #include "networkmanager.h"
-#include "typesenums.h"
-#include "confwizard.h"
-#include "messengerapp.h"
-#include "videoapp.h"
 #include "ipfilter.h"
 #include "pinger.h"
 #include "handshaker.h"
 #include "appuid.h"
 #include "upnpnat.h"
+#include "typesenums.h"
+#include "confwizard.h"
+#include "messengerapp.h"
+#include "voiceapp.h"
+#include "videoapp.h"
+
 
 class SVoIP: public QObject
 {

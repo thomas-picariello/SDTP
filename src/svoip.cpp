@@ -176,15 +176,18 @@ QPair<AppUID,AbstractApp*> SVoIP::startApp(Contact* contact, AppType appType){
                     localUID.setInstanceID(localUID.instanceID() + 1);
 
             switch(appType){
-            case Messenger:
-                app = new MessengerApp(contact);
-                break;
-            case VideoStreamer:
-                app = new VideoApp(contact);
-                break;
-            default:
-                emit error(InvalidAppID);
-                break;
+                case Messenger:
+                    app = new MessengerApp(contact);
+                    break;
+                case VoIP:
+                    app = new VoiceApp(contact);
+                    break;
+                case VideoStreamer:
+                    app = new VideoApp(contact);
+                    break;
+                default:
+                    emit error(InvalidAppID);
+                    break;
             }
             if(app){
                 m_appList.insert(localUID, app);

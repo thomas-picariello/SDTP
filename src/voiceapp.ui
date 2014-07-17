@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VoiceApp</class>
+ <widget class="QWidget" name="VoiceApp">
+  <property name="windowTitle">
+   <string>Call</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../res/res.qrc">
+    <normaloff>:/icons/call_normal</normaloff>:/icons/call_normal</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">/*Global*/
+QWidget{
+	background-color:white;
+}
+
+/*QPushButton*/
+QPushButton{
+	background-color:#888;
+	color:white;
+	border:none;
+	padding: 10 10;
+	margin:1;
+}
+QPushButton::hover{
+	background-color:#09f;
+}
+QPushButton::pressed{
+	background-color:#07f;
+}
+QPushButton::disabled{
+	background-color:#aaa;
+}
+
+/*QToolButton*/
+QToolButton{
+	background-color:#888;
+	color:white;
+	border:none;
+	padding: 5;
+	margin:1;
+}
+QToolButton::hover{
+	background-color:#09f;
+}
+QToolButton::pressed{
+	background-color:#07f;
+}
+
+/*QMenu*/
+QMenu{
+	padding: 1;
+	margin: 0;
+}
+QMenu::item{
+	padding: 10px 10px;
+}
+QMenu::item::selected{
+	color:white;
+	background-color:#09f;
+}
+QMenu::item::pressed{
+	color:white;
+	background-color:#07f;
+}
+
+/*QProgressBar*/
+ QProgressBar {
+    border: 1px solid grey;
+ }
+ QProgressBar::chunk {
+     background-color:#0b0;
+ }
+
+/*QSlider*/
+QSlider{
+	padding-left: 1px;
+	background-color:transparent;
+}
+ QSlider::groove:vertical {
+    background: transparent;
+ }
+ QSlider::handle:vertical {
+    height: 15px;
+    background: rgba(80,80,80,200);
+    margin: 0 -14px; /* expand outside the groove */
+ }
+QSlider::handle::vertical::hover{
+	background: rgba(0,153,255,200);
+}
+QSlider::handle::vertical::pressed{
+	background: rgba(0,119,255,200);
+}
+
+</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <layout class="QVBoxLayout" name="names_layout">
+     <property name="topMargin">
+      <number>6</number>
+     </property>
+     <property name="bottomMargin">
+      <number>6</number>
+     </property>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="monitor_layout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="mic_monitor_layout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QGridLayout" name="mic_vol_layout">
+         <item row="0" column="0">
+          <widget class="QProgressBar" name="mic_monitor_pb">
+           <property name="minimumSize">
+            <size>
+             <width>30</width>
+             <height>200</height>
+            </size>
+           </property>
+           <property name="value">
+            <number>24</number>
+           </property>
+           <property name="textVisible">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QSlider" name="mic_vol_sl">
+           <property name="minimumSize">
+            <size>
+             <width>30</width>
+             <height>200</height>
+            </size>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="mic_mute_layout">
+         <item row="0" column="0">
+          <widget class="QToolButton" name="mic_mute_bt">
+           <property name="text">
+            <string>Mute</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="output_layout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QGridLayout" name="output_vol_layout">
+         <item row="0" column="0">
+          <widget class="QProgressBar" name="output_monitor_pb">
+           <property name="minimumSize">
+            <size>
+             <width>30</width>
+             <height>200</height>
+            </size>
+           </property>
+           <property name="value">
+            <number>24</number>
+           </property>
+           <property name="textVisible">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QSlider" name="output_vol_sl">
+           <property name="minimumSize">
+            <size>
+             <width>30</width>
+             <height>200</height>
+            </size>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="tracking">
+            <bool>true</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="output_mute_layout">
+         <item row="0" column="0">
+          <widget class="QToolButton" name="output_mute_bt">
+           <property name="text">
+            <string>Mute</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="call_bt">
+     <property name="text">
+      <string>Call</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../res/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>
