@@ -22,7 +22,7 @@ void VoiceApp::updateContactNames(){
     while((item = ui->names_layout->takeAt(0)) != 0)
         delete item->widget();
 
-    foreach(Contact* contact, m_ContactList){
+    foreach(Contact* contact, m_contactList){
         QLabel* label = new QLabel(contact->getName(), this);
         QString color;
         if(contact->getStatus() == Contact::Offline)

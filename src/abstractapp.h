@@ -16,11 +16,11 @@ public:
         IncompatibleVersion //TODO: add more errors
     };
 
-    explicit AbstractApp(Contact* contact, QWidget *parent=0): QWidget(parent){ m_ContactList.append(contact); }
+    explicit AbstractApp(Contact* contact, QWidget *parent=0): QWidget(parent){ m_contactList.append(contact); }
 
-    QList<Contact*> getContactList(){ return m_ContactList; }
-    void addContact(Contact* contact){ m_ContactList.append(contact); }
-    void removeContact(Contact* contact){ m_ContactList.removeOne(contact); }
+    QList<Contact*> getContactList(){ return m_contactList; }
+    void addContact(Contact* contact){ m_contactList.append(contact); }
+    void removeContact(Contact* contact){ m_contactList.removeOne(contact); }
 
 public slots :
     virtual void readIncommingData(QByteArray &data) = 0;
@@ -30,7 +30,7 @@ signals :
     void error(AbstractApp::Error);
 
 protected:
-    QList<Contact*> m_ContactList;
+    QList<Contact*> m_contactList;
 };
 
 
