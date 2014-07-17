@@ -26,5 +26,11 @@
         <file alias="video_hover">icons/video_hover.png</file>
         <file alias="video_normal">icons/video_normal.png</file>
         <file alias="video_pressed">icons/video_pressed.png</file>
+        <file alias="call">icons/call.png</file>
+        <file alias="hangup">icons/hangup.png</file>
+        <file alias="mic_disabled">icons/mic_disabled.png</file>
+        <file alias="speaker_disabled">icons/speaker_disabled.png</file>
+        <file alias="mic_enabled">icons/mic_enabled.png</file>
+        <file alias="speaker_enabled">icons/speaker_enabled.png</file>
     </qresource>
 </RCC>
