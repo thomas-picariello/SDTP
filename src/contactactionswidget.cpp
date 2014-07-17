@@ -139,11 +139,10 @@ void ContactActionsWidget::showMenu(){
 
 void ContactActionsWidget::buildAppLaunchers()
 {
-    //clean layout
+    //clear layout
     QLayoutItem *item;
     while((item = m_appLauncherButtonsLayout.takeAt(0)) != 0){
         delete item->widget();
-        delete item;
     }
     m_appLauncherButtonsList.clear();
 
