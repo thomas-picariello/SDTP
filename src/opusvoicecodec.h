@@ -8,6 +8,8 @@
 #include <QAudioOutput>
 #include <QAudioFormat>
 #include <QAudioDeviceInfo>
+#include <QtMath>
+
 #include <opus/opus.h>
 #include "qpcmbuffer.h"
 
@@ -27,9 +29,13 @@ public:
     void setEncoderApplication(int application);
     quint64 getBitrate() const;
     void setBitrate(quint64 bitrate);
-    void getProbes() const;    
+    void setOutputVolume(qreal volume);
+    void setInputMute(bool mute);
+    void setOutputMute(bool mute);
 
 signals:
+    void newInputProbe(qint16 inProbe);
+    void newOutputProbe(qint16 outProbe);
 
 public slots:
     void start();
@@ -44,18 +50,19 @@ protected:
     qint64 writeData(const char * data, qint64 size);
 
 private:
-    QAudioInput *mAudioInput;
-    QAudioOutput *mAudioOutput;
-    QAudioFormat mAudioFormat;
-    OpusEncoder *mEncoder;
-    OpusDecoder *mDecoder;
-    QPcmBuffer mInputPcmBuffer;
-    QPcmBuffer mOutputPcmBuffer;
-    QByteArray mInputEncodedBuffer;
-    QByteArray mOutputEncodedBuffer;
-    int mApplication;
-    float mOpusFrameLength;
+    QAudioInput *m_audioInput;
+    QAudioOutput *m_audioOutput;
+    QAudioFormat m_audioFormat;
+    OpusEncoder *m_encoder;
+    OpusDecoder *m_decoder;
+    QPcmBuffer m_inputPcmBuffer;
+    QPcmBuffer m_outputPcmBuffer;
+    QByteArray m_inputEncodedBuffer;
+    QByteArray m_outputEncodedBuffer;
+    int m_application;
+    float m_opusFrameLength;
 
+    qint16 computeRMS(const QPcmBuffer& buffer);
     //Debug
     void displayOpusErr(int err);
 

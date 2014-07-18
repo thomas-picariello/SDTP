@@ -1,86 +1,84 @@
 #include "opusvoicecodec.h"
 
 OpusVoiceCodec::OpusVoiceCodec(QIODevice *parent):QIODevice(parent){
-    mApplication = OPUS_APPLICATION_VOIP;
-    mOpusFrameLength = 40.0;
+    m_application = OPUS_APPLICATION_VOIP;
+    m_opusFrameLength = 40.0;
 
-    mAudioFormat.setChannelCount(1);
-    mAudioFormat.setSampleRate(48000);
-    mAudioFormat.setSampleSize(16);                        //Requiered by Opus
-    mAudioFormat.setCodec("audio/pcm");                    //Requiered by Opus
-    mAudioFormat.setByteOrder(QAudioFormat::LittleEndian); //Requiered by Opus
-    mAudioFormat.setSampleType(QAudioFormat::SignedInt);   //Requiered by Opus
+    m_audioFormat.setChannelCount(1);
+    m_audioFormat.setSampleRate(48000);
+    m_audioFormat.setSampleSize(16);                        //Requiered by Opus
+    m_audioFormat.setCodec("audio/pcm");                    //Requiered by Opus
+    m_audioFormat.setByteOrder(QAudioFormat::LittleEndian); //Requiered by Opus
+    m_audioFormat.setSampleType(QAudioFormat::SignedInt);   //Requiered by Opus
 
     QAudioDeviceInfo info;
     info = QAudioDeviceInfo::defaultInputDevice();
-    if (!info.isFormatSupported(mAudioFormat)) {
+    if (!info.isFormatSupported(m_audioFormat)) {
         qWarning() << "Default input format not supported, trying to use the nearest.";
-        mAudioFormat = info.nearestFormat(mAudioFormat);
+        m_audioFormat = info.nearestFormat(m_audioFormat);
     }
-    mAudioInput = new QAudioInput(mAudioFormat, this);
+    m_audioInput = new QAudioInput(m_audioFormat, this);
 
     info = QAudioDeviceInfo::defaultOutputDevice();
-    if (!info.isFormatSupported(mAudioFormat)) {
+    if (!info.isFormatSupported(m_audioFormat)) {
         qWarning() << "Raw audio format not supported by backend, cannot play audio.";
     }
-    mAudioOutput = new QAudioOutput(mAudioFormat, this);
+    m_audioOutput = new QAudioOutput(m_audioFormat, this);
 
-    mAudioInput->setNotifyInterval((int)mOpusFrameLength);
+    m_audioInput->setNotifyInterval((int)m_opusFrameLength);
 
-    connect(mAudioInput, SIGNAL(notify()),
+    connect(m_audioInput, SIGNAL(notify()),
             this, SLOT(opusEncode()));
 
     //the input pcm buffer size is set to the duration of the opus frame
-    mInputPcmBuffer.setMaxSize(mAudioFormat.framesForDuration((qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount());
+    m_inputPcmBuffer.setMaxSize(m_audioFormat.framesForDuration((qint64)m_opusFrameLength*1000)*m_audioFormat.channelCount());
     //the input pcm buffer size is set to 2 time the duration of the opus frame (arbitrary)
-    mOutputPcmBuffer.setMaxSize(mAudioFormat.framesForDuration(2*(qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount());
-    mInputPcmBuffer.open(ReadWrite);
-    mOutputPcmBuffer.open(ReadWrite);
+    m_outputPcmBuffer.setMaxSize(m_audioFormat.framesForDuration(2*(qint64)m_opusFrameLength*1000)*m_audioFormat.channelCount());
+    m_inputPcmBuffer.open(ReadWrite);
+    m_outputPcmBuffer.open(ReadWrite);
 
     int err = OPUS_OK;
-    mEncoder = opus_encoder_create(mAudioFormat.sampleRate(), 2, mApplication, &err);
+    m_encoder = opus_encoder_create(m_audioFormat.sampleRate(), 2, m_application, &err);
     if(err != OPUS_OK)
         displayOpusErr(err);
-    mDecoder = opus_decoder_create(mAudioFormat.sampleRate(), 2, &err);
+    m_decoder = opus_decoder_create(m_audioFormat.sampleRate(), 2, &err);
     if(err != OPUS_OK)
         displayOpusErr(err);
-
-    setBitrate(25000); //TODO: remove debug
 }
 
 void OpusVoiceCodec::start(){
-    mAudioInput->start(&mInputPcmBuffer);
+    m_audioInput->start(&m_inputPcmBuffer);
     setOpenMode(ReadWrite);
 }
 
 void OpusVoiceCodec::stop(){
-    mAudioInput->stop();
-    mAudioOutput->stop();
+    m_audioInput->stop();
+    m_audioOutput->stop();
     setOpenMode(NotOpen);
 }
 
 QAudioFormat OpusVoiceCodec::getAudioFormat() const{
-    return mAudioFormat;
+    return m_audioFormat;
 }
 
 void OpusVoiceCodec::setAudioFormat(QAudioFormat format){
-    mAudioFormat = format;
+    m_audioFormat = format;
 }
 
 float OpusVoiceCodec::getOpusFrameSize() const{
-    return mOpusFrameLength;
+    return m_opusFrameLength;
 }
 
 void OpusVoiceCodec::setOpusFrameSize(float frameSizeInMs){
     QList<int> authorisedValues;
     authorisedValues << 2.5 << 5.0 << 10.0 << 20.0 << 40.0 << 60.0;
     if(authorisedValues.contains(frameSizeInMs)){
-        mOpusFrameLength = frameSizeInMs;
+        m_opusFrameLength = frameSizeInMs;
     }
 }
 
 int OpusVoiceCodec::getEncoderApplication() const{
-    return mApplication;
+    return m_application;
 }
 
 void OpusVoiceCodec::setEncoderApplication(int application){
@@ -89,21 +87,36 @@ void OpusVoiceCodec::setEncoderApplication(int application){
                      << OPUS_APPLICATION_RESTRICTED_LOWDELAY
                      << OPUS_APPLICATION_VOIP;
     if(authorisedValues.contains(application)){
-        mApplication = application;
-        opus_encoder_ctl(mEncoder, OPUS_SET_APPLICATION(application));
+        m_application = application;
+        opus_encoder_ctl(m_encoder, OPUS_SET_APPLICATION(application));
     }
 }
 
 quint64 OpusVoiceCodec::getBitrate() const{
     qint32 returnValue;
-    opus_encoder_ctl(mEncoder, OPUS_GET_BITRATE(&returnValue));
+    opus_encoder_ctl(m_encoder, OPUS_GET_BITRATE(&returnValue));
     return returnValue;
 }
 
 void OpusVoiceCodec::setBitrate(quint64 bitrate){
     if(bitrate >= 500 && bitrate <= 512000){
-        opus_encoder_ctl(mEncoder, OPUS_SET_BITRATE(bitrate));
+        opus_encoder_ctl(m_encoder, OPUS_SET_BITRATE(bitrate));
     }
+}
+
+void OpusVoiceCodec::setOutputVolume(qreal volume){
+    m_audioOutput->setVolume(volume);
+}
+
+void OpusVoiceCodec::setInputMute(bool mute){
+    if(mute)
+        m_audioInput->suspend();
+    else
+        m_audioInput->resume();
+}
+
+void OpusVoiceCodec::setOutputMute(bool mute){
+
 }
 
 void OpusVoiceCodec::displayOpusErr(int err){
@@ -111,53 +124,63 @@ void OpusVoiceCodec::displayOpusErr(int err){
 }
 qint64 OpusVoiceCodec::readData(char * data, qint64 maxSize){
     qint64 pos = 0;
-    while((pos < maxSize) && (pos <mInputEncodedBuffer.size())){
-        data[pos] = mInputEncodedBuffer.at(pos);
+    while((pos < maxSize) && (pos <m_inputEncodedBuffer.size())){
+        data[pos] = m_inputEncodedBuffer.at(pos);
         pos++;
     }
-    mInputEncodedBuffer.remove(0, pos);
+    m_inputEncodedBuffer.remove(0, pos);
     return pos;
 }
 
 qint64 OpusVoiceCodec::writeData(const char * data, qint64 size){
-    if(mAudioOutput->state() != QAudio::ActiveState && openMode() == ReadWrite)
-        mAudioOutput->start(&mOutputPcmBuffer);
-    mOutputEncodedBuffer.append(data, size);
+    if(m_audioOutput->state() != QAudio::ActiveState && openMode() == ReadWrite)
+        m_audioOutput->start(&m_outputPcmBuffer);
+    m_outputEncodedBuffer.append(data, size);
     opusDecode();
+    emit newOutputProbe(computeRMS(m_outputPcmBuffer));
     return size;
+}
+
+qint16 OpusVoiceCodec::computeRMS(const QPcmBuffer& buffer){
+    qreal quadraticSum = 0;
+    for(int i=0; i<buffer.size(); i++){
+        quadraticSum += qPow(buffer.data()[i], 2);
+    }
+    return qSqrt(quadraticSum/buffer.size());
 }
 
 void OpusVoiceCodec::opusEncode(){
     QVector<uchar> encodedFrame(4000);
-    int encodedBytes = opus_encode(mEncoder,
-                                 mInputPcmBuffer.data(),
-                                 mInputPcmBuffer.size()/2,
+    int encodedBytes = opus_encode(m_encoder,
+                                 m_inputPcmBuffer.data(),
+                                 m_inputPcmBuffer.size()/2,
                                  encodedFrame.data(),
                                  4000);
     if(encodedBytes < 0){
         displayOpusErr(encodedBytes);
     }else{
-        mInputEncodedBuffer.clear();
+        m_inputEncodedBuffer.clear();
         for(int i=0; i<encodedBytes; i++)
-            mInputEncodedBuffer.append(encodedFrame.at(i));
+            m_inputEncodedBuffer.append(encodedFrame.at(i));
         emit readyRead();
+        emit newInputProbe(computeRMS(m_inputPcmBuffer));
     }
 }
 
 void OpusVoiceCodec::opusDecode(){
-    static int pcmFrameLength = mAudioFormat.framesForDuration((qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount();
-    int decodedFrames = opus_decode(mDecoder,
-                                 reinterpret_cast<const uchar*>(mOutputEncodedBuffer.constData()),
-                                 mOutputEncodedBuffer.size(),
-                                 mOutputPcmBuffer.preAllocate(pcmFrameLength),
+    static int pcmFrameLength = m_audioFormat.framesForDuration((qint64)m_opusFrameLength*1000)*m_audioFormat.channelCount();
+    int decodedFrames = opus_decode(m_decoder,
+                                 reinterpret_cast<const uchar*>(m_outputEncodedBuffer.constData()),
+                                 m_outputEncodedBuffer.size(),
+                                 m_outputPcmBuffer.preAllocate(pcmFrameLength),
                                  pcmFrameLength/2, //number of samples per channel per frame
                                  0);
     if(decodedFrames < 0)
         displayOpusErr(decodedFrames);
-    mOutputEncodedBuffer.clear();
+    m_outputEncodedBuffer.clear();
 }
 
 OpusVoiceCodec::~OpusVoiceCodec(){
-    opus_decoder_destroy(mDecoder);
-    opus_encoder_destroy(mEncoder);
+    opus_decoder_destroy(m_decoder);
+    opus_encoder_destroy(m_encoder);
 }
