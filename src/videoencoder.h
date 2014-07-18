@@ -5,6 +5,7 @@
 #include <QImage>
 #include <QQueue>
 #include <QVideoFrame>
+#include <QBuffer>
 
 class VideoEncoder : public QThread
 {

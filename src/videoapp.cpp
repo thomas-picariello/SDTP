@@ -35,6 +35,7 @@ void VideoApp::updateDisplay(){
 }
 void VideoApp::readIncommingData(const QByteArray &data){
 
+    qDebug()<<"data Incoming";
 
 }
 void VideoApp::drawFrame(QVideoFrame frame){
