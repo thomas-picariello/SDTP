@@ -1,6 +1,6 @@
-#include "voip.h"
+#include "opusvoicecodec.h"
 
-VoIP::VoIP(QIODevice *parent):QIODevice(parent){
+OpusVoiceCodec::OpusVoiceCodec(QIODevice *parent):QIODevice(parent){
     mApplication = OPUS_APPLICATION_VOIP;
     mOpusFrameLength = 40.0;
 
@@ -45,33 +45,33 @@ VoIP::VoIP(QIODevice *parent):QIODevice(parent){
     if(err != OPUS_OK)
         displayOpusErr(err);
 
-    setBitrate(25000);
+    setBitrate(25000); //TODO: remove debug
 }
 
-void VoIP::start(){
+void OpusVoiceCodec::start(){
     mAudioInput->start(&mInputPcmBuffer);
     setOpenMode(ReadWrite);
 }
 
-void VoIP::stop(){
+void OpusVoiceCodec::stop(){
     mAudioInput->stop();
     mAudioOutput->stop();
     setOpenMode(NotOpen);
 }
 
-QAudioFormat VoIP::getAudioFormat() const{
+QAudioFormat OpusVoiceCodec::getAudioFormat() const{
     return mAudioFormat;
 }
 
-void VoIP::setAudioFormat(QAudioFormat format){
+void OpusVoiceCodec::setAudioFormat(QAudioFormat format){
     mAudioFormat = format;
 }
 
-float VoIP::getOpusFrameSize() const{
+float OpusVoiceCodec::getOpusFrameSize() const{
     return mOpusFrameLength;
 }
 
-void VoIP::setOpusFrameSize(float frameSizeInMs){
+void OpusVoiceCodec::setOpusFrameSize(float frameSizeInMs){
     QList<int> authorisedValues;
     authorisedValues << 2.5 << 5.0 << 10.0 << 20.0 << 40.0 << 60.0;
     if(authorisedValues.contains(frameSizeInMs)){
@@ -79,11 +79,11 @@ void VoIP::setOpusFrameSize(float frameSizeInMs){
     }
 }
 
-int VoIP::getEncoderApplication() const{
+int OpusVoiceCodec::getEncoderApplication() const{
     return mApplication;
 }
 
-void VoIP::setEncoderApplication(int application){
+void OpusVoiceCodec::setEncoderApplication(int application){
     QList<int> authorisedValues;
     authorisedValues << OPUS_APPLICATION_AUDIO
                      << OPUS_APPLICATION_RESTRICTED_LOWDELAY
@@ -94,22 +94,22 @@ void VoIP::setEncoderApplication(int application){
     }
 }
 
-quint64 VoIP::getBitrate() const{
+quint64 OpusVoiceCodec::getBitrate() const{
     qint32 returnValue;
     opus_encoder_ctl(mEncoder, OPUS_GET_BITRATE(&returnValue));
     return returnValue;
 }
 
-void VoIP::setBitrate(quint64 bitrate){
+void OpusVoiceCodec::setBitrate(quint64 bitrate){
     if(bitrate >= 500 && bitrate <= 512000){
         opus_encoder_ctl(mEncoder, OPUS_SET_BITRATE(bitrate));
     }
 }
 
-void VoIP::displayOpusErr(int err){
+void OpusVoiceCodec::displayOpusErr(int err){
     qWarning() << "Opus error:" << opus_strerror(err);
 }
-qint64 VoIP::readData(char * data, qint64 maxSize){
+qint64 OpusVoiceCodec::readData(char * data, qint64 maxSize){
     qint64 pos = 0;
     while((pos < maxSize) && (pos <mInputEncodedBuffer.size())){
         data[pos] = mInputEncodedBuffer.at(pos);
@@ -119,7 +119,7 @@ qint64 VoIP::readData(char * data, qint64 maxSize){
     return pos;
 }
 
-qint64 VoIP::writeData(const char * data, qint64 size){
+qint64 OpusVoiceCodec::writeData(const char * data, qint64 size){
     if(mAudioOutput->state() != QAudio::ActiveState && openMode() == ReadWrite)
         mAudioOutput->start(&mOutputPcmBuffer);
     mOutputEncodedBuffer.append(data, size);
@@ -127,7 +127,7 @@ qint64 VoIP::writeData(const char * data, qint64 size){
     return size;
 }
 
-void VoIP::opusEncode(){
+void OpusVoiceCodec::opusEncode(){
     QVector<uchar> encodedFrame(4000);
     int encodedBytes = opus_encode(mEncoder,
                                  mInputPcmBuffer.data(),
@@ -144,7 +144,7 @@ void VoIP::opusEncode(){
     }
 }
 
-void VoIP::opusDecode(){
+void OpusVoiceCodec::opusDecode(){
     static int pcmFrameLength = mAudioFormat.framesForDuration((qint64)mOpusFrameLength*1000)*mAudioFormat.channelCount();
     int decodedFrames = opus_decode(mDecoder,
                                  reinterpret_cast<const uchar*>(mOutputEncodedBuffer.constData()),
@@ -157,7 +157,7 @@ void VoIP::opusDecode(){
     mOutputEncodedBuffer.clear();
 }
 
-VoIP::~VoIP(){
+OpusVoiceCodec::~OpusVoiceCodec(){
     opus_decoder_destroy(mDecoder);
     opus_encoder_destroy(mEncoder);
 }

@@ -1,5 +1,5 @@
-#ifndef VOIP_H
-#define VOIP_H
+#ifndef OPUSVOICECODEC_H
+#define OPUSVOICECODEC_H
 
 #include <QDebug>
 #include <QIODevice>
@@ -11,15 +11,13 @@
 #include <opus/opus.h>
 #include "qpcmbuffer.h"
 
-class VoIP : public QIODevice
+class OpusVoiceCodec : public QIODevice
 {
     Q_OBJECT
 
 public:
-    explicit VoIP(QIODevice *parent = 0);
-
-    void start();
-    void stop();
+    explicit OpusVoiceCodec(QIODevice *parent = 0);
+    ~OpusVoiceCodec();
 
     QAudioFormat getAudioFormat() const;
     void setAudioFormat(QAudioFormat format);
@@ -29,12 +27,15 @@ public:
     void setEncoderApplication(int application);
     quint64 getBitrate() const;
     void setBitrate(quint64 bitrate);
-
-    ~VoIP();
+    void getProbes() const;    
 
 signals:
-    
+
 public slots:
+    void start();
+    void stop();
+
+private slots:
     void opusEncode();
     void opusDecode();
 
@@ -58,7 +59,7 @@ private:
     //Debug
     void displayOpusErr(int err);
 
-    Q_DISABLE_COPY(VoIP)
+    Q_DISABLE_COPY(OpusVoiceCodec)
 };
 
-#endif // VOIP_H
+#endif // OPUSVOICECODEC_H
