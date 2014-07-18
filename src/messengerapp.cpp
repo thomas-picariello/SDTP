@@ -36,7 +36,7 @@ void MessengerApp::updateDisplay(){
     ui->message_list->verticalScrollBar()->setValue(ui->message_list->verticalScrollBar()->maximum());
 }
 
-void MessengerApp::readIncommingData(QByteArray &data){
+void MessengerApp::readIncommingData(const QByteArray& data){
     m_MsgList.append("<div align='left' style='color:green; margin: 10px;'>"+data+"</div>");
 
     updateDisplay();

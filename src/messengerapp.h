@@ -26,7 +26,7 @@ public:
     void updateDisplay();
 
 public slots :
-    virtual void readIncommingData(QByteArray &data);
+    virtual void readIncommingData(const QByteArray& data);
 
 private slots:
     void sendMessage();

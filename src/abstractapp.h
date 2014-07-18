@@ -23,7 +23,7 @@ public:
     void removeContact(Contact* contact){ m_contactList.removeOne(contact); }
 
 public slots :
-    virtual void readIncommingData(QByteArray &data) = 0;
+    virtual void readIncommingData(const QByteArray& data) = 0;
 
 signals :
     void sendData(LinkType linkType, QByteArray &data);
