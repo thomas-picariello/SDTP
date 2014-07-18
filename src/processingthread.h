@@ -17,7 +17,7 @@ signals:
     void queueFull();
 public:
     void stop();
-    void addFrameToProcessingQueue(QVideoFrame* frame);
+    void addFrameToProcessingQueue(QVideoFrame frame);
 private:
     virtual void run();
 private:

@@ -48,4 +48,4 @@ target_link_libraries(${PROJECT}
     ${LIBVPX_LIBRARIES}
 )
 
-qt5_use_modules(${PROJECT} Widgets Multimedia MultimediaWidgets Sql Declarative Gui )
+qt5_use_modules(${PROJECT} Widgets Multimedia MultimediaWidgets Sql Declarative Gui OpenGL )

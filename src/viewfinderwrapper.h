@@ -47,8 +47,7 @@ private slots:
     void onCameraError(QCamera::Error error);
 
     // Surface
-    void frameReady();
-    void onNewFrame(QVideoFrame* frame);
+    void onNewFrame(QVideoFrame *frame);
 
     // ProcessingThread
     void onFrameProcessed();
@@ -70,7 +69,6 @@ private:
     VideoSurface m_surface;
     bool m_viewFinderActive;
 
-    QPixmap m_currentFrame;
     long m_receivedFrameCounter;
     long m_processedFrameCounter;
 

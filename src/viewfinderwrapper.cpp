@@ -8,7 +8,6 @@ ViewFinderWrapper::ViewFinderWrapper(QDeclarativeItem *parent) :
     m_processor(0)
 {
 
-    m_currentFrame = QPixmap();
 
 
 
@@ -16,7 +15,6 @@ ViewFinderWrapper::ViewFinderWrapper(QDeclarativeItem *parent) :
     setFlag(QGraphicsItem::ItemHasNoContents, false);
 
     // Connect surface to our slot
-    connect(&m_surface, SIGNAL(frameAvailable()), this, SLOT(frameReady()));
     connect(&m_surface,SIGNAL(newFrame(QVideoFrame*)),this,SLOT(onNewFrame(QVideoFrame*)));
 }
 
@@ -62,6 +60,7 @@ void ViewFinderWrapper::startCamera()
     connect(m_processor, SIGNAL(queueFull()), this, SLOT(onThreadCongested()));
 
     m_processor->start();
+
 
 
     m_camera = new QCamera(this);
@@ -112,7 +111,6 @@ void ViewFinderWrapper::reset()
 {
     m_cameraStatus = QCamera::UnloadedStatus;
     m_cameraError = QCamera::NoError;
-    m_currentFrame = QPixmap();
     m_receivedFrameCounter = 0;
     m_processedFrameCounter = 0;
     update();
@@ -159,26 +157,13 @@ void ViewFinderWrapper::onCameraError(QCamera::Error error)
     m_cameraError = error;
     emit cameraErrorChanged(m_cameraError);
 }
-
-void ViewFinderWrapper::frameReady()
-{
-    m_receivedFrameCounter++;
-    emit frameCountChanged(m_receivedFrameCounter);
-
-    // Get the current frame from the video surface
-
-    // Add received frame to processing thread for processing
-    if (m_processor) {
-        m_processor->addFrameToProcessingQueue(m_surface.frame());
-    }
-
-}
 void ViewFinderWrapper::onNewFrame(QVideoFrame *frame){
 
 
     emit newFrameAvaillable(*frame);
+
     if (m_processor) {
-        m_processor->addFrameToProcessingQueue(m_surface.frame());
+        m_processor->addFrameToProcessingQueue(*frame);
     }
 
 }

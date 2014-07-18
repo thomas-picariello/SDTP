@@ -14,6 +14,7 @@
 #include "typesenums.h"
 #include "abstractapp.h"
 #include "viewfinderwrapper.h"
+#include "qglcanvas.h"
 
 
 
@@ -42,14 +43,10 @@ public slots :
 signals :
     void error();
 
-
-
-private slots:
-    void senddata();
-
 private:
     Ui::VideoApp *ui;
     ViewFinderWrapper *wrapper;
+    QGLCanvas *m_Canvas;
 
 
 

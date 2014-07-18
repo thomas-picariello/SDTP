@@ -6,18 +6,13 @@ const int FILLCOLOR = 0xFF0000;
 VideoSurface::VideoSurface(QObject *parent) :
     QAbstractVideoSurface(parent)
 {
-    m_lastFrame = new QVideoFrame();
+
 
 }
 
 VideoSurface::~VideoSurface()
 {
     stop();
-}
-
-QVideoFrame* VideoSurface::frame() const
-{
-    return m_lastFrame;
 }
 bool VideoSurface::isFormatSupported(const QVideoSurfaceFormat &format, QVideoSurfaceFormat *similar) const{
     Q_UNUSED(similar);
@@ -28,9 +23,6 @@ bool VideoSurface::isFormatSupported(const QVideoSurfaceFormat &format, QVideoSu
          return imageFormat != QImage::Format_Invalid
                  && !size.isEmpty()
                  && format.handleType() == QAbstractVideoBuffer::NoHandle;
-}
-void VideoSurface::paint(QPainter *painter){
-
 }
 
 QList<QVideoFrame::PixelFormat> VideoSurface::supportedPixelFormats(QAbstractVideoBuffer::HandleType handleType) const
@@ -64,6 +56,6 @@ bool VideoSurface::start(const QVideoSurfaceFormat &format)
 
 void VideoSurface::stop()
 {
-    delete m_lastFrame;
+
     QAbstractVideoSurface::stop();
 }
