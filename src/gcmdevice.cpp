@@ -118,7 +118,7 @@ QByteArray GcmDevice::encrypt(quint64 seqNum, QByteArray& clearText){
 
         AuthenticatedEncryptionFilter encFilter (enc, new StringSink(cypherTextStr), false, GCM_TAG_SIZE);
 
-        encFilter.ChannelPut(AAD_CHANNEL, (byte*)seqNumBytes.data(), seqNum);
+        encFilter.ChannelPut(AAD_CHANNEL, (byte*)seqNumBytes.data(), seqNumBytes.size());
         //TODO: find encrypted packet size
         encFilter.ChannelMessageEnd(AAD_CHANNEL);
 
