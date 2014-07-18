@@ -23,7 +23,5 @@ void QGLCanvas::paintEvent(QPaintEvent*)
 
         p.drawImage(this->rect(), img);
 
-
-        qDebug()<<"image displayed";
     }
 }

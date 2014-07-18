@@ -8,7 +8,7 @@
 #include <QPixmap>
 #include <QCameraViewfinder>
 #include "videosurface.h"
-#include "processingthread.h"
+#include "videoencoder.h"
 
 class ViewFinderWrapper : public QDeclarativeItem
 {
@@ -29,6 +29,7 @@ signals:
     void processedCountChanged(long count);
     void runningChanged();
     void newFrameAvaillable(QVideoFrame);
+    void newFrameToSend(QByteArray);
 
 public slots:
     int cameraStatus() const;
@@ -72,7 +73,7 @@ private:
     long m_receivedFrameCounter;
     long m_processedFrameCounter;
 
-    ProcessingThread* m_processor;
+    VideoEncoder* m_processor;
 };
 
 #endif // VIEWFINDERWRAPPER_H

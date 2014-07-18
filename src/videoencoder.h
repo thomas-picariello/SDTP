@@ -1,19 +1,19 @@
-#ifndef PROCESSINGTHREAD_H
-#define PROCESSINGTHREAD_H
+#ifndef VIDEOENCODER_H
+#define VIDEOENCODER_H
 
 #include <QThread>
 #include <QImage>
 #include <QQueue>
 #include <QVideoFrame>
 
-class ProcessingThread : public QThread
+class VideoEncoder : public QThread
 {
     Q_OBJECT
 public:
-    explicit ProcessingThread(QObject *parent = 0);
-    virtual ~ProcessingThread();
+    explicit VideoEncoder(QObject *parent = 0);
+    virtual ~VideoEncoder();
 signals:
-    void frameProcessed();
+    void frameProcessed(QByteArray);
     void queueFull();
 public:
     void stop();
@@ -26,4 +26,4 @@ private:
     bool m_stopped;
 };
 
-#endif // PROCESSINGTHREAD_H
+#endif // VIDEOENCODER_H

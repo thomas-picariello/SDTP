@@ -16,6 +16,8 @@ ViewFinderWrapper::ViewFinderWrapper(QDeclarativeItem *parent) :
 
     // Connect surface to our slot
     connect(&m_surface,SIGNAL(newFrame(QVideoFrame*)),this,SLOT(onNewFrame(QVideoFrame*)));
+
+
 }
 
 ViewFinderWrapper::~ViewFinderWrapper()
@@ -55,9 +57,10 @@ void ViewFinderWrapper::startCamera()
     Q_ASSERT(!m_camera);
     Q_ASSERT(!m_processor);
 
-    m_processor = new ProcessingThread(this);
+    m_processor = new VideoEncoder(this);
     connect(m_processor, SIGNAL(frameProcessed()), this, SLOT(onFrameProcessed()));
     connect(m_processor, SIGNAL(queueFull()), this, SLOT(onThreadCongested()));
+    connect(m_processor,SIGNAL(frameProcessed(QByteArray)),this,SIGNAL(newFrameToSend(QByteArray)));
 
     m_processor->start();
 

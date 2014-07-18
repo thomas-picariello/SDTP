@@ -37,8 +37,9 @@ public:
     void updateDisplay();
 
 public slots :
-    virtual void readIncommingData(QByteArray &data);
+    virtual void readIncommingData(const QByteArray &data);
     void drawFrame(QVideoFrame frame);
+    void onDataToSend(QByteArray data);
 
 signals :
     void error();
