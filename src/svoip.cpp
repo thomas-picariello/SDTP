@@ -81,10 +81,6 @@ void SVoIP::onNewConnection(){
     m_ipFilter.filter(m_listener.nextPendingConnection());
 }
 
-//void SVoIP::onNetworkManagerDestroy(NetworkManager* networkManager){
-//    m_networkManagerList.remove(networkManager->getContact());
-//}
-
 void SVoIP::onContactEvent(int id, ContactDB::Event event){
     Contact* contact = m_contactDB->findById(id);
     switch(event){
@@ -110,16 +106,12 @@ void SVoIP::onContactEvent(int id, ContactDB::Event event){
 }
 
 void SVoIP::onDisconnect(Contact* contact){
-    //delete Apps
     foreach(AppUID uid, m_appRegisterTable.keys(contact)){
         m_appRegisterTable.remove(uid);
         m_appList.remove(uid);
     }
-
-    //delete Netmgr
     m_networkManagerList.remove(contact);
 
-    //restart pinger
     Pinger *pinger = m_pingerList.value(contact, NULL);
     if(pinger)
         pinger->start();
@@ -145,7 +137,7 @@ void SVoIP::onHandshakeSuccess(){
                     this, &SVoIP::onStartAppForRequest);
         }
         delete handshaker;
-        //m_handshakerList.remove(host);
+        m_handshakerList.remove(host);
     }
 }
 
