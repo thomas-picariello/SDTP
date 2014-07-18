@@ -93,9 +93,6 @@ void HandshakeResponder::responderParseHalfKeyAndResponderIntegrity(){ //R:2 par
     QByteArray encryptedRespIntegrity, responderIntegrity;
     m_socketStream >> encryptedRespIntegrity;
     responderIntegrity = gcmDecrypt(encryptedRespIntegrity);
-    //TODO remove debug
-    qDebug() << "Responder: encrypted responder integrity" << encryptedRespIntegrity.toBase64();
-    qDebug() << "Responder: clear responder integrity" << responderIntegrity.toBase64();
 
     if(responderIntegrity != m_responderIntegrityHash){
         processError(DataCorrupted);

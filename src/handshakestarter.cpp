@@ -83,10 +83,6 @@ void HandshakeStarter::starterSendHalfKeyAndResponderIntegrity(){ //S:2 forge
     m_socketStream << rsaEncrypt(secondHalfSymKey);
     QByteArray encryptedResponderIntegrity = gcmEncrypt(m_responderIntegrityHash);
     m_socketStream << encryptedResponderIntegrity;
-    //TODO: remove debug
-    qDebug() << "Starter: encrypted responder integrity" << encryptedResponderIntegrity.toBase64();
-    qDebug() << "Starter: clear responder integrity" << m_responderIntegrityHash.toBase64();
-
     m_timeout.start();
 }
 

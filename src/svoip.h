@@ -17,7 +17,6 @@
 #include "networkmanager.h"
 #include "ipfilter.h"
 #include "pinger.h"
-//#include "handshaker.h"
 #include "handshakeresponder.h"
 #include "handshakestarter.h"
 #include "appuid.h"
@@ -75,7 +74,6 @@ private :
     IpFilter m_ipFilter;
     QTcpServer m_listener;
     QMap<Contact*, Pinger*> m_pingerList;
-//    QMap<QString, Handshaker*> m_handshakerList;
     QMap<QString, AbstractHandshake*> m_handshakeList;
 
     QMap<Contact*,NetworkManager*> m_networkManagerList;
