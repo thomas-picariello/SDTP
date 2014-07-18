@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QTimer>
 
+#include "opusvoicecodec.h"
 #include "abstractapp.h"
 
 namespace Ui{
@@ -14,6 +15,7 @@ class VoiceApp : public AbstractApp
 {
     Q_OBJECT
 public:
+    static const AppType APPTYPE = VoIP;
     static const int MONITORS_UPDATE_INTERVAL = 200;
 
     enum State{
@@ -37,7 +39,7 @@ private slots:
     void updateMonitorsValue();
 
 private:
-    Ui::VoiceApp *ui;
+    Ui::VoiceApp* m_ui;
     QTimer m_monitorUpdateTimer;
     State m_state;
 
