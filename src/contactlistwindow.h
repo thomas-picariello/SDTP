@@ -6,6 +6,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QMessageBox>
+#include <QCloseEvent>
 #include "editcontactwindow.h"
 #include "settingswindow.h"
 #include "contact.h"
@@ -58,6 +59,7 @@ private:
     SettingsWindow mSettingsWindow;
     EditContactWindow mEditContactWindow;
 
+    virtual void closeEvent(QCloseEvent* event);
     Contact* getSelectedContact();
     QListWidgetItem* findItemByContactId(int id);
     void setContactStatusIcon(QListWidgetItem *item, Contact::Status status);

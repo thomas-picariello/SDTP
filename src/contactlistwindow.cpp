@@ -152,6 +152,11 @@ void ContactListWindow::updateContactStatus(){
     }
 }
 
+void ContactListWindow::closeEvent(QCloseEvent* event){
+    event->accept();
+    exit(0);
+}
+
 Contact* ContactListWindow::getSelectedContact(){
     QListWidgetItem *currentItem = ui->list->currentItem();
     if(currentItem){
