@@ -80,8 +80,8 @@ void TcpLink::internalStateChanged(QAbstractSocket::SocketState state){
 }
 
 void TcpLink::onConnectionError(QAbstractSocket::SocketError){
-    emit disconnected(); //TODO: check if meaningfull
     emit error(m_Socket->errorString());
+    emit disconnected();
 }
 
 qint64 TcpLink::readData(char *data, qint64 maxSize){
