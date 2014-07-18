@@ -58,7 +58,7 @@ void SVoIP::startProgram(){
     connect(&m_listener, &QTcpServer::newConnection,
             this, &SVoIP::onNewConnection);
     connect(&m_ipFilter, &IpFilter::accepted,
-            this, &SVoIP::startHandshaker);
+            this, &SVoIP::startHandshake);
     connect(m_contactListWindow, &ContactListWindow::settingsUpdated,
             this, &SVoIP::restartListener);
     connect(m_contactDB, &ContactDB::contactEvent,
@@ -72,7 +72,7 @@ void SVoIP::startProgram(){
         Pinger* pinger = new Pinger(contact);
         m_pingerList.insert(contact, pinger);
         connect(pinger, &Pinger::connected,
-                this, &SVoIP::startHandshaker);
+                this, &SVoIP::startHandshake);
         pinger->start();
     }
 }
@@ -88,7 +88,7 @@ void SVoIP::onContactEvent(int id, ContactDB::Event event){
             Pinger* pinger = new Pinger(contact);
             m_pingerList.insert(contact, pinger);
             connect(pinger, &Pinger::connected,
-                    this, &SVoIP::startHandshaker);
+                    this, &SVoIP::startHandshake);
             pinger->start();
         }
         break;
@@ -118,17 +118,17 @@ void SVoIP::onDisconnect(Contact* contact){
 }
 
 void SVoIP::onHandshakeSuccess(){
-    Handshaker* handshaker = dynamic_cast<Handshaker*>(sender());
-    if(handshaker){
-        Contact* contact = handshaker->getContact();
+    AbstractHandshake* handshake = dynamic_cast<AbstractHandshake*>(sender());
+    if(handshake){
+        Contact* contact = handshake->getContact();
         contact->setStatus(Contact::Online);
-        QString host = handshaker->getHost();
+        QString host = handshake->getHost();
         m_ipFilter.removeBan(host);
         if(!m_networkManagerList.contains(contact)){
-            NetworkManager* netMgr = new NetworkManager(handshaker->getContact(),
-                                                        handshaker->getSocket(),
-                                                        handshaker->getGcmKey(),
-                                                        handshaker->getGcmBaseIV(),
+            NetworkManager* netMgr = new NetworkManager(handshake->getContact(),
+                                                        handshake->getSocket(),
+                                                        handshake->getGcmKey(),
+                                                        handshake->getGcmBaseIV(),
                                                         this);
             m_networkManagerList.insert(contact, netMgr);
             connect(netMgr, &NetworkManager::disconnected,
@@ -136,30 +136,30 @@ void SVoIP::onHandshakeSuccess(){
             connect(netMgr, &NetworkManager::startAppFor,
                     this, &SVoIP::onStartAppForRequest);
         }
-        delete handshaker;
-        m_handshakerList.remove(host);
+        delete handshake;
+        m_handshakeList.remove(host);
     }
 }
 
-void SVoIP::onHandshakeError(Handshaker::Error error){
-    Handshaker* handshaker = dynamic_cast<Handshaker*>(sender());
-    if(handshaker){
-        qDebug()<< "Handshake error:" << handshaker->getErrorString(error);
-        QString host = handshaker->getHost();
-        if(handshaker->getRecievedBanTime() != 0)
-            m_ipFilter.addBan(host, handshaker->getRecievedBanTime());
+void SVoIP::onHandshakeError(AbstractHandshake::Error error){
+    AbstractHandshake* handshake = dynamic_cast<AbstractHandshake*>(sender());
+    if(handshake){
+        qDebug()<< "Handshake error:" << handshake->getErrorString(error);
+        QString host = handshake->getHost();
+        if(handshake->getRecievedBanTime() != 0)
+            m_ipFilter.addBan(host, handshake->getRecievedBanTime());
 
         const quint16 banTime = m_ipFilter.getRemainingBanTime(host);
         foreach (Pinger* pinger, m_pingerList){
             if(pinger->hasHost(host))
                 pinger->start(banTime);
         }
-        Contact* contact = handshaker->getContact();
+        Contact* contact = handshake->getContact();
         if(contact){
             m_pingerList.value(contact)->start(banTime);
         }
-        delete handshaker;
-        m_handshakerList.remove(host);
+        delete handshake;
+        m_handshakeList.remove(host);
     }
 
 }
@@ -221,7 +221,7 @@ void SVoIP::onStartAppForRequest(Contact* contact, AppUID distantUID){
         m_networkManagerList.value(contact, NULL)->registerAppConnection(appEntry.first, distantUID);
 }
 
-void SVoIP::startHandshaker(QTcpSocket* socket){
+void SVoIP::startHandshake(QTcpSocket* socket){
     Pinger* pinger = dynamic_cast<Pinger*>(sender());
     IpFilter* filter = dynamic_cast<IpFilter*>(sender());
     if(pinger || filter){
@@ -229,19 +229,19 @@ void SVoIP::startHandshaker(QTcpSocket* socket){
         if(getHostState(host) != NotConnected && host != "127.0.0.1")   //TODO: remove debug localhost
             socket->close();
         else{
-            Handshaker* handshaker = new Handshaker(socket, m_rsaKeyring, this);
-            m_handshakerList.insertMulti(socket->peerAddress().toString(), handshaker); //TODO: debug multi
-            connect(handshaker, &Handshaker::success, this, &SVoIP::onHandshakeSuccess);
-            connect(handshaker, &Handshaker::error, this, &SVoIP::onHandshakeError);
-            if(pinger)
-                handshaker->startHandshake(pinger->getContact());
-            else{
+            AbstractHandshake* handshake;
+            if(pinger){
+                handshake = new HandshakeStarter(socket, pinger->getContact(), &m_ipFilter, m_rsaKeyring, this);
+            }else{
                 foreach (Pinger* pinger, m_pingerList){
                     if(pinger->hasHost(host))
                         pinger->stop();
                 }
-                handshaker->waitForHandshake(m_contactDB);
+                handshake = new HandshakeResponder(socket, m_contactDB, &m_ipFilter, m_rsaKeyring, this);
             }
+            m_handshakeList.insertMulti(socket->peerAddress().toString(), handshake); //TODO: debug multi
+            connect(handshake, &AbstractHandshake::success, this, &SVoIP::onHandshakeSuccess);
+            connect(handshake, &AbstractHandshake::error, this, &SVoIP::onHandshakeError);
         }
     }
 }
@@ -289,7 +289,7 @@ SVoIP::IpState SVoIP::getHostState(QString host){
         if(netMgr->getHost() == host)
             return Connected;
     }
-    if(m_handshakerList.contains(host)){
+    if(m_handshakeList.contains(host)){
         return Handshaking;
     }else
         return NotConnected;

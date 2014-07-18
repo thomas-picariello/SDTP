@@ -17,7 +17,9 @@
 #include "networkmanager.h"
 #include "ipfilter.h"
 #include "pinger.h"
-#include "handshaker.h"
+//#include "handshaker.h"
+#include "handshakeresponder.h"
+#include "handshakestarter.h"
 #include "appuid.h"
 #include "upnpnat.h"
 #include "typesenums.h"
@@ -48,13 +50,13 @@ private slots:
     void onContactEvent(int id, ContactDB::Event event);
     void onDisconnect(Contact* contact);
     void onHandshakeSuccess();
-    void onHandshakeError(Handshaker::Error error);
+    void onHandshakeError(AbstractHandshake::Error error);
     void registerNAT(quint16 port,bool connexionType);
     void restartListener();
 
     void onStartAppRequest(Contact *contact, AppType appType);
     void onStartAppForRequest(Contact *contact, AppUID distantUID);
-    void startHandshaker(QTcpSocket *socket);
+    void startHandshake(QTcpSocket *socket);
 
     void checkParameters(QByteArray key = QByteArray());
     void onNewConnection();
@@ -73,7 +75,8 @@ private :
     IpFilter m_ipFilter;
     QTcpServer m_listener;
     QMap<Contact*, Pinger*> m_pingerList;
-    QMap<QString, Handshaker*> m_handshakerList;
+//    QMap<QString, Handshaker*> m_handshakerList;
+    QMap<QString, AbstractHandshake*> m_handshakeList;
 
     QMap<Contact*,NetworkManager*> m_networkManagerList;
     QMap<AppUID,AbstractApp*> m_appList;
