@@ -58,6 +58,7 @@ void NetworkManager::unregisterApp(AppUID uid){
 
 void NetworkManager::onTcpDisconnect(){
     m_contact->setStatus(Contact::Offline);
+    emit disconnected(m_contact);
 }
 
 void NetworkManager::sendData(LinkType linkType, QByteArray &data){

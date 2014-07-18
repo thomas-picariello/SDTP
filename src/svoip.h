@@ -44,11 +44,11 @@ public:
 	SVoIP(QObject *parent = 0);
     ~SVoIP();
 
-public slots:
+private slots:
     void onContactEvent(int id, ContactDB::Event event);
+    void onDisconnect(Contact* contact);
     void onHandshakeSuccess();
     void onHandshakeError(Handshaker::Error error);
-    void onNetworkManagerDestroy(NetworkManager *networkManager);
     void registerNAT(quint16 port,bool connexionType);
     void restartListener();
 
@@ -56,7 +56,6 @@ public slots:
     void onStartAppForRequest(Contact *contact, AppUID distantUID);
     void startHandshaker(QTcpSocket *socket);
 
-private slots:
     void checkParameters(QByteArray key = QByteArray());
     void onNewConnection();
     void startProgram();

@@ -58,9 +58,10 @@ public slots:
     void sendData(LinkType linkType, QByteArray &data);
 
 signals:
-    void destroyed(NetworkManager* networkManager);
-    void error(NetworkManager::Error err);
-    void startAppFor(Contact *contact, AppUID distantAppUID);
+    void disconnected(Contact*);
+    void destroyed(NetworkManager*);
+    void error(NetworkManager::Error);
+    void startAppFor(Contact*, AppUID);
 
 private slots:
     void onStartAppForRequest(AppUID distantUID);

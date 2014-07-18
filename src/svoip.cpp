@@ -81,9 +81,9 @@ void SVoIP::onNewConnection(){
     m_ipFilter.filter(m_listener.nextPendingConnection());
 }
 
-void SVoIP::onNetworkManagerDestroy(NetworkManager* networkManager){
-    m_networkManagerList.remove(networkManager->getContact());
-}
+//void SVoIP::onNetworkManagerDestroy(NetworkManager* networkManager){
+//    m_networkManagerList.remove(networkManager->getContact());
+//}
 
 void SVoIP::onContactEvent(int id, ContactDB::Event event){
     Contact* contact = m_contactDB->findById(id);
@@ -109,6 +109,22 @@ void SVoIP::onContactEvent(int id, ContactDB::Event event){
     }
 }
 
+void SVoIP::onDisconnect(Contact* contact){
+    //delete Apps
+    foreach(AppUID uid, m_appRegisterTable.keys(contact)){
+        m_appRegisterTable.remove(uid);
+        m_appList.remove(uid);
+    }
+
+    //delete Netmgr
+    m_networkManagerList.remove(contact);
+
+    //restart pinger
+    Pinger *pinger = m_pingerList.value(contact, NULL);
+    if(pinger)
+        pinger->start();
+}
+
 void SVoIP::onHandshakeSuccess(){
     Handshaker* handshaker = dynamic_cast<Handshaker*>(sender());
     if(handshaker){
@@ -123,8 +139,8 @@ void SVoIP::onHandshakeSuccess(){
                                                         handshaker->getGcmBaseIV(),
                                                         this);
             m_networkManagerList.insert(contact, netMgr);
-            connect(netMgr, &NetworkManager::destroyed,
-                    this, &SVoIP::onNetworkManagerDestroy);
+            connect(netMgr, &NetworkManager::disconnected,
+                    this, &SVoIP::onDisconnect);
             connect(netMgr, &NetworkManager::startAppFor,
                     this, &SVoIP::onStartAppForRequest);
         }
