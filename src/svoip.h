@@ -46,19 +46,17 @@ public:
     ~SVoIP();
 
 private slots:
+    void checkParameters(QByteArray key = QByteArray());
     void onContactEvent(int id, ContactDB::Event event);
     void onDisconnect(Contact* contact);
     void onHandshakeSuccess();
     void onHandshakeError(AbstractHandshake::Error error);
-    void registerNAT(quint16 port,bool connexionType);
-    void restartListener();
-
     void onStartAppRequest(Contact *contact, AppType appType);
     void onStartAppForRequest(Contact *contact, AppUID distantUID);
-    void startHandshake(QTcpSocket *socket);
-
-    void checkParameters(QByteArray key = QByteArray());
     void onNewConnection();
+    void registerNAT(quint16 port,bool connexionType);
+    void restartListener();
+    void startHandshake(QTcpSocket *socket);
     void startProgram();
 
 signals:

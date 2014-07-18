@@ -97,19 +97,16 @@ void SVoIP::onContactEvent(int id, ContactDB::Event event){
             if(netMgr) delete netMgr;
         }
         break;
-        case ContactDB::ContactEdited:{
-            //not usefull theoretically...
-
-        }
-        break;
     }
 }
 
 void SVoIP::onDisconnect(Contact* contact){
     foreach(AppUID uid, m_appRegisterTable.keys(contact)){
         m_appRegisterTable.remove(uid);
+        m_appList.value(uid)->deleteLater();
         m_appList.remove(uid);
     }
+    m_networkManagerList.value(contact)->deleteLater();
     m_networkManagerList.remove(contact);
 
     Pinger *pinger = m_pingerList.value(contact, NULL);
