@@ -16,7 +16,6 @@ class VoiceApp : public AbstractApp
     Q_OBJECT
 public:
     static const AppType APPTYPE = VoIP;
-    static const int MONITORS_UPDATE_INTERVAL = 200;
 
     enum State{
         Disconnected,
@@ -30,20 +29,25 @@ public:
 signals:
 
 public slots:
-    virtual void readIncommingData(QByteArray &data);
+    virtual void readIncommingData(const QByteArray& data);
 
 private slots:
     void endCall();
     void onContactStatusChange();
+    void onCodecReadyRead();
     void startCall();
-    void updateMonitorsValue();
+    void onNewInputProbe(qint16 probe);
+    void onNewOutputProbe(qint16 probe);
+    void setOutputVolume(int value);
+    void setInputMute(bool mute);
+    void setOutputMute(bool mute);
 
 private:
     Ui::VoiceApp* m_ui;
-    QTimer m_monitorUpdateTimer;
+    OpusVoiceCodec m_codec;
     State m_state;
 
-    void onStateChange();
+    void updateUiToState();
 };
 
 #endif // VOICEAPP_H

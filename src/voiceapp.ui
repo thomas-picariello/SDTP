@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>VoiceApp</class>
  <widget class="QWidget" name="VoiceApp">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>94</width>
+    <height>286</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Call</string>
   </property>
@@ -127,29 +135,10 @@ QSlider::handle::vertical::pressed{
             </size>
            </property>
            <property name="value">
-            <number>24</number>
+            <number>0</number>
            </property>
            <property name="textVisible">
             <bool>false</bool>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QSlider" name="mic_vol_sl">
-           <property name="minimumSize">
-            <size>
-             <width>30</width>
-             <height>200</height>
-            </size>
-           </property>
-           <property name="maximum">
-            <number>100</number>
-           </property>
-           <property name="value">
-            <number>75</number>
            </property>
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -164,8 +153,8 @@ QSlider::handle::vertical::pressed{
           <widget class="QToolButton" name="mic_mute_bt">
            <property name="icon">
             <iconset resource="../res/res.qrc">
-             <normaloff>:/icons/mic_disabled</normaloff>
-             <normalon>:/icons/mic_enabled</normalon>:/icons/mic_disabled</iconset>
+             <normaloff>:/icons/mic_enabled</normaloff>
+             <normalon>:/icons/mic_disabled</normalon>:/icons/mic_enabled</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -177,7 +166,7 @@ QSlider::handle::vertical::pressed{
             <bool>true</bool>
            </property>
            <property name="checked">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -201,7 +190,7 @@ QSlider::handle::vertical::pressed{
             </size>
            </property>
            <property name="value">
-            <number>24</number>
+            <number>0</number>
            </property>
            <property name="textVisible">
             <bool>false</bool>
@@ -223,7 +212,7 @@ QSlider::handle::vertical::pressed{
             <number>100</number>
            </property>
            <property name="value">
-            <number>75</number>
+            <number>100</number>
            </property>
            <property name="tracking">
             <bool>true</bool>
@@ -241,8 +230,8 @@ QSlider::handle::vertical::pressed{
           <widget class="QToolButton" name="output_mute_bt">
            <property name="icon">
             <iconset resource="../res/res.qrc">
-             <normaloff>:/icons/speaker_disabled</normaloff>
-             <normalon>:/icons/speaker_enabled</normalon>:/icons/speaker_disabled</iconset>
+             <normaloff>:/icons/speaker_enabled</normaloff>
+             <normalon>:/icons/speaker_disabled</normalon>:/icons/speaker_enabled</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -254,7 +243,7 @@ QSlider::handle::vertical::pressed{
             <bool>true</bool>
            </property>
            <property name="checked">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>

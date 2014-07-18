@@ -2,7 +2,8 @@
 #include"ui_voiceapp.h"
 
 VoiceApp::VoiceApp(Contact* contact, QWidget* parent) :
-    AbstractApp(contact, parent), m_ui(new Ui::VoiceApp())
+    AbstractApp(contact, parent),
+    m_ui(new Ui::VoiceApp())
 {
     setWindowFlags(Qt::WindowCloseButtonHint);
     m_ui->setupUi(this);
@@ -12,42 +13,72 @@ VoiceApp::VoiceApp(Contact* contact, QWidget* parent) :
         m_state = Ready;
     else
         m_state = Disconnected;
-    onStateChange();
+    updateUiToState();
 
-    m_ui->mic_monitor_pb->setInterpolationTime(MONITORS_UPDATE_INTERVAL);
-    m_ui->output_monitor_pb->setInterpolationTime(MONITORS_UPDATE_INTERVAL);
-    connect(&m_monitorUpdateTimer, &QTimer::timeout, this, &VoiceApp::updateMonitorsValue);
-    m_monitorUpdateTimer.start(MONITORS_UPDATE_INTERVAL);
+    m_codec.setBitrate(25000);
+    connect(&m_codec, &OpusVoiceCodec::readyRead, this, &VoiceApp::onCodecReadyRead);
+
+    m_ui->mic_monitor_pb->setInterpolationTime((int)m_codec.getOpusFrameSize());
+    m_ui->output_monitor_pb->setInterpolationTime((int)m_codec.getOpusFrameSize());
+    connect(&m_codec, &OpusVoiceCodec::newInputProbe, this, &VoiceApp::onNewInputProbe);
+    connect(&m_codec, &OpusVoiceCodec::newOutputProbe, this, &VoiceApp::onNewOutputProbe);
+
+    connect(m_ui->output_vol_sl, &QSlider::valueChanged, this, &VoiceApp::setOutputVolume);
+    connect(m_ui->mic_mute_bt, &QToolButton::clicked, this, &VoiceApp::setInputMute);
+    connect(m_ui->output_mute_bt, &QToolButton::clicked, this, &VoiceApp::setOutputVolume);
 }
 
 
-void VoiceApp::readIncommingData(QByteArray& data){
-
+void VoiceApp::readIncommingData(const QByteArray& data){
+    m_codec.write(data);
 }
 
 void VoiceApp::endCall(){
     m_state = Ready;
-    onStateChange();
+    m_codec.stop();
+    updateUiToState();
 }
 
 void VoiceApp::onContactStatusChange(){
     Contact* contact = dynamic_cast<Contact*>(sender());
     if(contact){
-        onStateChange();
+        updateUiToState();
     }
+}
+
+void VoiceApp::onCodecReadyRead(){
+    emit sendData(TCP, m_codec.readAll());
 }
 
 void VoiceApp::startCall(){
     m_state = Calling;
-    onStateChange();
+    m_codec.start();
+    updateUiToState();
 }
 
-void VoiceApp::updateMonitorsValue(){
-    m_ui->mic_monitor_pb->setValue(qrand() % (m_ui->mic_vol_sl->value()+1));
-    m_ui->output_monitor_pb->setValue(qrand() % (m_ui->output_vol_sl->value()+1));
+void VoiceApp::onNewInputProbe(qint16 probe){
+    m_ui->mic_monitor_pb->setValue((probe/32767.0)*100);
 }
 
-void VoiceApp::onStateChange(){
+void VoiceApp::onNewOutputProbe(qint16 probe){
+    m_ui->output_monitor_pb->setValue((probe/32767.0)*100);
+}
+
+void VoiceApp::setOutputVolume(int value){
+    m_codec.setOutputVolume(value/100.0);
+}
+
+void VoiceApp::setInputMute(bool mute){
+    m_codec.setInputMute(mute);
+    m_ui->mic_monitor_pb->setValue(0);
+}
+
+void VoiceApp::setOutputMute(bool mute){
+    m_codec.setOutputMute(mute);
+    m_ui->output_monitor_pb->setValue(0);
+}
+
+void VoiceApp::updateUiToState(){
     QColor buttonColor;
     disconnect(m_ui->call_bt, &QPushButton::clicked, this, 0);
     switch(m_state){
