@@ -5,7 +5,6 @@
 #include <QTcpSocket>
 #include <QHostAddress>
 #include <QTimer>
-#include "typesenums.h"
 
 class TcpLink : public AbstractLink
 {
@@ -36,7 +35,7 @@ signals:
     void disconnected();
 
 private:
-    QTcpSocket *m_Socket;
+    QTcpSocket *m_socket;
 
     virtual qint64 readData(char *data, qint64 maxSize);
     virtual qint64 writeData(const char *data, qint64 size);
