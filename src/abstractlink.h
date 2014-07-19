@@ -3,6 +3,7 @@
 
 #include <QIODevice>
 #include <QAbstractSocket>
+#include "typesenums.h"
 
 class AbstractLink : public QIODevice
 {
@@ -17,10 +18,10 @@ public:
 
     AbstractLink(QObject *parent=0):
         QIODevice(parent),
-        m_State(Offline)
+        m_state(Offline)
     {}
 
-    State state(){ return m_State; }
+    State state(){ return m_state; }
 
     virtual qint64 bytesAvailable() const = 0;
     virtual bool isSequential(){ return true; }
@@ -45,7 +46,7 @@ private slots:
     }
 
 protected :
-    State m_State;
+    State m_state;
 
     virtual qint64 readData(char * data, qint64 maxSize) = 0;
     virtual qint64 writeData(const char * data, qint64 size) = 0;
