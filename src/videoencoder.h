@@ -7,6 +7,7 @@
 #include <QVideoFrame>
 #include <QDataStream>
 #include <QCameraViewfinder>
+#include <QBuffer>
 
 #include "videosurface.h"
 

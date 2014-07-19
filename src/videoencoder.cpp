@@ -1,7 +1,7 @@
 #include "videoencoder.h"
 #include <QDebug>
 
-static const int QUEUE_MAX_LENGTH = 5;
+static const int QUEUE_MAX_LENGTH = 10;
 static const int THREAD_SLEEP_MS = 15;
 static const int IMAGE_WIDTH = 1280;
 static const int IMAGE_HEIGHT = 720;
@@ -19,7 +19,10 @@ void VideoEncoder::stop(){
     m_stopped = true;
 }
 void VideoEncoder::addFrameToProcessingQueue(QImage *frame){
-    if (m_queue.length() < m_queueMaxLength)m_queue.enqueue(frame->copy(QRect(0,0,IMAGE_WIDTH,IMAGE_HEIGHT)));
+    if (m_queue.length() < m_queueMaxLength){
+        m_queue.enqueue(frame->copy(QRect(0,0,IMAGE_WIDTH,IMAGE_HEIGHT)));
+        //qDebug()<<"queue filled";
+    }
     else ;//qDebug()<<"queue Full";
 }
 
@@ -32,21 +35,28 @@ void VideoEncoder::run(){
         while (!m_stopped)
         {
             qDebug()<<i++;
+
             if(!m_queue.isEmpty()){
 
                 QByteArray ba;
-                QDataStream datastream(&ba,QIODevice::ReadWrite);
+                QBuffer buffer(&ba);
+                buffer.open(QIODevice::WriteOnly);
+               // QDataStream datastream(&ba,QIODevice::ReadWrite);
 
                 qDebug()<<"processing";
 
-                datastream << m_queue.dequeue() ;
+                //datastream << m_queue.dequeue();
 
+                m_queue.dequeue().save(&buffer, "PNG",75);
                 emit frameProcessed(ba);
 
 
 
 
-            }else msleep(THREAD_SLEEP_MS);
+            }else {
+                qDebug()<<"going to sleep";
+                msleep(THREAD_SLEEP_MS);
+            }
         }
 
 
