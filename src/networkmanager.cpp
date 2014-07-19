@@ -6,6 +6,8 @@ NetworkManager::NetworkManager(Contact *contact, QTcpSocket *socket, QByteArray 
     m_gcmBaseIv(gcmBaseIV),
     m_gcmKey(gcmKey)
 {
+    m_contact->setActiveHost(socket->peerAddress().toString());
+
     dynamic_cast<TcpLink*>(getGcmDevice(TCP)->getLink())->setSocket(socket);
     getGcmDevice(TCP)->setKeyAndBaseIV(m_gcmKey, m_gcmBaseIv);
     connect(getGcmDevice(TCP), &QIODevice::readyRead,
@@ -58,6 +60,7 @@ void NetworkManager::unregisterApp(AppUID uid){
 
 void NetworkManager::onTcpDisconnect(){
     m_contact->setStatus(Contact::Offline);
+    m_contact->setActiveHost(QString());
     emit disconnected(m_contact);
 }
 
@@ -118,10 +121,12 @@ GcmDevice* NetworkManager::getGcmDevice(LinkType linkType){
             connect(dynamic_cast<TcpLink*>(gcmDevice->getLink()), &TcpLink::disconnected,
                     this, &NetworkManager::onTcpDisconnect);
             break;
-        case UDP:
-            //TODO: impl
+        case UDP:{
+            quint16 listenPort = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toUInt();
+            gcmDevice = new GcmDevice(new UdpLink(m_contact->getActiveHost(), m_contact->getPort(), listenPort), this);
+            m_gcmDevicesList.insert(linkType, gcmDevice);
             break;
-        case RTP:
+        }case RTP:
             //TODO: impl
             break;
         }

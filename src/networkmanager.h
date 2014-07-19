@@ -13,6 +13,7 @@
 #include "abstractapp.h"
 #include "abstractlink.h"
 #include "tcplink.h"
+#include "udplink.h"
 #include "contact.h"
 #include "appuid.h"
 #include "appmanager.h"
