@@ -6,6 +6,7 @@
 #include <QQueue>
 #include <QVideoFrame>
 #include <QBuffer>
+#include <QDataStream>
 
 class VideoEncoder : public QThread
 {
@@ -18,11 +19,12 @@ signals:
     void queueFull();
 public:
     void stop();
-    void addFrameToProcessingQueue(QVideoFrame frame);
+    void addFrameToProcessingQueue(QImage *frame);
 private:
     virtual void run();
 private:
-    QQueue<QVideoFrame> m_queue;
+    QQueue<QImage> m_queue;
+    QImage *m_img;
     int m_queueMaxLength;
     bool m_stopped;
 };

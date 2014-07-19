@@ -34,8 +34,20 @@ bool VideoSurface::present(const QVideoFrame &frame)
 
 
     if(frame.isValid()){
-        QVideoFrame videoFrame(frame);
-        emit newFrame(&videoFrame);
+        QVideoFrame copyframe = frame;
+
+        copyframe.map(QAbstractVideoBuffer::MapMode::ReadOnly);
+
+        emit newFrame(&QImage(copyframe.bits(),
+                             copyframe.width(),
+                             copyframe.height(),
+                             QVideoFrame::imageFormatFromPixelFormat(
+                                  copyframe.pixelFormat())).copy(
+                          QRect(0,0,copyframe.width(),copyframe.height())));
+
+        copyframe.unmap();
+
+
         return true;
     }
     return false;

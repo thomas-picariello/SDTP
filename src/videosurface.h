@@ -16,7 +16,7 @@ public:
     bool isFormatSupported(const QVideoSurfaceFormat &format, QVideoSurfaceFormat *similar) const;
 
 signals:
-    void newFrame(QVideoFrame*);
+    void newFrame(QImage*);
 public:
     virtual void stop();
 private:

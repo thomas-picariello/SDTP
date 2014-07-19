@@ -1,11 +1,12 @@
 #include "videoencoder.h"
 #include <QDebug>
 
-static const int QUEUE_MAX_LENGTH = 5;
-static const int THREAD_SLEEP_MS = 20;
+static const int QUEUE_MAX_LENGTH = 10;
+static const int THREAD_SLEEP_MS = 15;
 
 VideoEncoder::VideoEncoder(QObject *parent) :
     QThread(parent), m_stopped(false), m_queueMaxLength(QUEUE_MAX_LENGTH){
+
 }
 
 VideoEncoder::~VideoEncoder(){
@@ -15,32 +16,23 @@ VideoEncoder::~VideoEncoder(){
 void VideoEncoder::stop(){
     m_stopped = true;
 }
-void VideoEncoder::addFrameToProcessingQueue(QVideoFrame frame){
-    if (m_queue.length() < m_queueMaxLength)m_queue.enqueue(frame);
+void VideoEncoder::addFrameToProcessingQueue(QImage *frame){
+
+    if (m_queue.length() < m_queueMaxLength)m_queue.enqueue(frame->copy(QRect(0,0,frame->width(),frame->height())));
     else emit queueFull();
 }
 
 void VideoEncoder::run(){
+
+    QByteArray ba;
+    QDataStream datastream(&ba,QIODevice::ReadWrite);
     while (!m_stopped)
     {
         if (!m_queue.isEmpty())
         {
-            QVideoFrame framecopy = m_queue.dequeue();
 
-
-            QByteArray ba;
-            QBuffer buffer(&ba);
-            buffer.open(QIODevice::WriteOnly);
-            QImage(framecopy.bits(),
-                 framecopy.width(),
-                 framecopy.height(),
-                 QVideoFrame::imageFormatFromPixelFormat(
-                     framecopy.pixelFormat())
-                   ).save(&buffer, "PNG"); // writes image into ba in PNG format
-
-
-
-
+            ba.clear();
+            datastream << m_queue.dequeue();
 
             emit frameProcessed(ba);
 

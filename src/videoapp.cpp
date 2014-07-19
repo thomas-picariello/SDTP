@@ -16,8 +16,8 @@ VideoApp::VideoApp(Contact * contact, QWidget* parent) :
 
 
 
-    connect(wrapper,SIGNAL(newFrameAvaillable(QVideoFrame)),
-            this,SLOT(drawFrame(QVideoFrame)));
+    connect(wrapper,SIGNAL(newFrameAvaillable(QImage*)),
+            this,SLOT(drawFrame(QImage*)));
     connect(wrapper,SIGNAL(newFrameToSend(QByteArray)),this,SLOT(onDataToSend(QByteArray)));
 
     ui->setupUi(this);
@@ -38,26 +38,16 @@ void VideoApp::readIncommingData(const QByteArray &data){
     qDebug()<<"data Incoming";
 
 }
-void VideoApp::drawFrame(QVideoFrame frame){
+void VideoApp::drawFrame(QImage *frame){
 
-
-    frame.map(QAbstractVideoBuffer::ReadOnly);
-    m_Canvas->setImage(QImage(frame.bits(),
-                             frame.width(),
-                             frame.height(),
-                             QVideoFrame::imageFormatFromPixelFormat(
-                                  frame.pixelFormat())).copy(
-                                    QRect(0,0,frame.width(),frame.height())));
-    frame.unmap();
-
-
+    m_Canvas->setImage(*frame);
 
 }
 
 void VideoApp::onDataToSend(QByteArray data)
 {
 
-    emit sendData(LinkType::UDP,data);
+   // emit sendData(LinkType::TCP,data);
 
 
 }

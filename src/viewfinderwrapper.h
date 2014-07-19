@@ -28,7 +28,7 @@ signals:
     void frameCountChanged(long count);
     void processedCountChanged(long count);
     void runningChanged();
-    void newFrameAvaillable(QVideoFrame);
+    void newFrameAvaillable(QImage*);
     void newFrameToSend(QByteArray);
 
 public slots:
@@ -48,10 +48,9 @@ private slots:
     void onCameraError(QCamera::Error error);
 
     // Surface
-    void onNewFrame(QVideoFrame *frame);
+    void onNewFrame(QImage *frame);
 
     // ProcessingThread
-    void onFrameProcessed();
     void onThreadCongested();
 
 private:

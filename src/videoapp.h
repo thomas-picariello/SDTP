@@ -38,7 +38,7 @@ public:
 
 public slots :
     virtual void readIncommingData(const QByteArray &data);
-    void drawFrame(QVideoFrame frame);
+    void drawFrame(QImage *frame);
     void onDataToSend(QByteArray data);
 
 signals :

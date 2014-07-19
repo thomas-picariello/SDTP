@@ -15,7 +15,7 @@ ViewFinderWrapper::ViewFinderWrapper(QDeclarativeItem *parent) :
     setFlag(QGraphicsItem::ItemHasNoContents, false);
 
     // Connect surface to our slot
-    connect(&m_surface,SIGNAL(newFrame(QVideoFrame*)),this,SLOT(onNewFrame(QVideoFrame*)));
+    connect(&m_surface,SIGNAL(newFrame(QImage*)),this,SLOT(onNewFrame(QImage*)));
 
 
 }
@@ -58,9 +58,8 @@ void ViewFinderWrapper::startCamera()
     Q_ASSERT(!m_processor);
 
     m_processor = new VideoEncoder(this);
-    connect(m_processor, SIGNAL(frameProcessed()), this, SLOT(onFrameProcessed()));
     connect(m_processor, SIGNAL(queueFull()), this, SLOT(onThreadCongested()));
-    connect(m_processor,SIGNAL(frameProcessed(QByteArray)),this,SIGNAL(newFrameToSend(QByteArray)));
+    connect(m_processor, SIGNAL(frameProcessed(QByteArray)),this,SIGNAL(newFrameToSend(QByteArray)));
 
     m_processor->start();
 
@@ -160,28 +159,21 @@ void ViewFinderWrapper::onCameraError(QCamera::Error error)
     m_cameraError = error;
     emit cameraErrorChanged(m_cameraError);
 }
-void ViewFinderWrapper::onNewFrame(QVideoFrame *frame){
+void ViewFinderWrapper::onNewFrame(QImage *frame){
 
 
-    emit newFrameAvaillable(*frame);
+
+    emit newFrameAvaillable(frame);
 
     if (m_processor) {
-        m_processor->addFrameToProcessingQueue(*frame);
+        m_processor->addFrameToProcessingQueue(frame);
     }
-
-}
-
-void ViewFinderWrapper::onFrameProcessed()
-{
-
-    m_processedFrameCounter++;
-    emit processedCountChanged(m_processedFrameCounter);
 
 }
 
 void ViewFinderWrapper::onThreadCongested()
 {
 
-    qDebug()<<"onthread congested";
+    //qDebug()<<"onthread congested";
 
 }
