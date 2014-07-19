@@ -15,7 +15,7 @@ VoiceApp::VoiceApp(Contact* contact, QWidget* parent) :
         m_state = Disconnected;
     updateUiToState();
 
-    m_codec.setBitrate(25000);
+    m_codec.setBitrate(5000);
     connect(&m_codec, &OpusVoiceCodec::readyRead, this, &VoiceApp::onCodecReadyRead);
 
     m_ui->mic_monitor_pb->setInterpolationTime((int)m_codec.getOpusFrameSize());
@@ -36,6 +36,8 @@ void VoiceApp::readIncommingData(const QByteArray& data){
 void VoiceApp::endCall(){
     m_state = Ready;
     m_codec.stop();
+    m_ui->mic_monitor_pb->setValue(0);
+    m_ui->output_monitor_pb->setValue(0);
     updateUiToState();
 }
 
@@ -47,7 +49,7 @@ void VoiceApp::onContactStatusChange(){
 }
 
 void VoiceApp::onCodecReadyRead(){
-    emit sendData(TCP, m_codec.readAll());
+    emit sendData(UDP, m_codec.readAll());
 }
 
 void VoiceApp::startCall(){
@@ -76,6 +78,10 @@ void VoiceApp::setInputMute(bool mute){
 void VoiceApp::setOutputMute(bool mute){
     m_codec.setOutputMute(mute);
     m_ui->output_monitor_pb->setValue(0);
+}
+
+void VoiceApp::closeEvent(QCloseEvent* event){
+    m_codec.stop();
 }
 
 void VoiceApp::updateUiToState(){

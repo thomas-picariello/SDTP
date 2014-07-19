@@ -47,6 +47,7 @@ private:
     OpusVoiceCodec m_codec;
     State m_state;
 
+    virtual void closeEvent(QCloseEvent* event);
     void updateUiToState();
 };
 
