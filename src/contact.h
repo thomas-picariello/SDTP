@@ -47,6 +47,12 @@ public:
             QObject *parent = 0);
 
     /**
+     * @brief activeHost returns the currently online host.
+     * @return the host, or an empty string if none has been defined
+     */
+    QString getActiveHost() const;
+
+    /**
      * @brief Returns a copy of the hosts list of the Contact.
      * @return a copy of the hosts list of the Contact
      */
@@ -87,6 +93,12 @@ public:
      * @return a pointer to the internal hosts list of the Contact
      */
     QStringList* hostsList();
+
+    /**
+     * @brief Defines the active host from the host list
+     * @param activeHost the active host.
+     */
+    void setActiveHost(QString& activeHost);
 
     /**
      * @brief Defines the host list of the Contact.
@@ -146,6 +158,7 @@ signals:
 
 private :
     QStringList m_hostsList;
+    QString m_activeHost;
     uint m_id;
     QByteArray m_key;
     QString m_name;

@@ -17,6 +17,10 @@ Contact::Contact(int id, QString name, QStringList hostsList, quint16 port, QByt
     m_status(Offline)
 {}
 
+QString Contact::getActiveHost() const{
+    return m_activeHost;
+}
+
 QStringList Contact::getHostsList() const{
     return m_hostsList;
 }
@@ -43,6 +47,10 @@ Contact::Status Contact::getStatus() const{
 
 QStringList* Contact::hostsList(){
     return &m_hostsList;
+}
+
+void Contact::setActiveHost(QString& activeHost){
+    m_activeHost = activeHost;
 }
 
 void Contact::setHostsList(QStringList hostsList){
