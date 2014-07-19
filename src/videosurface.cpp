@@ -7,6 +7,7 @@ VideoSurface::VideoSurface(QObject *parent) :
     QAbstractVideoSurface(parent)
 {
 
+
 }
 VideoSurface::~VideoSurface()
 {
@@ -29,6 +30,7 @@ QList<QVideoFrame::PixelFormat> VideoSurface::supportedPixelFormats(QAbstractVid
 }
 bool VideoSurface::present(const QVideoFrame &frame)
 {
+
 
     if(frame.isValid())
     {
@@ -53,10 +55,13 @@ bool VideoSurface::present(const QVideoFrame &frame)
 }
 bool VideoSurface::start(const QVideoSurfaceFormat &format)
 {
+
+    QVideoSurfaceFormat form = format;
+    qDebug()<<format.frameRate();
     if (isActive()) {
         stop();
     } else if (!format.frameSize().isEmpty()) {
-        return QAbstractVideoSurface::start(format);
+        return QAbstractVideoSurface::start(form);
     }
     return false;
 

@@ -1,8 +1,8 @@
 #include "videoencoder.h"
 #include <QDebug>
 
-static const int QUEUE_MAX_LENGTH = 10;
-static const int THREAD_SLEEP_MS = 15;
+static const int QUEUE_MAX_LENGTH = 50;
+static const int THREAD_SLEEP_MS = 20;
 static const int IMAGE_WIDTH = 1280;
 static const int IMAGE_HEIGHT = 720;
 
@@ -34,7 +34,7 @@ void VideoEncoder::run(){
 
         while (!m_stopped)
         {
-            qDebug()<<i++;
+
 
             if(!m_queue.isEmpty()){
 
@@ -43,18 +43,17 @@ void VideoEncoder::run(){
                 buffer.open(QIODevice::WriteOnly);
                // QDataStream datastream(&ba,QIODevice::ReadWrite);
 
-                qDebug()<<"processing";
-
                 //datastream << m_queue.dequeue();
 
-                m_queue.dequeue().save(&buffer, "PNG",75);
+                m_queue.dequeue().save(&buffer, "JPG",20);
+                //qDebug()<<i++;
                 emit frameProcessed(ba);
 
 
 
 
             }else {
-                qDebug()<<"going to sleep";
+                //qDebug()<<"going to sleep";
                 msleep(THREAD_SLEEP_MS);
             }
         }

@@ -52,6 +52,7 @@ private:
     Ui::VideoApp *ui;
 
     QGLCanvas *m_Canvas;
+    QGLCanvas *m_Canvas2;
 
     VideoEncoder *m_encoder;
 
