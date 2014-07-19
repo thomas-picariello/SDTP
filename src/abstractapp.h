@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QHash>
+#include <QCloseEvent>
 
 #include "typesenums.h"
 #include "contact.h"
