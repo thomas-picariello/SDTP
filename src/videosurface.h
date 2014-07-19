@@ -6,6 +6,8 @@
 #include <QVideoSurfaceFormat>
 #include <QDebug>
 
+
+
 class VideoSurface : public QAbstractVideoSurface
 {
     Q_OBJECT
@@ -16,9 +18,11 @@ public:
     bool isFormatSupported(const QVideoSurfaceFormat &format, QVideoSurfaceFormat *similar) const;
 
 signals:
-    void newFrame(QImage*);
+    void newFrame(QImage);
+
 public:
     virtual void stop();
+
 private:
     virtual QList<QVideoFrame::PixelFormat> supportedPixelFormats(QAbstractVideoBuffer::HandleType handleType = QAbstractVideoBuffer::NoHandle) const;
     virtual bool present(const QVideoFrame &frame);
@@ -29,7 +33,8 @@ private:
      QRect targetRect;
      QSize imageSize;
      QRect sourceRect;
-     QVideoFrame currentFrame;
+     QByteArray currentFrame;
+
 };
 
 #endif // VIDEOSURFACE_H

@@ -5,9 +5,9 @@ QGLCanvas::QGLCanvas(QWidget* parent)
 {
 }
 
-void QGLCanvas::setImage(const QImage& image)
+void QGLCanvas::setImage(QImage *image)
 {
-    img = image;
+    img = image->copy(QRect(0,0,image->width(),image->height()));
     update();
 
 }

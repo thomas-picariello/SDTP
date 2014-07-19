@@ -11,7 +11,8 @@ class QGLCanvas : public QGLWidget
 {
 public:
     QGLCanvas(QWidget* parent = NULL);
-    void setImage(const QImage& image);
+public slots:
+    void setImage(QImage *image);
 protected:
     void paintEvent(QPaintEvent*);
 private:

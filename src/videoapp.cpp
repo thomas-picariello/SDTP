@@ -6,25 +6,34 @@ VideoApp::VideoApp(Contact * contact, QWidget* parent) :
     AbstractApp(contact, parent),
     ui(new Ui::VideoApp){
 
-
-    wrapper = new ViewFinderWrapper();
-    wrapper->setWidth(800);
-    wrapper->setHeight(600);
-    wrapper->startCamera();
-
     m_Canvas = new QGLCanvas();
 
+    m_camera = new QCamera(this);
 
+    m_surface = new VideoSurface();
 
-    connect(wrapper,SIGNAL(newFrameAvaillable(QImage*)),
-            this,SLOT(drawFrame(QImage*)));
-    connect(wrapper,SIGNAL(newFrameToSend(QByteArray)),this,SLOT(onDataToSend(QByteArray)));
+   m_encoder = new VideoEncoder;
+
+    QList<QByteArray> cameras = m_camera->availableDevices();
+
+    m_camera = new QCamera(cameras.first());
+    m_camera->setViewfinder(new QCameraViewfinder);
+
+    if (m_camera) {
+        m_camera->start();
+        if(m_camera->state()==QCamera::ActiveState)m_camera->setViewfinder(m_surface);
+    }
 
     ui->setupUi(this);
 
     layout()->addWidget(m_Canvas);
 
 
+
+    connect(m_surface,SIGNAL(newFrame(QImage)),this,SLOT(drawFrame(QImage)));
+    connect(m_encoder,SIGNAL(frameProcessed(QByteArray)),this,SLOT(onDataToSend(QByteArray)));
+
+    m_encoder->start();
 
 }
 void VideoApp::addContact(){
@@ -38,15 +47,17 @@ void VideoApp::readIncommingData(const QByteArray &data){
     qDebug()<<"data Incoming";
 
 }
-void VideoApp::drawFrame(QImage *frame){
+void VideoApp::drawFrame(QImage frame){
 
-    m_Canvas->setImage(*frame);
+
+    m_Canvas->setImage(&frame);
+    m_encoder->addFrameToProcessingQueue(&frame);
+
 
 }
-
 void VideoApp::onDataToSend(QByteArray data)
 {
-
+    qDebug()<<"data : "<<data.length();
    // emit sendData(LinkType::TCP,data);
 
 

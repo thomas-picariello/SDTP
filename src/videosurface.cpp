@@ -7,9 +7,7 @@ VideoSurface::VideoSurface(QObject *parent) :
     QAbstractVideoSurface(parent)
 {
 
-
 }
-
 VideoSurface::~VideoSurface()
 {
     stop();
@@ -32,26 +30,24 @@ QList<QVideoFrame::PixelFormat> VideoSurface::supportedPixelFormats(QAbstractVid
 bool VideoSurface::present(const QVideoFrame &frame)
 {
 
+    if(frame.isValid())
+    {
+       // qDebug()<<"newVideoFrame";
 
-    if(frame.isValid()){
         QVideoFrame copyframe = frame;
 
         copyframe.map(QAbstractVideoBuffer::MapMode::ReadOnly);
 
-        emit newFrame(&QImage(copyframe.bits(),
-                             copyframe.width(),
-                             copyframe.height(),
+        emit newFrame(QImage(frame.bits(),
+                             frame.width(),
+                             frame.height(),
                              QVideoFrame::imageFormatFromPixelFormat(
-                                  copyframe.pixelFormat())).copy(
-                          QRect(0,0,copyframe.width(),copyframe.height())));
-
+                                  frame.pixelFormat())));
         copyframe.unmap();
 
-
         return true;
-    }
-    return false;
-
+    }else if(frame.isValid())return true;
+    else return false;
 
 
 }
@@ -71,3 +67,4 @@ void VideoSurface::stop()
 
     QAbstractVideoSurface::stop();
 }
+
