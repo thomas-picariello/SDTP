@@ -47,23 +47,24 @@ void VideoApp::updateDisplay(){
 }
 void VideoApp::readIncommingData(const QByteArray &data){
 
+
+    //m_Canvas2->setImage(&QImage::fromData(data,"JPG"));
     qDebug()<<"data Incoming";
 
 }
 void VideoApp::drawFrame(QImage frame){
 
 
-    //m_Canvas->setImage(&frame);
+    m_Canvas->setImage(&frame);
     m_encoder->addFrameToProcessingQueue(&frame);
 
 
 }
 void VideoApp::onDataToSend(QByteArray data)
 {
-    qDebug()<<"data : "<<data.length();
+    qDebug()<<"data : "<<data.size()<<"bytes";
     m_Canvas2->setImage(&QImage::fromData(data,"JPG"));
-    m_Canvas->setImage(&QImage::fromData(data,"JPG"));
-   // emit sendData(LinkType::TCP,data);
+    emit sendData(LinkType::TCP,data);
 
 
 }

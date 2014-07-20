@@ -1,8 +1,8 @@
 #include "videoencoder.h"
 #include <QDebug>
 
-static const int QUEUE_MAX_LENGTH = 50;
-static const int THREAD_SLEEP_MS = 20;
+static const int QUEUE_MAX_LENGTH = 10;
+static const int THREAD_SLEEP_MS = 40;
 static const int IMAGE_WIDTH = 1280;
 static const int IMAGE_HEIGHT = 720;
 
@@ -45,7 +45,7 @@ void VideoEncoder::run(){
 
                 //datastream << m_queue.dequeue();
 
-                m_queue.dequeue().save(&buffer, "JPG",20);
+                m_queue.dequeue().save(&buffer, "JPG",10);
                 //qDebug()<<i++;
                 emit frameProcessed(ba);
 

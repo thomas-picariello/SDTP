@@ -7,21 +7,10 @@ VideoSurface::VideoSurface(QObject *parent) :
     QAbstractVideoSurface(parent)
 {
 
-
 }
 VideoSurface::~VideoSurface()
 {
     stop();
-}
-bool VideoSurface::isFormatSupported(const QVideoSurfaceFormat &format, QVideoSurfaceFormat *similar) const{
-    Q_UNUSED(similar);
-
-         const QImage::Format imageFormat = QVideoFrame::imageFormatFromPixelFormat(format.pixelFormat());
-         const QSize size = format.frameSize();
-
-         return imageFormat != QImage::Format_Invalid
-                 && !size.isEmpty()
-                 && format.handleType() == QAbstractVideoBuffer::NoHandle;
 }
 
 QList<QVideoFrame::PixelFormat> VideoSurface::supportedPixelFormats(QAbstractVideoBuffer::HandleType handleType) const
@@ -34,7 +23,7 @@ bool VideoSurface::present(const QVideoFrame &frame)
 
     if(frame.isValid())
     {
-       // qDebug()<<"newVideoFrame";
+       qDebug()<<"newVideoFrame";
 
         QVideoFrame copyframe = frame;
 
@@ -51,19 +40,6 @@ bool VideoSurface::present(const QVideoFrame &frame)
     }else if(frame.isValid())return true;
     else return false;
 
-
-}
-bool VideoSurface::start(const QVideoSurfaceFormat &format)
-{
-
-    QVideoSurfaceFormat form = format;
-    qDebug()<<format.frameRate();
-    if (isActive()) {
-        stop();
-    } else if (!format.frameSize().isEmpty()) {
-        return QAbstractVideoSurface::start(form);
-    }
-    return false;
 
 }
 
