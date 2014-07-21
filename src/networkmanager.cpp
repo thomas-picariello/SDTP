@@ -9,7 +9,6 @@ NetworkManager::NetworkManager(Contact *contact, QTcpSocket *socket, QByteArray 
     m_contact->setActiveHost(socket->peerAddress().toString());
 
     dynamic_cast<TcpLink*>(getGcmDevice(TCP)->getLink())->setSocket(socket);
-    getGcmDevice(TCP)->setKeyAndBaseIV(m_gcmKey, m_gcmBaseIv);
     connect(getGcmDevice(TCP), &QIODevice::readyRead,
             this, &NetworkManager::routeIncommingData);
     connect(&m_appManager, &AppManager::sendData,
@@ -117,6 +116,7 @@ GcmDevice* NetworkManager::getGcmDevice(LinkType linkType){
         switch(linkType){
         case TCP:
             gcmDevice = new GcmDevice(new TcpLink(), this);
+            gcmDevice->setKeyAndBaseIV(m_gcmKey, m_gcmBaseIv);
             m_gcmDevicesList.insert(linkType, gcmDevice);
             connect(dynamic_cast<TcpLink*>(gcmDevice->getLink()), &TcpLink::disconnected,
                     this, &NetworkManager::onTcpDisconnect);
@@ -124,6 +124,7 @@ GcmDevice* NetworkManager::getGcmDevice(LinkType linkType){
         case UDP:{
             quint16 listenPort = QSettings("settings.ini", QSettings::IniFormat).value("network/listen_port").toUInt();
             gcmDevice = new GcmDevice(new UdpLink(m_contact->getActiveHost(), m_contact->getPort(), listenPort), this);
+            gcmDevice->setKeyAndBaseIV(m_gcmKey, m_gcmBaseIv);
             m_gcmDevicesList.insert(linkType, gcmDevice);
             break;
         }case RTP:
