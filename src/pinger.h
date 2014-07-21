@@ -16,6 +16,7 @@ public:
 
     Contact* getContact();
     QTcpSocket* getSocket();
+    QTcpSocket* takeSocket();
     bool hasHost(QString &host) const;
     void setSocket(QTcpSocket* socket);
 

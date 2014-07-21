@@ -228,7 +228,7 @@ void SVoIP::startHandshake(QTcpSocket* socket){
         else{
             AbstractHandshake* handshake;
             if(pinger){
-                handshake = new HandshakeStarter(socket, pinger->getContact(), &m_ipFilter, m_rsaKeyring, this);
+                handshake = new HandshakeStarter(pinger->takeSocket(), pinger->getContact(), &m_ipFilter, m_rsaKeyring, this);
             }else{
                 foreach (Pinger* pinger, m_pingerList){
                     if(pinger->hasHost(host))
