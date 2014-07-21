@@ -297,5 +297,5 @@ SVoIP::~SVoIP(){
     if(m_contactDB) delete m_contactDB;
     if(m_passwordWindow) delete m_passwordWindow;
     qDeleteAll(m_appList);
-    qDeleteAll(QMap<Contact*,NetworkManager*>(m_networkManagerList)); //copy list to avoid networkManager self remove
+    qDeleteAll(m_networkManagerList);
 }
