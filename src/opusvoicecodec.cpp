@@ -74,6 +74,10 @@ void OpusVoiceCodec::setOpusFrameSize(float frameSizeInMs){
     authorisedValues << 2.5 << 5.0 << 10.0 << 20.0 << 40.0 << 60.0;
     if(authorisedValues.contains(frameSizeInMs)){
         m_opusFrameLength = frameSizeInMs;
+        //the input pcm buffer size is set to the duration of the opus frame
+        m_inputPcmBuffer.setMaxSize(m_audioFormat.framesForDuration((qint64)m_opusFrameLength*1000)*m_audioFormat.channelCount());
+        //the input pcm buffer size is set to 2 time the duration of the opus frame (arbitrary)
+        m_outputPcmBuffer.setMaxSize(m_audioFormat.framesForDuration(2*(qint64)m_opusFrameLength*1000)*m_audioFormat.channelCount());
     }
 }
 
@@ -116,7 +120,10 @@ void OpusVoiceCodec::setInputMute(bool mute){
 }
 
 void OpusVoiceCodec::setOutputMute(bool mute){
-
+    if(mute)
+        m_audioOutput->setVolume(0.0);
+    else
+        m_audioOutput->setVolume(1.0);
 }
 
 void OpusVoiceCodec::displayOpusErr(int err){
@@ -137,16 +144,16 @@ qint64 OpusVoiceCodec::writeData(const char * data, qint64 size){
         m_audioOutput->start(&m_outputPcmBuffer);
     m_outputEncodedBuffer.append(data, size);
     opusDecode();
-    emit newOutputProbe(computeRMS(m_outputPcmBuffer));
+    emit newOutputProbe(computeRMS(m_outputPcmBuffer, m_audioOutput->volume()));
     return size;
 }
 
-qint16 OpusVoiceCodec::computeRMS(const QPcmBuffer& buffer){
+qint16 OpusVoiceCodec::computeRMS(const QPcmBuffer& buffer, qreal volume){
     qreal quadraticSum = 0;
     for(int i=0; i<buffer.size(); i++){
         quadraticSum += qPow(buffer.data()[i], 2);
     }
-    return qSqrt(quadraticSum/buffer.size());
+    return qSqrt(quadraticSum/buffer.size()) * volume;
 }
 
 void OpusVoiceCodec::opusEncode(){
@@ -163,7 +170,7 @@ void OpusVoiceCodec::opusEncode(){
         for(int i=0; i<encodedBytes; i++)
             m_inputEncodedBuffer.append(encodedFrame.at(i));
         emit readyRead();
-        emit newInputProbe(computeRMS(m_inputPcmBuffer));
+        emit newInputProbe(computeRMS(m_inputPcmBuffer, 1.0));
     }
 }
 

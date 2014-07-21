@@ -23,6 +23,21 @@ public:
         Calling
     };
 
+    enum Controls:quint8{
+        StartCall = 0x00,
+        EndCall = 0x01
+    };
+
+    struct Packet{
+        enum Type:quint8{
+            Control = 0x00,
+            Data = 0x01
+        } type;
+        QByteArray payload;
+        Packet(){}
+        Packet(Type _type, QByteArray _payload): type(_type), payload(_payload){}
+    };
+
     explicit VoiceApp(Contact* contact, QWidget *parent = 0);
     ~VoiceApp();
 
@@ -35,6 +50,7 @@ private slots:
     void endCall();
     void onContactStatusChange();
     void onCodecReadyRead();
+    void onCallButtonClick();
     void startCall();
     void onNewInputProbe(qint16 probe);
     void onNewOutputProbe(qint16 probe);
@@ -48,7 +64,11 @@ private:
     State m_state;
 
     virtual void closeEvent(QCloseEvent* event);
+    void sendPacket(Packet::Type type, const QByteArray& payload);
     void updateUiToState();
 };
+
+QDataStream& operator <<(QDataStream &out, const VoiceApp::Packet &packet);
+QDataStream& operator >>(QDataStream &in, VoiceApp::Packet &packet);
 
 #endif // VOICEAPP_H

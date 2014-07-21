@@ -15,7 +15,7 @@ VoiceApp::VoiceApp(Contact* contact, QWidget* parent) :
         m_state = Disconnected;
     updateUiToState();
 
-    m_codec.setBitrate(5000);
+    m_codec.setBitrate(25000);
     connect(&m_codec, &OpusVoiceCodec::readyRead, this, &VoiceApp::onCodecReadyRead);
 
     m_ui->mic_monitor_pb->setInterpolationTime((int)m_codec.getOpusFrameSize());
@@ -23,18 +23,35 @@ VoiceApp::VoiceApp(Contact* contact, QWidget* parent) :
     connect(&m_codec, &OpusVoiceCodec::newInputProbe, this, &VoiceApp::onNewInputProbe);
     connect(&m_codec, &OpusVoiceCodec::newOutputProbe, this, &VoiceApp::onNewOutputProbe);
 
+    connect(m_ui->call_bt, &QPushButton::clicked, this, &VoiceApp::onCallButtonClick);
     connect(m_ui->output_vol_sl, &QSlider::valueChanged, this, &VoiceApp::setOutputVolume);
     connect(m_ui->mic_mute_bt, &QToolButton::clicked, this, &VoiceApp::setInputMute);
-    connect(m_ui->output_mute_bt, &QToolButton::clicked, this, &VoiceApp::setOutputVolume);
+    connect(m_ui->output_mute_bt, &QToolButton::clicked, this, &VoiceApp::setOutputMute);
 }
 
 
 void VoiceApp::readIncommingData(const QByteArray& data){
-    m_codec.write(data);
+    QByteArray myData = data;
+    Packet packet;
+    QDataStream(&myData, QIODevice::ReadOnly) >> packet;
+    switch(packet.type){
+    case Packet::Control:
+        switch((Controls)packet.payload.at(0)){
+        case EndCall:
+            endCall();
+            break;
+        case StartCall:
+            startCall();
+            break;
+        }
+        break;
+    case Packet::Data:
+        m_codec.write(packet.payload);
+        break;
+    }
 }
 
 void VoiceApp::endCall(){
-    m_state = Ready;
     m_codec.stop();
     m_ui->mic_monitor_pb->setValue(0);
     m_ui->output_monitor_pb->setValue(0);
@@ -49,11 +66,25 @@ void VoiceApp::onContactStatusChange(){
 }
 
 void VoiceApp::onCodecReadyRead(){
-    emit sendData(UDP, m_codec.readAll());
+    sendPacket(Packet::Data, m_codec.readAll());
+}
+
+void VoiceApp::onCallButtonClick(){
+    QByteArray control;
+    if(m_state == Ready){
+        m_state = Calling;
+        startCall();
+        control.append((char)StartCall);
+        sendPacket(Packet::Control, control);
+    }else if(m_state == Calling){
+        m_state = Ready;
+        endCall();
+        control.append((char)EndCall);
+        sendPacket(Packet::Control, control);
+    }
 }
 
 void VoiceApp::startCall(){
-    m_state = Calling;
     m_codec.start();
     updateUiToState();
 }
@@ -81,12 +112,22 @@ void VoiceApp::setOutputMute(bool mute){
 }
 
 void VoiceApp::closeEvent(QCloseEvent* event){
-    m_codec.stop();
+    event->accept();
+    endCall();
+}
+
+void VoiceApp::sendPacket(Packet::Type type, const QByteArray& payload){
+    QByteArray packetBytes;
+    QDataStream(&packetBytes, QIODevice::WriteOnly) << Packet(type, payload);
+    //readIncommingData(packetBytes); //WARNING: debug loopback
+    if(type == Packet::Control)
+        emit sendData(TCP, packetBytes);
+    else
+        emit sendData(UDP, packetBytes);
 }
 
 void VoiceApp::updateUiToState(){
     QColor buttonColor;
-    disconnect(m_ui->call_bt, &QPushButton::clicked, this, 0);
     switch(m_state){
     case Disconnected:
         buttonColor.setNamedColor("#bbb");
@@ -95,12 +136,10 @@ void VoiceApp::updateUiToState(){
     case Ready:
         buttonColor.setNamedColor("#0b0");
         m_ui->call_bt->setIcon(QIcon(":/icons/call"));
-        connect(m_ui->call_bt, &QPushButton::clicked, this, &VoiceApp::startCall);
         break;
     case Calling:
         buttonColor.setNamedColor("#b00");
         m_ui->call_bt->setIcon(QIcon(":/icons/hangup"));
-        connect(m_ui->call_bt, &QPushButton::clicked, this, &VoiceApp::endCall);
         break;
     }
     m_ui->call_bt->setStyleSheet("QPushButton{background:"         + buttonColor.name() +";}"
@@ -131,4 +170,18 @@ void VoiceApp::updateUiToState(){
 
 VoiceApp::~VoiceApp(){
     delete m_ui;
+}
+
+QDataStream& operator <<(QDataStream &out, const VoiceApp::Packet &packet){
+    out << (quint8)packet.type;
+    out << packet.payload;
+    return out;
+}
+
+QDataStream& operator >>(QDataStream &in, VoiceApp::Packet &packet){
+    quint8 typeInt;
+    in >> typeInt;
+    in >> packet.payload;
+    packet.type = (VoiceApp::Packet::Type)typeInt;
+    return in;
 }

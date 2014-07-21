@@ -62,7 +62,7 @@ private:
     int m_application;
     float m_opusFrameLength;
 
-    qint16 computeRMS(const QPcmBuffer& buffer);
+    qint16 computeRMS(const QPcmBuffer& buffer, qreal volume);
     //Debug
     void displayOpusErr(int err);
 
