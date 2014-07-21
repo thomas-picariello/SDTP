@@ -38,9 +38,11 @@ void VoiceApp::readIncommingData(const QByteArray& data){
     case Packet::Control:
         switch((Controls)packet.payload.at(0)){
         case EndCall:
+            m_state = Ready;
             endCall();
             break;
         case StartCall:
+            m_state = Calling;
             startCall();
             break;
         }
