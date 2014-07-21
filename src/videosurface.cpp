@@ -19,33 +19,16 @@ QList<QVideoFrame::PixelFormat> VideoSurface::supportedPixelFormats(QAbstractVid
 }
 bool VideoSurface::present(const QVideoFrame &frame)
 {
-
-
     if(frame.isValid())
     {
-       qDebug()<<"newVideoFrame";
-
-        QVideoFrame copyframe = frame;
-
-        copyframe.map(QAbstractVideoBuffer::MapMode::ReadOnly);
-
-        emit newFrame(QImage(frame.bits(),
-                             frame.width(),
-                             frame.height(),
-                             QVideoFrame::imageFormatFromPixelFormat(
-                                  frame.pixelFormat())));
-        copyframe.unmap();
-
+        QVideoFrame copyframe;
+        copyframe  = frame;
+        emit newFrame(copyframe);
         return true;
-    }else if(frame.isValid())return true;
-    else return false;
-
-
+    }else return false;
 }
 
 void VideoSurface::stop()
 {
-
     QAbstractVideoSurface::stop();
 }
-

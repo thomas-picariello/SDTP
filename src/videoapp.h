@@ -5,20 +5,17 @@
 
 #include <contact.h>
 #include <QDebug>
-#include <QMediaPlayer>
-#include <QVideoWidget>
-#include <QDeclarativeContext>
-#include <QtGui>
-#include <QVideoFrame>
 #include <QCamera>
-#include <QBuffer>
+#include <QCameraViewfinder>
+#include <QImageEncoderSettings>
+#include <QThread>
 
 #include "typesenums.h"
 #include "abstractapp.h"
 
 #include "qglcanvas.h"
-#include "videoencoder.h"
 #include "videosurface.h"
+#include "videoprocessor.h"
 
 
 
@@ -42,7 +39,6 @@ public:
 
 public slots :
     virtual void readIncommingData(const QByteArray &data);
-    void drawFrame(QImage frame);
     void onDataToSend(QByteArray data);
 
 signals :
@@ -50,19 +46,12 @@ signals :
 
 private:
     Ui::VideoApp *ui;
-
     QGLCanvas *m_Canvas;
     QGLCanvas *m_Canvas2;
-
-    VideoEncoder *m_encoder;
-
     QCamera* m_camera;
-
     VideoSurface *m_surface;
-
-
-
-
+    QThread *thread;
+    VideoProcessor *m_videoprocessor;
 };
 
 #endif // VIDEOAPP_H

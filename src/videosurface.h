@@ -14,23 +14,14 @@ class VideoSurface : public QAbstractVideoSurface
 public:
     explicit VideoSurface(QObject *parent = 0);
     virtual ~VideoSurface();
-signals:
-    void newFrame(QImage);
-
-public:
     virtual void stop();
-
+signals:
+    void newFrame(QVideoFrame);
 private:
     virtual QList<QVideoFrame::PixelFormat> supportedPixelFormats(QAbstractVideoBuffer::HandleType handleType = QAbstractVideoBuffer::NoHandle) const;
     virtual bool present(const QVideoFrame &frame);
-private:
-    QWidget *widget;
-     QImage::Format imageFormat;
-     QRect targetRect;
-     QSize imageSize;
-     QRect sourceRect;
-     QByteArray currentFrame;
 
+    QImage::Format imageFormat;
 };
 
 #endif // VIDEOSURFACE_H

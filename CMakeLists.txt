@@ -13,7 +13,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/macros.cmake)
 #add cmake macros
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 #Set MSVC runtime linking
 #setMsvcLinkType(static)

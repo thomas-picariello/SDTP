@@ -4,9 +4,6 @@
 #include <QThread>
 #include <QImage>
 #include <QQueue>
-#include <QVideoFrame>
-#include <QDataStream>
-#include <QCameraViewfinder>
 #include <QBuffer>
 
 #include "videosurface.h"
@@ -17,6 +14,7 @@ class VideoEncoder : public QThread
 public:
     explicit VideoEncoder(QObject *parent = 0);
     virtual ~VideoEncoder();
+
     QImage *img;
 signals:
     void frameProcessed(QByteArray);
@@ -31,8 +29,6 @@ private:
     QQueue<QImage> m_queue;
     int m_queueMaxLength;
     bool m_stopped;
-
-
 };
 
 #endif // VIDEOENCODER_H
