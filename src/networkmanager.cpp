@@ -79,7 +79,7 @@ void NetworkManager::sendData(LinkType linkType, QByteArray &data){
             if(packet.destAppUID.type() != AppType::Undefined){
                 QByteArray packetBytes;
                 QDataStream(&packetBytes, QIODevice::WriteOnly) << packet;
-                getGcmDevice(TCP)->write(packetBytes);
+                getGcmDevice(linkType)->write(packetBytes);
             }else
                 emit error(UnconnectedApp);
         }else
