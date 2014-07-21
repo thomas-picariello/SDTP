@@ -53,7 +53,7 @@ void GcmDevice::readFromLink(){
     m_DataBuffer.append(m_Link->readAll());
     const quint32 cypherPayloadSize = qFromBigEndian<quint32>((uchar*)m_DataBuffer.mid(sizeof(quint64), sizeof(quint32)).data());
     const quint32 packetSize = sizeof(quint64) + sizeof(quint32) + cypherPayloadSize;
-    if(m_DataBuffer.size() >= (int)packetSize){
+    while(m_DataBuffer.size() >= (int)packetSize){
         QByteArray packet = m_DataBuffer.left(packetSize);
         QDataStream packetStream(&packet, QIODevice::ReadOnly);
         quint64 seqNum;
@@ -62,8 +62,8 @@ void GcmDevice::readFromLink(){
         packetStream >> cypherPayload;
         m_PacketList.append(qMakePair(seqNum, cypherPayload));
         m_DataBuffer.remove(0, packetSize);
-        emit readyRead();
     }
+    emit readyRead();
 }
 
 QByteArray GcmDevice::decrypt(quint64 seqNum, QByteArray& gcmPacket){
