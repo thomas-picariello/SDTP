@@ -34,15 +34,15 @@ public:
     explicit VideoApp(Contact *contact, QWidget *parent = 0);
     virtual ~VideoApp();
 
-    void addContact();
-    void updateDisplay();
-
 public slots :
     virtual void readIncommingData(const QByteArray &data);
     void onDataToSend(QByteArray data);
-
 signals :
     void error();
+protected :
+    virtual void closeevent(QCloseEvent* event);
+    virtual void showEvent(QShowEvent* event);
+
 
 private:
     Ui::VideoApp *ui;

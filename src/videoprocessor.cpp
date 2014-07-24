@@ -1,15 +1,11 @@
 #include "videoprocessor.h"
 
-// --- CONSTRUCTOR ---
 VideoProcessor::VideoProcessor() {
-    // you could copy data from constructor arguments to internal variables here.
 
     i=0;
 }
-
-// --- DECONSTRUCTOR ---
 VideoProcessor::~VideoProcessor() {
-    // free resources
+
 }
 void VideoProcessor::process(QVideoFrame frame) {
 

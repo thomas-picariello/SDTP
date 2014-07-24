@@ -14,10 +14,8 @@ VideoApp::VideoApp(Contact * contact, QWidget* parent) :
     thread = new QThread();
     m_videoprocessor = new VideoProcessor();
 
-    m_videoprocessor->moveToThread(thread);
-
-
-
+    m_videoprocessor->moveToThread(thread);    
+    thread->start();
 
     QList<QByteArray> cameras = m_camera->availableDevices();
     m_camera = new QCamera(cameras.first());
@@ -37,23 +35,8 @@ VideoApp::VideoApp(Contact * contact, QWidget* parent) :
 
     ui->setupUi(this);
 
-
-
-
     layout()->addWidget(m_Canvas);
     layout()->addWidget(m_Canvas2);
-
-    this->adjustSize();
-
-    thread->start();
-
-
-}
-void VideoApp::addContact(){
-
-}
-void VideoApp::updateDisplay(){
-
 }
 void VideoApp::readIncommingData(const QByteArray &data){
     m_videoprocessor->decode(data);
@@ -61,10 +44,23 @@ void VideoApp::readIncommingData(const QByteArray &data){
 
 void VideoApp::onDataToSend(QByteArray data)
 {
-    //readIncommingData(data);
-    emit sendData(LinkType::TCP,data);
+    readIncommingData(data);
+    //emit sendData(LinkType::UDP,data);
+}
+
+void VideoApp::closeevent(QCloseEvent *event)
+{
+    event->accept();
+    m_camera->stop();
+}
+
+void VideoApp::showEvent(QShowEvent *event)
+{
+    event->accept();
+    m_camera->start();
 }
 VideoApp::~VideoApp(){
+    m_camera->stop();
     delete m_Canvas,m_Canvas2,m_camera,m_surface,m_videoprocessor;
     delete ui;
 }
