@@ -27,7 +27,7 @@ void PasswordWindow::onOkClick(){
                                new CryptoPP::HashFilter(hash,
                                         new CryptoPP::StringSink(digest)
                                         ));
-        qDebug()<<"Hash from entered password"<<QByteArray(digest.data(), (int)digest.size()).toBase64(); //TODO:clean
+        //qDebug()<<"Hash from entered password"<<QByteArray(digest.data(), (int)digest.size()).toBase64(); //TODO:clean
         if(mPwdHash != QByteArray(digest.data(), (int)digest.size())){
             emit error("Error: Password hashes do not match.");
             QMessageBox::critical(this, "Error", "Wrong password !");

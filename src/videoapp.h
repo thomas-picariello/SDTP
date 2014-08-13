@@ -1,10 +1,15 @@
+/**
+ * @brief VideoApp is an app specifically designed to acquire and display Video Streams.
+ *
+ */
+
 #ifndef VIDEOAPP_H
 #define VIDEOAPP_H
 
 
 
 #include <contact.h>
-#include <QDebug>
+//#include <QDebug>
 #include <QCamera>
 #include <QCameraViewfinder>
 #include <QImageEncoderSettings>

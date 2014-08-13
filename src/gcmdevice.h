@@ -1,7 +1,11 @@
+/**
+ * @brief GcmDevice is used to Crypt and decrypt Data from a Link.
+ */
+
 #ifndef GCMDEVICE_H
 #define GCMDEVICE_H
 
-#include <QDebug>
+//#include <QDebug>
 #include <QIODevice>
 #include <QPair>
 #include <QtEndian>

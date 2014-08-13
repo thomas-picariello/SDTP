@@ -1,3 +1,7 @@
+
+/**
+ * @brief HandshakeStarter is a handshake tailored specifically for a starter position.
+ */
 #ifndef HANDSHAKESTARTER_H
 #define HANDSHAKESTARTER_H
 

@@ -141,7 +141,7 @@ void SVoIP::onHandshakeSuccess(){
 void SVoIP::onHandshakeError(AbstractHandshake::Error error){
     AbstractHandshake* handshake = dynamic_cast<AbstractHandshake*>(sender());
     if(handshake){
-        qDebug()<< "Handshake error:" << handshake->getErrorString(error);
+        //qDebug()<< "Handshake error:" << handshake->getErrorString(error);
         QString host = handshake->getHost();
         if(handshake->getRecievedBanTime() != 0)
             m_ipFilter.addBan(host, handshake->getRecievedBanTime());
@@ -253,19 +253,18 @@ void SVoIP::registerNAT(quint16 port,bool connexionType){
 
     if(!nat.discovery()){
         error = nat.get_last_error();
-        qDebug()<<"discovery error is : "+error;
+        //qDebug()<<"discovery error is : "+error;
     }
 
     if(!nat.add_port_mapping("svoip","10.207.3.65",port,port,"TCP")){
         error = nat.get_last_error();
-        qDebug()<<"add_port_mapping error is : "+error;
+        //qDebug()<<"add_port_mapping error is : "+error;
     }
     else {
         error = nat.get_last_error();
-        qDebug()<<"add port mapping succ.";
+        //qDebug()<<"add port mapping succ.";
     }
 }
-
 QString SVoIP::generateSalt(){
     const uint blockSize = 32;
     byte randomBlock[blockSize];
@@ -280,7 +279,6 @@ QString SVoIP::generateSalt(){
                               false));
     return QString::fromStdString(encodedBlock);
 }
-
 SVoIP::IpState SVoIP::getHostState(QString host){
     foreach(NetworkManager* netMgr, m_networkManagerList) {
         if(netMgr->getHost() == host)
@@ -291,7 +289,6 @@ SVoIP::IpState SVoIP::getHostState(QString host){
     }else
         return NotConnected;
 }
-
 SVoIP::~SVoIP(){
     if(m_contactListWindow) delete m_contactListWindow;
     if(m_contactDB) delete m_contactDB;

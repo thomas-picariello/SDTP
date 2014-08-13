@@ -1,3 +1,8 @@
+
+/**
+ * @brief AudioBargraph represents a GUI object used to display Audio signals.
+ */
+
 #ifndef AUDIOBARGRAPH_H
 #define AUDIOBARGRAPH_H
 

@@ -1,3 +1,7 @@
+/**
+ * @brief FlatTouchStyle is used to manipulate size and position of various menu Items
+ */
+
 #ifndef FLATTOUCHSTYLE_H
 #define FLATTOUCHSTYLE_H
 

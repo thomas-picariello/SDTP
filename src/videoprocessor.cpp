@@ -24,7 +24,7 @@ void VideoProcessor::process(QVideoFrame frame) {
     buffer.open(QIODevice::WriteOnly);
     image.save(&buffer, "JPG",20);
     emit finished(ba);
-    qDebug()<<i++;
+    //qDebug()<<i++;
 
     frame.unmap();
 }

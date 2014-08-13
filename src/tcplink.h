@@ -1,3 +1,6 @@
+/**
+ * @brief TcpLink is a Link specifically designed for TCP Sockets.
+ */
 #ifndef TCPLINK_H
 #define TCPLINK_H
 

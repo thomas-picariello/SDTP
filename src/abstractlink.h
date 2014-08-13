@@ -1,3 +1,7 @@
+/**
+ * @brief Abstract link is a collection of basic methods and variables used in all kind of Links.
+ */
+
 #ifndef ABSTRACTLINK_H
 #define ABSTRACTLINK_H
 

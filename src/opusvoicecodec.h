@@ -1,7 +1,11 @@
+/**
+ * @brief OpusVoiceCodec is used to code and decode Audio material
+ */
+
 #ifndef OPUSVOICECODEC_H
 #define OPUSVOICECODEC_H
 
-#include <QDebug>
+//#include <QDebug>
 #include <QIODevice>
 #include <QBuffer>
 #include <QAudioInput>

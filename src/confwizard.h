@@ -1,10 +1,14 @@
+/**
+ * @brief ConfWizard is an Object which helps to configure the main settings on the first launch of the app.
+ */
+
 #ifndef CONFWIZARD_H
 #define CONFWIZARD_H
 
 #include <QDialog>
 #include <QFile>
 #include <QMessageBox>
-#include <QDebug>
+//#include <QDebug>
 #include <QPair>
 #include <QSettings>
 #include <cryptopp/sha.h>

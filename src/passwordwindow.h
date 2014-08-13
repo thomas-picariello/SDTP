@@ -1,7 +1,11 @@
+/**
+ * @brief PasswordWindow is a tiny window which asks the user for a valid password before allowing him access to the contactList.
+ */
+
 #ifndef PASSWORDWINDOW_H
 #define PASSWORDWINDOW_H
 
-#include <QDebug>
+//#include <QDebug>
 #include <QDialog>
 #include <QMessageBox>
 #include <cryptopp/sha.h>

@@ -1,10 +1,14 @@
+/**
+ * @brief VideoSurface is used to acquire VideoFrames from a QCamera object.
+ */
+
 #ifndef VIDEOSURFACE_H
 #define VIDEOSURFACE_H
 
 #include <QAbstractVideoSurface>
 #include <QImage>
 #include <QVideoSurfaceFormat>
-#include <QDebug>
+//#include <QDebug>
 
 
 

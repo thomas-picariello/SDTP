@@ -1,3 +1,7 @@
+/**
+ * @brief MessengerApp is an App specifically designed to send and receive Text messages.
+ */
+
 #ifndef MESSENGERAPP_H
 #define MESSENGERAPP_H
 

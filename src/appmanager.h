@@ -1,3 +1,7 @@
+/**
+ * @brief AppManager is exclusively used by the NetworkManager to manipulate Apps
+ */
+
 #ifndef APPMANAGER_H
 #define APPMANAGER_H
 

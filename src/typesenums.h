@@ -1,3 +1,7 @@
+/**
+ * @brief Typesenum is a container for differents type definitions.
+ */
+
 #ifndef IDSENUMS_H
 #define IDSENUMS_H
 

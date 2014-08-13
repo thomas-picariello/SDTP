@@ -1,3 +1,7 @@
+/**
+ * @brief The ContactListWindow Displays a ContactList and gives the User access to the related Functions and options.
+ */
+
 #ifndef CONTACTLISTWINDOW_H
 #define CONTACTLISTWINDOW_H
 

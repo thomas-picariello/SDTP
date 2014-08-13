@@ -1,3 +1,7 @@
+/**
+ * @brief UdpLink is a Link specifically designed for UDP Sockets
+ */
+
 #ifndef UDPLINK_H
 #define UDPLINK_H
 

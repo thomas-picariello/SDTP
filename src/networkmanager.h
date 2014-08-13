@@ -1,7 +1,11 @@
+/**
+ * @brief NetworkManager is one of the principal Objects in the Structure and mainly represents a valid connexion with a Contact. It manages Apps and makes works as router.
+ */
+
 #ifndef NETWORKMANAGER_H
 #define NETWORKMANAGER_H
 
-#include <QDebug>
+//#include <QDebug>
 #include <QObject>
 #include <QMap>
 

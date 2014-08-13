@@ -1,7 +1,11 @@
+/**
+ * @brief Pinger is used to search periodiccally for Online Contacts and verifie if Offline Contacts are still offline.
+ */
+
 #ifndef PINGER_H
 #define PINGER_H
 
-#include <QDebug>
+//#include <QDebug>
 #include <QObject>
 #include <QTimer>
 

@@ -1,10 +1,14 @@
+/**
+ * @brief VideoProcessor is an Object which processes VideoFrames.
+ */
+
 #ifndef VIDEOPROCESSOR_H
 #define VIDEOPROCESSOR_H
 
 #include <QQueue>
 #include <QImage>
 #include <QBuffer>
-#include <QDebug>
+//#include <QDebug>
 #include <QVideoFrame>
 
 class VideoProcessor : public QObject {

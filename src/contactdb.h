@@ -1,7 +1,12 @@
+/**
+ * @brief ContactDB Stores Contact data and makes it availlable.
+ */
+
+
 #ifndef CONTACTDB_H
 #define CONTACTDB_H
 
-#include <QDebug>
+//#include <QDebug>
 #include <QtSql/QtSql>
 #include <QList>
 #include <QByteArray>

@@ -38,6 +38,7 @@ add_executable(${PROJECT}
     ${SVOIP_HEADERS}
     ${SVOIP_UI_MOC}
     ${SVOIP_RES_MOC}
+    sdtp.rc
 )
 
 target_link_libraries(${PROJECT}

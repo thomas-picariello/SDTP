@@ -1,3 +1,7 @@
+/**
+ * @brief Abstract handshake define the basic functions which are found in all handshakes.
+ */
+
 #ifndef ABSTRACTHANDSHAKE_H
 #define ABSTRACTHANDSHAKE_H
 

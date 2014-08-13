@@ -91,7 +91,7 @@ QByteArray RsaKeyring::generatePublicKey(QByteArray &privateKey){
         CryptoPP::RSA::PublicKey rsaPublic(rsaPrivate);
         rsaPublic.Save(pubSink);
     }catch(CryptoPP::Exception& e){
-        qDebug()<<e.what();
+        //qDebug()<<e.what();
         emit error(PublicKeyGenerationFailed);
     }
     QByteArray publicKey(pubKeyStr.data(), (int)pubKeyStr.size());
@@ -176,7 +176,7 @@ void RsaKeyring::readKeystore(){
             reader.readNext();
         }
     }catch(CryptoPP::Exception& e){
-        qDebug()<<e.what();
+        //qDebug()<<e.what();
         emit error(KeystoreLoadingFailed);
     }
     if(validatePrivateKey(privateKey)){

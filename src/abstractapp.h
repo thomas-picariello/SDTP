@@ -1,3 +1,7 @@
+/**
+ * @brief AbstractApp is the abstract structure on which eveery app should be build on.
+ */
+
 #ifndef ABSTRACTAPP_H
 #define ABSTRACTAPP_H
 

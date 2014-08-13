@@ -1,3 +1,7 @@
+/**
+ * @brief UpnpNat is an Object which lookks for upnp enabled routers and trys to configure a portfowrding instruction.
+ */
+
 #ifndef UPNPNAT_H
 #define UPNPNAT_H
 

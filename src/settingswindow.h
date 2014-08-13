@@ -1,3 +1,7 @@
+/**
+ * @brief SettingsWindow diplayes Editable settings and helps the user change them and save them.
+ */
+
 #ifndef SETTINGSWINDOW_H
 #define SETTINGSWINDOW_H
 

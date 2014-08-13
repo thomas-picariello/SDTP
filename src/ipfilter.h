@@ -1,3 +1,7 @@
+/**
+ * @brief IpFilter is used to filter banned Ips and manage them.
+ */
+
 #ifndef IPFILTER_H
 #define IPFILTER_H
 

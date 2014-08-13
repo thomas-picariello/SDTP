@@ -1,7 +1,11 @@
+/**
+ * @brief The GUI part of an applauncherItem. Which is used to Launch an manipulate apps
+ */
+
 #ifndef CONTACTACTIONSWIDGET_H
 #define CONTACTACTIONSWIDGET_H
 
-#include <QDebug>
+//#include <QDebug>
 #include <QWidget>
 #include <QHBoxLayout>
 #include <QPushButton>

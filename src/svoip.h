@@ -1,3 +1,8 @@
+/**
+ * @brief svoip is the base class of the programm and allows to start all the others
+ */
+
+
 #ifndef SVOIP_H
 #define SVOIP_H
 

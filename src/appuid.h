@@ -1,3 +1,7 @@
+/**
+ * @brief AppUID represents the ID of an app and its details.
+ */
+
 #ifndef APPUID_H
 #define APPUID_H
 

@@ -15,7 +15,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 set(CMAKE_BUILD_TYPE Release)
 
-#Set MSVC runtime linking
-#setMsvcLinkType(static)
+add_definitions(-DQT_NO_DEBUG_OUTPUT)
+
 
 add_subdirectory(src)

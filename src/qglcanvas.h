@@ -1,9 +1,13 @@
+/**
+ * @brief QGLCanvas is used to paint a Video on Display.
+ */
+
 #ifndef QGLCANVAS_H
 #define QGLCANVAS_H
 
 #include <QGLWidget>
 #include <QPainter>
-#include <QDebug>
+//#include <QDebug>
 
 
 

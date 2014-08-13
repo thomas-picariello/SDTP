@@ -25,11 +25,8 @@ VideoApp::VideoApp(Contact * contact, QWidget* parent) :
         m_camera->start();
         if(m_camera->state()==QCamera::ActiveState)m_camera->setViewfinder(m_surface);
     }
-
-
     connect(m_surface,SIGNAL(newFrame(QVideoFrame)),m_videoprocessor,SLOT(process(QVideoFrame)));
     connect(m_videoprocessor, SIGNAL(finished(QByteArray)), this, SLOT(onDataToSend(QByteArray)));
-
     connect(m_videoprocessor, &VideoProcessor::imgForDisplay,m_Canvas,&QGLCanvas::setImage);
     connect(m_videoprocessor, &VideoProcessor::decoded,m_Canvas2,&QGLCanvas::setImage);
 

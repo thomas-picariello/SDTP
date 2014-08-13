@@ -1,7 +1,12 @@
+/**
+ * @brief RsaKeyring is used to store the Private and public key and/or generate some.
+ */
+
+
 #ifndef RSAKEYRING_H
 #define RSAKEYRING_H
 
-#include <QDebug>
+//#include <QDebug>
 #include <QObject>
 #include <QByteArray>
 #include <QFuture>

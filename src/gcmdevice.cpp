@@ -98,7 +98,7 @@ QByteArray GcmDevice::decrypt(quint64 seqNum, QByteArray& gcmPacket){
 
         clearText.append(clearTextStr.data(), (int)clearTextStr.size());
     }catch(CryptoPP::Exception& e){
-        qDebug()<<e.what();
+        //qDebug()<<e.what();
     }
     return clearText;
 }
@@ -126,7 +126,7 @@ QByteArray GcmDevice::encrypt(quint64 seqNum, QByteArray& clearText){
         encFilter.ChannelMessageEnd(DEFAULT_CHANNEL);
         cypherText.append(cypherTextStr.data(), (int)cypherTextStr.size());
     }catch(CryptoPP::Exception& e){
-        qDebug()<<e.what();
+        //qDebug()<<e.what();
     }
     return cypherText;
 }

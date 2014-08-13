@@ -46,7 +46,7 @@ bool ConfWizard::verifyPass(){
 }
 bool ConfWizard::verifyPort(){
 
-    qDebug()<<ui->portBox->value();
+    //qDebug()<<ui->portBox->value();
     if(ui->portBox->value()<=65000 && ui->portBox->value() >= 1)return true;
     else return false;
 }

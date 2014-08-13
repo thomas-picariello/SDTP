@@ -1,3 +1,7 @@
+/**
+ * @brief HandshakeResponder is a specific handshake object tailored for a responder position.
+ */
+
 #ifndef HANDSHAKERESPONDER_H
 #define HANDSHAKERESPONDER_H
 

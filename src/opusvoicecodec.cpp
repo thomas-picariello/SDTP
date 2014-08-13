@@ -14,14 +14,14 @@ OpusVoiceCodec::OpusVoiceCodec(QIODevice *parent):QIODevice(parent){
     QAudioDeviceInfo info;
     info = QAudioDeviceInfo::defaultInputDevice();
     if (!info.isFormatSupported(m_audioFormat)) {
-        qWarning() << "Default input format not supported, trying to use the nearest.";
+        //qWarning() << "Default input format not supported, trying to use the nearest.";
         m_audioFormat = info.nearestFormat(m_audioFormat);
     }
     m_audioInput = new QAudioInput(m_audioFormat, this);
 
     info = QAudioDeviceInfo::defaultOutputDevice();
     if (!info.isFormatSupported(m_audioFormat)) {
-        qWarning() << "Raw audio format not supported by backend, cannot play audio.";
+        //qWarning() << "Raw audio format not supported by backend, cannot play audio.";
     }
     m_audioOutput = new QAudioOutput(m_audioFormat, this);
 
@@ -127,7 +127,7 @@ void OpusVoiceCodec::setOutputMute(bool mute){
 }
 
 void OpusVoiceCodec::displayOpusErr(int err){
-    qWarning() << "Opus error:" << opus_strerror(err);
+    //qWarning() << "Opus error:" << opus_strerror(err);
 }
 qint64 OpusVoiceCodec::readData(char * data, qint64 maxSize){
     qint64 pos = 0;

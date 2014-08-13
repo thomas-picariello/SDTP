@@ -1,3 +1,7 @@
+/**
+ * @brief xmlparser is a utility class used to parse xml data from upnp enabled routers.
+ */
+
 #ifndef __INCLUDE_XML_NODE__
 #define __INCLUDE_XML_NODE__
 

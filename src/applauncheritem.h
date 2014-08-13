@@ -1,3 +1,7 @@
+/**
+ * @brief AppLauncherItem is an object which represent a button on the GUI used to launch a specific app and includes basic characteritics and informations about it.
+ */
+
 #ifndef APPLAUNCHERITEM_H
 #define APPLAUNCHERITEM_H
 
