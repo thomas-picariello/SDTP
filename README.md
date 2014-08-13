@@ -1,7 +1,7 @@
-Secure-VoIP
+Secure Data Transfer Protocol
 ================
 
-Secure alternative to common VoIP protocols
+Secure alternative to common Communication protocols.
 
 *Autor : Felix Kletti, Thomas Picariello*
 
@@ -9,7 +9,7 @@ Secure alternative to common VoIP protocols
 
 =================
 
-This is a student project to develop and implement an encrypted VoIP Protocol.
+This is a student project to develop and implement an encrypted data transfer Protocol.
 
 It is still in pre-alpha, some functionality might not work at all.
 
