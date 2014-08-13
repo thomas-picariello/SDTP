@@ -1,6 +1,4 @@
-/**
- * @brief PasswordWindow is a tiny window which asks the user for a valid password before allowing him access to the contactList.
- */
+
 
 #ifndef PASSWORDWINDOW_H
 #define PASSWORDWINDOW_H
@@ -16,6 +14,9 @@ namespace Ui {
 class PasswordWindow;
 }
 
+/**
+ * @brief PasswordWindow is a tiny window which asks the user for a valid password before allowing him access to the contactList.
+ */
 class PasswordWindow : public QDialog
 {
     Q_OBJECT

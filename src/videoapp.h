@@ -1,12 +1,5 @@
-/**
- * @brief VideoApp is an app specifically designed to acquire and display Video Streams.
- *
- */
-
 #ifndef VIDEOAPP_H
 #define VIDEOAPP_H
-
-
 
 #include <contact.h>
 //#include <QDebug>
@@ -26,9 +19,12 @@
 
 namespace Ui{
 class VideoApp;
-
 }
 
+/**
+ * @brief VideoApp is an app specifically designed to acquire and display Video Streams.
+ *
+ */
 class VideoApp : public AbstractApp
 {
     Q_OBJECT

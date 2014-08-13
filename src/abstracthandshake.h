@@ -1,7 +1,3 @@
-/**
- * @brief Abstract handshake define the basic functions which are found in all handshakes.
- */
-
 #ifndef ABSTRACTHANDSHAKE_H
 #define ABSTRACTHANDSHAKE_H
 
@@ -44,6 +40,9 @@ using CryptoPP::SHA256;
 #include "rsakeyring.h"
 #include "ipfilter.h"
 
+/**
+ * @brief AbstractHandshake define the basic functions which are found in all handshakes.
+ */
 class AbstractHandshake : public QObject
 {
     Q_OBJECT

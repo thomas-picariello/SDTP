@@ -1,5 +1,5 @@
 /**
- * @brief The GUI part of an applauncherItem. Which is used to Launch an manipulate apps
+ * @brief ContactActionsWidget is the view of an AppLauncherItem which is used to launch an manipulate apps.
  */
 
 #ifndef CONTACTACTIONSWIDGET_H

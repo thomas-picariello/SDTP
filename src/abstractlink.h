@@ -1,5 +1,6 @@
 /**
- * @brief Abstract link is a collection of basic methods and variables used in all kind of Links.
+ * @brief AbstractLink is the base class for all the links.
+ *  It is a pure abstract class.
  */
 
 #ifndef ABSTRACTLINK_H

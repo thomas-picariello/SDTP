@@ -1,7 +1,3 @@
-/**
- * @brief VoiceApp is an App designed to acquire andoutput sound.
- */
-
 #ifndef VOICEAPP_H
 #define VOICEAPP_H
 
@@ -15,6 +11,9 @@ namespace Ui{
 class VoiceApp;
 }
 
+/**
+ * @brief VoiceApp is an App designed to acquire andoutput sound.
+ */
 class VoiceApp : public AbstractApp
 {
     Q_OBJECT

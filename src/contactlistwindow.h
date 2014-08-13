@@ -1,7 +1,3 @@
-/**
- * @brief The ContactListWindow Displays a ContactList and gives the User access to the related Functions and options.
- */
-
 #ifndef CONTACTLISTWINDOW_H
 #define CONTACTLISTWINDOW_H
 
@@ -23,6 +19,9 @@ namespace Ui {
 class ContactListWindow;
 }
 
+/**
+ * @brief ContactListWindow displays a contact list and gives the user access to the related functions and options.
+ */
 class ContactListWindow : public QWidget
 {
     Q_OBJECT

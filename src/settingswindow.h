@@ -1,7 +1,3 @@
-/**
- * @brief SettingsWindow diplayes Editable settings and helps the user change them and save them.
- */
-
 #ifndef SETTINGSWINDOW_H
 #define SETTINGSWINDOW_H
 
@@ -21,6 +17,9 @@ namespace Ui {
 class SettingsWindow;
 }
 
+/**
+ * @brief SettingsWindow diplayes Editable settings and helps the user change them and save them.
+ */
 class SettingsWindow : public QWidget
 {
     Q_OBJECT

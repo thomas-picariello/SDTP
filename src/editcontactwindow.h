@@ -1,7 +1,3 @@
-/**
- * @brief EditContactWindow gives the user the possibillity to edit Contacts.
- */
-
 #ifndef EDITCONTACTWINDOW_H
 #define EDITCONTACTWINDOW_H
 
@@ -18,6 +14,9 @@ namespace Ui {
 class EditContactWindow;
 }
 
+/**
+ * @brief EditContactWindow gives the user the possibillity to edit Contacts.
+ */
 class EditContactWindow : public QWidget
 {
     Q_OBJECT

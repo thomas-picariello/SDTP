@@ -1,5 +1,5 @@
 /**
- * @brief svoip is the base class of the programm and allows to start all the others
+ * @brief SVoIP is the main class of the program and allows to start all the others
  */
 
 

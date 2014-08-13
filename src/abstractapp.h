@@ -1,5 +1,5 @@
 /**
- * @brief AbstractApp is the abstract structure on which eveery app should be build on.
+ * @brief AbstractApp is the abstract structure on which every app should be build on.
  */
 
 #ifndef ABSTRACTAPP_H
