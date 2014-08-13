@@ -9,7 +9,7 @@ Secure alternative to common Communication protocols.
 
 =================
 
-This is a student project to develop and implement an encrypted data transfer Protocol.
+This is a student project to develop and implement an encrypted data transfer protocol.
 
 It is still in pre-alpha, some functionality might not work at all.
 
@@ -31,6 +31,7 @@ To build this project you will need the following dependencies:
 	 - jthread: http://research.edm.uhasselt.be/~jori/page/index.php?n=CS.Jthread
 	 - jrtplib: http://research.edm.uhasselt.be/~jori/page/index.php?n=CS.Jrtplib
 	 - cryptopp: http://www.cryptopp.com/
+	 - vp8: http://www.webmproject.org/
 
 Reviews, advices, and bug reports are welcome.
 
