@@ -23,7 +23,7 @@ class ConfWizard : public QDialog
     Q_OBJECT
 
 public:
-    explicit ConfWizard(QPair<QByteArray,QByteArray> fileKey,QWidget *parent = 0);
+    explicit ConfWizard(QPair<QByteArray,QByteArray> *fileKey, RsaKeyring *rsaKeyring, QWidget *parent = 0);
     ~ConfWizard();
     bool verifyPort();
     bool verifyPass();
@@ -38,7 +38,7 @@ private slots:
 private:
     Ui::ConfWizard *ui;
     QPair<QByteArray,QByteArray> *m_fileKey;
-    RsaKeyring *m_RsaKeyRing;
+    RsaKeyring *m_RsaKeyring;
     QSettings *m_Settings;
     QMessageBox *m_MsgBox, *m_WarningBox;
 };

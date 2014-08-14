@@ -41,7 +41,7 @@ void SVoIP::checkParameters(QByteArray key){
 }
 
 void SVoIP::displayConfWizard(){
-    m_wizard = new ConfWizard(m_fileKey);
+    m_wizard = new ConfWizard(&m_fileKey, m_rsaKeyring);
 
     connect(m_wizard,SIGNAL(accepted()),this,SLOT(startProgram()));
     connect(m_wizard,SIGNAL(rejected()),qApp,SLOT(quit()));
