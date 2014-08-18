@@ -32,13 +32,15 @@ qt5_wrap_ui(SVOIP_UI_MOC ${SVOIP_FORMS})
 
 #process the ressource files.
 qt5_add_resources(SVOIP_RES_MOC ${SVOIP_RES})
+if(WIN32)
+    list(APPEND SVOIP_RES_MOC ../res/win_icon.rc)
+endif()
 
 add_executable(${PROJECT}
     ${SVOIP_SOURCES}
     ${SVOIP_HEADERS}
     ${SVOIP_UI_MOC}
     ${SVOIP_RES_MOC}
-    sdtp.rc
 )
 
 target_link_libraries(${PROJECT}
