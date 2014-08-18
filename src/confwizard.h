@@ -32,15 +32,14 @@ public:
 private slots:
     void on_okButton_clicked();
     void on_GenerateButton_clicked();
-    void on_PrivateKey_Generated(QByteArray pkey);
+    void onPrivateKeyGenerated(QByteArray pkey);
     void saveAll();
 
 private:
     Ui::ConfWizard *ui;
     QPair<QByteArray,QByteArray> *m_fileKey;
-    RsaKeyring *m_RsaKeyring;
-    QSettings *m_Settings;
-    QMessageBox *m_MsgBox, *m_WarningBox;
+    RsaKeyring *m_rsaKeyring;
+    QMessageBox *m_welcomeMsgBox, *m_warningMsgBox;
 };
 
 #endif // CONFWIZARD_H

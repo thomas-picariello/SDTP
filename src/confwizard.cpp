@@ -3,34 +3,34 @@
 
 ConfWizard::ConfWizard(QPair<QByteArray, QByteArray>* fileKey, RsaKeyring* rsaKeyring, QWidget *parent) :
     QDialog(parent),
+    m_welcomeMsgBox(NULL),
+    m_warningMsgBox(NULL),
     ui(new Ui::ConfWizard)
 {
     ui->setupUi(this);
 
     m_fileKey = fileKey;
-    m_RsaKeyring = rsaKeyring;
+    m_rsaKeyring = rsaKeyring;
 
-    QFile file(("ReadMe.txt"));
+    QFile file("ReadMe.txt");
     file.open(QIODevice::ReadOnly | QIODevice::Text);
-
-
+    if(file.isOpen()){
         QString WelcomeTxt = file.readAll();
-
-
-    m_MsgBox = new QMessageBox(QMessageBox::NoIcon,
-                               "Welcome",
-                               WelcomeTxt,
-                               QMessageBox::Ok);
-    m_WarningBox = new QMessageBox(QMessageBox::Warning,
+        file.close();
+        m_welcomeMsgBox = new QMessageBox(QMessageBox::NoIcon,
+                                   "Welcome",
+                                   WelcomeTxt,
+                                   QMessageBox::Ok);
+        m_welcomeMsgBox->show();
+        connect(m_welcomeMsgBox,&QMessageBox::buttonClicked,
+                this, &ConfWizard::show);
+    }else{
+        show();
+    }
+    m_warningMsgBox = new QMessageBox(QMessageBox::Warning,
                                    "Warning",
                                    "One of the parameters seems to be wrong.",
                                    QMessageBox::Close);
-
-    m_MsgBox->show();
-
-
-    connect(m_MsgBox,SIGNAL(buttonClicked(QAbstractButton*)),this,SLOT(show()));
-
 }
 bool ConfWizard::verifyPass(){
     QString pass1 = ui->PassLine->text(),pass2 = ui->ConfirmLine->text();
@@ -47,21 +47,18 @@ bool ConfWizard::verifyPort(){
     else return false;
 }
 void ConfWizard::saveAll(){
-
-
-
-    disconnect(m_RsaKeyring,SIGNAL(privateKeyValidated()),this,SLOT(saveAll()));
+    disconnect(m_rsaKeyring,SIGNAL(privateKeyValidated()),this,SLOT(saveAll()));
 
     // save port
-    m_Settings = new QSettings("settings.ini", QSettings::IniFormat,this);
-    m_Settings->setValue("network/listen_port", ui->portBox->text());
+    QSettings settings("settings.ini", QSettings::IniFormat, this);
+    settings.setValue("network/listen_port", ui->portBox->text());
 
     QByteArray oldkey = m_fileKey->first;
     // save psw
     QString pass1 = ui->PassLine->text(),pass2 = ui->ConfirmLine->text();
     if( !pass1.isEmpty() && !pass2.isEmpty() ){
 
-        QByteArray salt = QByteArray::fromBase64(m_Settings->value("encryption/salt").toByteArray());
+        QByteArray salt = QByteArray::fromBase64(settings.value("encryption/salt").toByteArray());
         std::string digest;
         pass1.append(salt);
         CryptoPP::SHA256 hash;
@@ -71,7 +68,7 @@ void ConfWizard::saveAll(){
                                     new CryptoPP::StringSink(digest)
                                         )); //no new line
 
-        m_Settings->setValue("encryption/password_hash", QByteArray(digest.data(), (int)digest.size()).toBase64());
+        settings.setValue("encryption/password_hash", QByteArray(digest.data(), (int)digest.size()).toBase64());
 
         CryptoPP::PKCS5_PBKDF1<CryptoPP::SHA256> derivator;
         uchar key[32];
@@ -92,42 +89,39 @@ void ConfWizard::saveAll(){
     //save rsakey
     QByteArray privateKey = QByteArray::fromBase64(ui->keyText->toPlainText().toUtf8());
 
-    m_RsaKeyring->updateFileKey(oldkey);
-    if(m_RsaKeyring->validatePrivateKey(privateKey))
-        m_RsaKeyring->commitToKeystore(privateKey);
+    m_rsaKeyring->updateFileKey(oldkey);
+    if(m_rsaKeyring->validatePrivateKey(privateKey))
+        m_rsaKeyring->commitToKeystore(privateKey);
 
     this->accept();
-
 }
 
-
-void ConfWizard::on_okButton_clicked()
-{
+void ConfWizard::on_okButton_clicked(){
     if(verifyPass() && verifyPort()){
         QByteArray key = QByteArray::fromBase64(ui->keyText->toPlainText().toUtf8());
-        connect(m_RsaKeyring,SIGNAL(privateKeyValidated()),this,SLOT(saveAll()));
-        m_RsaKeyring->validatePrivateKey(key);
+        connect(m_rsaKeyring,SIGNAL(privateKeyValidated()),this,SLOT(saveAll()));
+        m_rsaKeyring->validatePrivateKey(key);
         //TODO: connect(m_RsaKeyring, SIGNAL(error(RsaKeyring::error)), this, ...); for Error::PrivateKeyValidationFailed
-    }else m_WarningBox->show();
+    }else m_warningMsgBox->show();
 }
 
-void ConfWizard::on_GenerateButton_clicked()
-{
-    if(!m_RsaKeyring->isGenerating()){
-        connect(m_RsaKeyring,SIGNAL(privateKeyGenerationFinished(QByteArray)),
-                this,SLOT(on_PrivateKey_Generated(QByteArray)));
-        m_RsaKeyring->generateKeypair();
+void ConfWizard::on_GenerateButton_clicked(){
+    if(!m_rsaKeyring->isGenerating()){
+        connect(m_rsaKeyring,SIGNAL(privateKeyGenerationFinished(QByteArray)),
+                this,SLOT(onPrivateKeyGenerated(QByteArray)));
+        m_rsaKeyring->generateKeypair();
     }
-
-
 }
-void ConfWizard::on_PrivateKey_Generated(QByteArray pkey){
+void ConfWizard::onPrivateKeyGenerated(QByteArray pkey){
     ui->keyText->setText(pkey.toBase64());
-    disconnect(m_RsaKeyring,SIGNAL(privateKeyGenerationFinished(QByteArray)),
-               this,SLOT(on_PrivateKey_Generated(QByteArray)));
+    disconnect(m_rsaKeyring,SIGNAL(privateKeyGenerationFinished(QByteArray)),
+               this,SLOT(onPrivateKeyGenerated(QByteArray)));
 }
 
 ConfWizard::~ConfWizard()
 {
     delete ui;
+    if(m_welcomeMsgBox)
+        delete m_welcomeMsgBox;
+    delete m_warningMsgBox;
 }
