@@ -30,7 +30,8 @@ public:
         PrivatKeyGenerationFailed,
         PublicKeyGenerationFailed,
         PrivateKeyValidationFailed,
-        KeystoreLoadingFailed
+        KeystoreLoadingFailed,
+        KeystoreFileNotFound
     };
     Q_ENUMS(Error)
 

@@ -148,6 +148,10 @@ bool RsaKeyring::validatePrivateKey(QByteArray privateKey, int level){
 void RsaKeyring::readKeystore(){
     QByteArray privateKey;
     std::string xmlString;
+    if(!QFile("keystore.dat").exists()){
+        emit error(KeystoreFileNotFound);
+        return;
+    }
     try{
         if(mFileKey->first.isEmpty()){
             QFile keystoreFile("keystore.dat");
