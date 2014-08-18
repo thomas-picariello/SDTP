@@ -1,36 +1,33 @@
 #include "contactdb.h"
 
 ContactDB::ContactDB(QPair<QByteArray, QByteArray> *fileKey, QObject *parent):
-    QObject(parent), mFileKey(fileKey)
+    QObject(parent), m_fileKey(fileKey)
 {
     initDbTables();
     importDatabase();
 }
 
 ContactDB::~ContactDB(){
-    qDeleteAll(mContactList);
+    qDeleteAll(m_contactList);
 }
 
 void ContactDB::updateFileKey(){
     commitToDatabase();
 }
 
-bool ContactDB::erase(int id){
-    delete mContactList.value(id);
-    mContactList.remove(id);
-    QSqlQuery eraseDiskEntryQuery(mDatabase);
-    eraseDiskEntryQuery.prepare("DELETE FROM contacts WHERE id=:id");
-    eraseDiskEntryQuery.bindValue(":id", id);
+void ContactDB::erase(int id){
+    delete m_contactList.value(id);
+    m_contactList.remove(id);
+    commitToDatabase();
     emit contactEvent(id, ContactDeleted);
-    return eraseDiskEntryQuery.exec();
 }
 
 Contact* const ContactDB::findById(int id){
-    return mContactList.value(id, NULL);
+    return m_contactList.value(id, NULL);
 }
 
 Contact* const ContactDB::findByKey(QByteArray key){
-    foreach(Contact* contact, mContactList){
+    foreach(Contact* contact, m_contactList){
         if(contact->getKey() == key)
             return contact;
     }
@@ -38,7 +35,7 @@ Contact* const ContactDB::findByKey(QByteArray key){
 }
 
 QList<Contact*> ContactDB::getAllContacts() const{
-    return mContactList.values();
+    return m_contactList.values();
 }
 
 uint ContactDB::save(Contact *contact){
@@ -47,7 +44,7 @@ uint ContactDB::save(Contact *contact){
         id = getNextAvailableId();
         contact->setParent(this);
         contact->setId(id);
-        mContactList.insert(id, contact);
+        m_contactList.insert(id, contact);
         emit contactEvent(contact->getId(), ContactAdded);
     }else{
         id = contact->getId();
@@ -60,7 +57,7 @@ uint ContactDB::save(Contact *contact){
 QByteArray ContactDB::generateHash(){
     QByteArray content;
     QDataStream contentStream(&content, QIODevice::WriteOnly);
-    foreach(Contact *contact, mContactList){
+    foreach(Contact *contact, m_contactList){
         contentStream << contact->getId()
                       << contact->getName()
                       << contact->getHostsList()
@@ -80,7 +77,7 @@ QByteArray ContactDB::generateHash(){
 
 void ContactDB::initDbTables(){
     openDB();
-    QSqlQuery diskDbInitQuery(mDatabase);
+    QSqlQuery query(m_database);
     QString createContactTableQuery = "CREATE TABLE IF NOT EXISTS contacts("
                                            "id      INTEGER PRIMARY KEY, "
                                            "name    BLOB, "
@@ -88,19 +85,21 @@ void ContactDB::initDbTables(){
                                            "port    INTEGER, "
                                            "key     BLOB "
                                        ");";
-    diskDbInitQuery.exec(createContactTableQuery);
+    if(!query.exec(createContactTableQuery))
+        emit error(query.lastError().text());
 
     QString createIntegrityTableQuery = "CREATE TABLE IF NOT EXISTS integrity("
                                             "hash   BLOB"
                                         ");";
-    diskDbInitQuery.exec(createIntegrityTableQuery);
-    mDatabase.close();
+    if(query.exec(createIntegrityTableQuery))
+        emit error(query.lastError().text());
+    m_database.close();
 }
 
 uint ContactDB::getNextAvailableId(){
     uint id = 1; //id start at 1 in DB (-> min. id = 1)
     QList<uint> idList;
-    foreach(Contact* contact, mContactList)
+    foreach(Contact* contact, m_contactList)
         idList << contact->getId();
     while(idList.contains(id))
         id++;
@@ -110,12 +109,12 @@ uint ContactDB::getNextAvailableId(){
 void ContactDB::importDatabase(){
     openDB();
     CryptoPP::CFB_Mode<CryptoPP::AES>::Decryption dec;
-    if(!mFileKey->first.isEmpty()){
-        dec.SetKeyWithIV((byte*)mFileKey->first.data(),
-                         mFileKey->first.length(),
-                         (byte*)mFileKey->second.data());
+    if(!m_fileKey->first.isEmpty()){
+        dec.SetKeyWithIV((byte*)m_fileKey->first.data(),
+                         m_fileKey->first.length(),
+                         (byte*)m_fileKey->second.data());
     }
-    QSqlQuery readDiskQuery(mDatabase);
+    QSqlQuery readDiskQuery(m_database);
     readDiskQuery.exec("SELECT id,name,hosts,port,key FROM contacts;");
     while(readDiskQuery.next()){
         uint id = readDiskQuery.value(0).toUInt();                  //id
@@ -124,14 +123,14 @@ void ContactDB::importDatabase(){
         QByteArray port = readDiskQuery.value(3).toByteArray();     //port
         QByteArray key = readDiskQuery.value(4).toByteArray();      //key
 
-        if(!mFileKey->first.isEmpty()){
+        if(!m_fileKey->first.isEmpty()){
             dec.ProcessString((byte*)name.data(), name.length());
             dec.ProcessString((byte*)hostList.data(), hostList.length());
             dec.ProcessString((byte*)port.data(), port.length());
             dec.ProcessString((byte*)key.data(), key.length());
         }
 
-        mContactList.insert(id, new Contact(id,
+        m_contactList.insert(id, new Contact(id,
                                             name,
                                             deserializeStringList(hostList),
                                             qFromBigEndian<quint16>(reinterpret_cast<const uchar*>(port.constData())),
@@ -146,25 +145,25 @@ void ContactDB::importDatabase(){
         storedHash = readDiskQuery.value(0).toByteArray();
         if(storedHash != generateHash()){
             emit error(tr("Error: Contact database content corrupted"));
-            qDeleteAll(mContactList);
-            mContactList.clear();
+            qDeleteAll(m_contactList);
+            m_contactList.clear();
         }
     }
-    mDatabase.close();
+    m_database.close();
 }
 
 void ContactDB::commitToDatabase(){
     openDB();
     CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption enc;
-    if(!mFileKey->first.isEmpty()){
-        enc.SetKeyWithIV((byte*)mFileKey->first.data(),
-                         mFileKey->first.length(),
-                         (byte*)mFileKey->second.data());
+    if(!m_fileKey->first.isEmpty()){
+        enc.SetKeyWithIV((byte*)m_fileKey->first.data(),
+                         m_fileKey->first.length(),
+                         (byte*)m_fileKey->second.data());
     }
-    QSqlQuery writeDiskQuery(mDatabase);
-    if(!writeDiskQuery.exec("DELETE FROM contacts"))
-        emit error(writeDiskQuery.lastError().text());
-    foreach(Contact *contact, mContactList){
+    QSqlQuery query(m_database);
+    if(!query.exec("DELETE FROM contacts"))
+        emit error(query.lastError().text());
+    foreach(Contact *contact, m_contactList){
         uint id = contact->getId();
         QByteArray name = contact->getName().toUtf8();
         QByteArray hostList = serializeStringList(contact->getHostsList());
@@ -172,25 +171,25 @@ void ContactDB::commitToDatabase(){
         QDataStream(&port, QIODevice::WriteOnly) << contact->getPort();
         QByteArray key = contact->getKey();
 
-        if(!mFileKey->first.isEmpty()){
+        if(!m_fileKey->first.isEmpty()){
             enc.ProcessString((byte*)name.data(), name.length());
             enc.ProcessString((byte*)hostList.data(), hostList.length());
             enc.ProcessString((byte*)port.data(), port.length());
             enc.ProcessString((byte*)key.data(), key.length());
         }
 
-        writeDiskQuery.prepare("INSERT INTO contacts(id,name,hosts,port,key) "
+        query.prepare("INSERT INTO contacts(id,name,hosts,port,key) "
                       "VALUES (:id,:name,:hosts,:port,:key);");
-        writeDiskQuery.bindValue(":id", id);
-        writeDiskQuery.bindValue(":name", name);
-        writeDiskQuery.bindValue(":hosts", hostList);
-        writeDiskQuery.bindValue(":port", port);
-        writeDiskQuery.bindValue(":key", key);
-        if(!writeDiskQuery.exec())
-            emit error(writeDiskQuery.lastError().text());
+        query.bindValue(":id", id);
+        query.bindValue(":name", name);
+        query.bindValue(":hosts", hostList);
+        query.bindValue(":port", port);
+        query.bindValue(":key", key);
+        if(!query.exec())
+            emit error(query.lastError().text());
     }
 
-    QSqlQuery updateHashQuery(mDatabase);
+    QSqlQuery updateHashQuery(m_database);
     if(updateHashQuery.exec("DELETE FROM integrity;")) //clear the table
         emit error(updateHashQuery.lastError().text());
     updateHashQuery.prepare("INSERT INTO integrity(hash) "
@@ -198,16 +197,18 @@ void ContactDB::commitToDatabase(){
     updateHashQuery.bindValue(":hash", generateHash());
     if(!updateHashQuery.exec())
         emit error(updateHashQuery.lastError().text());
-    mDatabase.close();
+    m_database.close();
 }
 
 void ContactDB::openDB(){
-    if(!QSqlDatabase::contains("diskDb")){
-        mDatabase = QSqlDatabase::addDatabase("QSQLITE", "diskDb");
-        mDatabase.setDatabaseName("contacts.db3");
+    if(!QSqlDatabase::contains("contactDB")){
+        m_database = QSqlDatabase::addDatabase("QSQLITE", "contactDB");
+        m_database.setDatabaseName("contacts.db3");
+    }else{
+        m_database = QSqlDatabase::database("contactDB");
     }
-    if(!mDatabase.open())
-        emit error(mDatabase.lastError().text());
+    if(!m_database.open())
+        emit error(m_database.lastError().text());
 }
 
 QByteArray ContactDB::serializeStringList(QStringList stringList){

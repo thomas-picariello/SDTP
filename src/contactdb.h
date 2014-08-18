@@ -2,11 +2,9 @@
  * @brief ContactDB Stores Contact data and makes it availlable.
  */
 
-
 #ifndef CONTACTDB_H
 #define CONTACTDB_H
 
-//#include <QDebug>
 #include <QtSql/QtSql>
 #include <QList>
 #include <QByteArray>
@@ -29,6 +27,9 @@ public:
         ContactDeleted
     };
 
+    /**
+     * @brief The Action enum describs the actions that can done on a Contact.
+     */
     enum Action{
         Add,
         Edit,
@@ -38,7 +39,7 @@ public:
     explicit ContactDB(QPair<QByteArray, QByteArray> *fileKey, QObject *parent = 0);
     ~ContactDB();
 
-    bool erase(int id);
+    void erase(int id);
     Contact* const findById(int id);
     Contact* const findByKey(QByteArray key);
     QList<Contact*> getAllContacts() const;
@@ -50,9 +51,9 @@ signals:
     void error(QString err);
 
 private:
-    QMap<uint,Contact*> mContactList;
-    QSqlDatabase mDatabase;
-    QPair<QByteArray, QByteArray> *mFileKey;
+    QMap<uint,Contact*> m_contactList;
+    QSqlDatabase m_database;
+    QPair<QByteArray, QByteArray> *m_fileKey;
 
     void commitToDatabase();
     QByteArray generateHash();
