@@ -1,1 +1,1 @@
-IDI_ICON1               ICON    DISCARDABLE     "sdtpicon.ico"
+IDI_ICON1               ICON    DISCARDABLE     "../res/sdtp.ico"
