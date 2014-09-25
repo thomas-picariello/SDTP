@@ -50,20 +50,31 @@ void GcmDevice::onLinkOpenModeChanged(OpenMode openMode){
 }
 
 void GcmDevice::readFromLink(){
-    m_DataBuffer.append(m_Link->readAll());
-    const quint32 cypherPayloadSize = qFromBigEndian<quint32>((uchar*)m_DataBuffer.mid(sizeof(quint64), sizeof(quint32)).data());
-    const quint32 packetSize = sizeof(quint64) + sizeof(quint32) + cypherPayloadSize;
-    while(m_DataBuffer.size() >= (int)packetSize){
-        QByteArray packet = m_DataBuffer.left(packetSize);
-        QDataStream packetStream(&packet, QIODevice::ReadOnly);
-        quint64 seqNum;
-        QByteArray cypherPayload;
-        packetStream >> seqNum;
-        packetStream >> cypherPayload;
-        m_PacketList.append(qMakePair(seqNum, cypherPayload));
-        m_DataBuffer.remove(0, packetSize);
-    }
+    QDataStream parser(m_Link);
+    quint64 seqNum;
+    QByteArray cypherPayload;
+    parser >> seqNum;
+    parser >> cypherPayload;
+    m_PacketQueue.enqueue(qMakePair(seqNum, cypherPayload));
+//    qDebug() << seqNum;
+//    qDebug() << cypherPayload;
     emit readyRead();
+//    qDebug()<<"link ready read";
+//    m_DataBuffer.append(m_Link->readAll());
+//    const quint32 cypherPayloadSize = qFromBigEndian<quint32>((uchar*)m_DataBuffer.mid(sizeof(quint64), sizeof(quint32)).data());
+//    const quint32 packetSize = sizeof(quint64) + sizeof(quint32) + cypherPayloadSize;
+//    while(m_DataBuffer.size() >= (int)packetSize){
+//        QByteArray packet = m_DataBuffer.left(packetSize);
+//        QDataStream packetStream(&packet, QIODevice::ReadOnly);
+//        quint64 seqNum;
+//        QByteArray cypherPayload;
+//        packetStream >> seqNum;
+//        packetStream >> cypherPayload;
+//        m_PacketList.append(qMakePair(seqNum, cypherPayload));
+//        m_DataBuffer.remove(0, packetSize);
+//        qDebug()<<"packet appened to the buffer"<<seqNum;
+//    }
+//
 }
 
 QByteArray GcmDevice::decrypt(quint64 seqNum, QByteArray& gcmPacket){
@@ -97,9 +108,7 @@ QByteArray GcmDevice::decrypt(quint64 seqNum, QByteArray& gcmPacket){
         decFilter.ChannelMessageEnd(DEFAULT_CHANNEL);
 
         clearText.append(clearTextStr.data(), (int)clearTextStr.size());
-    }catch(CryptoPP::Exception& e){
-        //qDebug()<<e.what();
-    }
+    }catch(CryptoPP::Exception&){}
     return clearText;
 }
 
@@ -125,22 +134,21 @@ QByteArray GcmDevice::encrypt(quint64 seqNum, QByteArray& clearText){
         encFilter.ChannelPut(DEFAULT_CHANNEL, (byte*)clearText.data(), clearText.size());
         encFilter.ChannelMessageEnd(DEFAULT_CHANNEL);
         cypherText.append(cypherTextStr.data(), (int)cypherTextStr.size());
-    }catch(CryptoPP::Exception& e){
-        //qDebug()<<e.what();
-    }
+    }catch(CryptoPP::Exception&){}
     return cypherText;
 }
 
 qint64 GcmDevice::readData(char *data, qint64 maxlen){
     QPair<int,QByteArray> packet;
-    if(!m_PacketList.isEmpty()){
-        packet = m_PacketList.takeFirst();
+    if(!m_PacketQueue.isEmpty()){
+        packet = m_PacketQueue.dequeue();
         const quint64 seqNum = packet.first;
         if(seqNum > m_LastSequenceNumber){  //TODO: what on overflow ?
             QByteArray clearText = decrypt(seqNum, packet.second);
             if(clearText.size() <= maxlen){
                 memcpy(data, clearText.data(), clearText.size());
                 m_LastSequenceNumber = seqNum;
+                qDebug()<<"packet read"<<seqNum;
                 return clearText.size();
             }
         }
@@ -154,9 +162,14 @@ qint64 GcmDevice::writeData(const char *data, qint64 len){
     QByteArray cypherText = encrypt(seqNum, clearData);
     QByteArray packetBytes;
     QDataStream(&packetBytes, QIODevice::WriteOnly) << seqNum << cypherText;
-    m_Link->write(packetBytes);
-    m_LastSequenceNumber++;
-    return sizeof(seqNum) + sizeof(quint32) + cypherText.size();
+    if(m_Link->write(packetBytes) > 0){
+        m_LastSequenceNumber++;
+        return sizeof(seqNum) + sizeof(quint32) + cypherText.size();
+        qDebug()<<"packet written to link with seq num"<<m_LastSequenceNumber;
+    }else{
+        qDebug()<<"packet write failure!";
+        return 0;
+    }
 }
 
 QByteArray GcmDevice::generateIV(quint64 sequenceNumber){

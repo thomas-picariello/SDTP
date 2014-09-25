@@ -5,10 +5,11 @@
 #ifndef GCMDEVICE_H
 #define GCMDEVICE_H
 
-//#include <QDebug>
+#include <QDebug>
 #include <QIODevice>
 #include <QPair>
 #include <QtEndian>
+#include <QQueue>
 
 #include <cryptopp/cryptlib.h>
 
@@ -60,12 +61,12 @@ private slots:
 private:
     static const int GCM_TAG_SIZE = 16;
     QByteArray m_BaseIV;
-    QByteArray m_DataBuffer;
+//    QByteArray m_DataBuffer;
     QByteArray m_Key;
     quint64 m_LastSequenceNumber;
     AbstractLink* m_Link;
     QDataStream m_LinkStream;
-    QList<QPair<quint64,QByteArray>> m_PacketList;
+    QQueue<QPair<quint64,QByteArray>> m_PacketQueue;
 
     QByteArray generateIV(quint64 sequenceNumber);
     QByteArray decrypt(quint64 seqNum, QByteArray& gcmPacket);
