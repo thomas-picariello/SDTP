@@ -15,8 +15,4 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 set(CMAKE_BUILD_TYPE Debug)
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    add_definitions(-DQT_NO_DEBUG_OUTPUT)
-endif()
-
 add_subdirectory(src)
