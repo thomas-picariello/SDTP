@@ -1,9 +1,22 @@
 #include "appmanager.h"
 
-AppManager::AppManager(QObject* parent):
-    QObject(parent)
-{
-
+void AppManager::readIncommingData(QByteArray &data){
+    Packet packet;
+    QDataStream (&data, QIODevice::ReadOnly) >> packet;
+    switch(packet.command){
+    case StartAppCommand:
+        emit startAppFor(packet.distantUID);
+        break;
+    case AppStartedSignal:
+        registerConnection(packet.localUID, packet.distantUID);
+        break;
+    case AppClosedSignal:
+        emit distantAppUnregistered(getLocalAppUID(packet.distantUID));
+        unregisterApp(packet.distantUID);
+        break;
+    default:
+        emit error(UnknownCommand);
+    }
 }
 
 AbstractApp* AppManager::getApp(AppUID localUID) const{
@@ -34,33 +47,12 @@ bool AppManager::isLocalAppConnected(AppUID localUID) const{
     return m_AppConnectionsTable.contains(localUID);
 }
 
-void AppManager::readIncommingData(QByteArray &data){
-    Packet packet;
-    QDataStream (&data, QIODevice::ReadOnly) >> packet;
-    switch(packet.command){
-    case StartAppCommand:
-        emit startAppFor(packet.distantUID);
-        break;
-    case AppStartedSignal:
-        registerConnection(packet.localUID, packet.distantUID);
-        break;
-    case AppClosedSignal:
-        emit distantAppUnregistered(getLocalAppUID(packet.distantUID));
-        unregisterApp(packet.distantUID);
-        break;
-    default:
-        emit error(UnknownCommand);
-    }
-}
-
 void AppManager::requestPartnerApp(AppUID localAppUID){
     sendPacket(StartAppCommand, localAppUID, AppUID());
 }
 
 void AppManager::registerApp(AppUID localAppUID, AbstractApp *app){
     m_LocalAppsRegister.insert(localAppUID, app);
-    //TODO: remove debug localhost default loopback
-    //m_AppConnectionsTable.insert(localAppUID, localAppUID);
 }
 
 void AppManager::unregisterApp(AppUID localAppUID){
@@ -70,7 +62,7 @@ void AppManager::unregisterApp(AppUID localAppUID){
 
 bool AppManager::registerConnection(AppUID localUID, AppUID distantUID){
     bool appRegistered = m_LocalAppsRegister.value(localUID, NULL) != NULL;
-    if(appRegistered && !m_AppConnectionsTable.contains(localUID)){
+    if(appRegistered){
         m_AppConnectionsTable.insert(localUID, distantUID);
         sendPacket(AppStartedSignal, localUID, distantUID);
     }
@@ -95,7 +87,7 @@ QDataStream& operator>>(QDataStream &in, AppManager::Packet &packet){
     quint8 cmd;
     in >> cmd;
     packet.command = static_cast<AppManager::Command>(cmd);
-    in >> packet.distantUID;   //distant and local UID are inverted here
+    in >> packet.distantUID;   //distant and local UID inverted here
     in >> packet.localUID;
     return in;
 }
