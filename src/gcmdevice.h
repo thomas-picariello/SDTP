@@ -61,6 +61,7 @@ private slots:
 private:
     static const int GCM_TAG_SIZE = 16;
     QByteArray m_BaseIV;
+//    QByteArray m_DataBuffer;
     QByteArray m_Key;
     quint64 m_LastSequenceNumber;
     AbstractLink* m_Link;

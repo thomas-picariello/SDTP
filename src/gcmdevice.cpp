@@ -56,7 +56,8 @@ void GcmDevice::readFromLink(){
     parser >> seqNum;
     parser >> cypherPayload;
     m_PacketQueue.enqueue(qMakePair(seqNum, cypherPayload));
-    qDebug()<<"seq"<<seqNum<<"enqueued";
+//    qDebug() << seqNum;
+//    qDebug() << cypherPayload;
     emit readyRead();
 //    qDebug()<<"link ready read";
 //    m_DataBuffer.append(m_Link->readAll());
@@ -163,8 +164,8 @@ qint64 GcmDevice::writeData(const char *data, qint64 len){
     QDataStream(&packetBytes, QIODevice::WriteOnly) << seqNum << cypherText;
     if(m_Link->write(packetBytes) > 0){
         m_LastSequenceNumber++;
-        qDebug()<<"packet written to link with seq num"<<m_LastSequenceNumber;
         return sizeof(seqNum) + sizeof(quint32) + cypherText.size();
+        qDebug()<<"packet written to link with seq num"<<m_LastSequenceNumber;
     }else{
         qDebug()<<"packet write failure!";
         return 0;
