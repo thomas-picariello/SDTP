@@ -5,6 +5,7 @@
 #ifndef APPMANAGER_H
 #define APPMANAGER_H
 
+#include <QDebug>
 #include <QObject>
 #include <QMap>
 
@@ -42,7 +43,7 @@ public:
         AppUID distantUID;
     };
 
-    explicit AppManager(QObject* parent = 0): QObject(parent){}
+    explicit AppManager(QObject* parent = 0);
 
     AbstractApp* getApp(AppUID localUID) const;
     AppUID getLocalAppUID(AbstractApp* app) const;
