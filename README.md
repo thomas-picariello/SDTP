@@ -9,6 +9,11 @@ Secure alternative to common Communication protocols.
 
 =================
 
+Main Documentation: https://docs.google.com/document/d/1jIlMR7D5hcNrIzGCNCag9FkZrjMCVYjjF70Arbrky4s
+Appendix A - Tests: https://docs.google.com/document/d/1bvqDJjB571zPwWH8KSULuBMfdDkC9xKCUgAxhXCwhpE
+Appendix B - References: https://docs.google.com/document/d/1bvqDJjB571zPwWH8KSULuBMfdDkC9xKCUgAxhXCwhpE
+Appendix C - Contingency Plan: https://docs.google.com/document/d/1QFjVa_hqrysPke8aPrk7feTUJdWbasldd5qH_Ke9Fd8
+
 This is a student project to develop and implement an encrypted data transfer protocol.
 
 It is still in pre-alpha, some functionality might not work at all.
